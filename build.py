@@ -1,4 +1,4 @@
-import json, os, re, html as ihtml
+import json, os, re, copy, html as ihtml
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 data = json.load(open(os.path.join(ROOT, "structure_full.json")))
@@ -43,10 +43,18 @@ URL_RE = re.compile(r'(https?://\S+)')
 def linkify(escaped_text):
     return URL_RE.sub(lambda m: f'<a href="{m.group(1)}" target="_blank" rel="noopener">{m.group(1)}</a>', escaped_text)
 
+def is_citation(text):
+    # APA-style source line: (year) + a couple of periods + fairly long, or a bare DOI/URL line
+    has_year = bool(re.search(r'\(\d{4}', text))
+    has_link = "doi.org" in text or text.startswith("http")
+    return (has_year and text.count(".") >= 2 and len(text) > 40) or (has_link and len(text) < 130)
+
 def render_p(text):
     text = text.strip()
     if not text:
         return ""
+    if is_citation(text):
+        return f'<p class="cite">{linkify(esc(text))}</p>'
     if is_subhead(text) and not text.startswith("http"):
         return f'<p class="subhead">{esc(text)}</p>'
     parts = [linkify(esc(p)) for p in text.split("\n")]
@@ -73,14 +81,28 @@ def render_callout(node):
     children = node.get("c", [])
     if not x:
         return f'<div class="group">{render_children(children)}</div>'
-    body_children = children
-    label_html = ""
-    if body_children and body_children[0]["t"] == "P" and "\n" in body_children[0].get("x", ""):
-        label, headline = body_children[0]["x"].split("\n", 1)
-        label_html = f'<p class="finding-label">{esc(label.strip())}</p><p class="finding-headline">{esc(headline.strip())}</p>'
+    body_children = list(children)
+    head_html = ""
+    # first paragraph → bold title (or label + headline when it carries a \n)
+    if body_children and body_children[0]["t"] == "P":
+        first = body_children[0].get("x", "")
+        if "\n" in first:
+            label, headline = first.split("\n", 1)
+            head_html = f'<p class="finding-label">{esc(label.strip())}</p><p class="finding-headline">{esc(headline.strip())}</p>'
+        else:
+            head_html = f'<p class="finding-title">{esc(first)}</p>'
         body_children = body_children[1:]
-    return (f'<div class="finding"><div class="finding-icon">{esc(x)}</div>'
-            f'<div class="finding-body">{label_html}{render_children(body_children)}</div></div>')
+    # trailing short "종목 / 이름" → caption
+    caption_html = ""
+    if body_children and body_children[-1]["t"] == "P":
+        last = body_children[-1].get("x", "")
+        if "/" in last and len(last) <= 30:
+            body_children = body_children[:-1]
+            caption_html = f'<p class="finding-caption">{esc(last)}</p>'
+    inner = render_children(body_children)
+    # icon = newton symbol logo (CSS mask); original emoji dropped
+    return (f'<div class="finding"><div class="finding-icon"></div>'
+            f'<div class="finding-body">{head_html}{inner}{caption_html}</div></div>')
 
 def render_table_node():
     return render_table()
@@ -122,7 +144,49 @@ def render_children(items):
         i += 1
     return "".join(out)
 
-items = data
+items = copy.deepcopy(data)
+
+# ---- content re-arrangement ----
+def pop_by(container, pred):
+    for i, n in enumerate(container):
+        if pred(n):
+            return container.pop(i)
+        if n.get("c"):
+            f = pop_by(n["c"], pred)
+            if f is not None:
+                return f
+    return None
+
+def parent_list_of(container, pred):
+    for n in container:
+        if pred(n):
+            return container
+        if n.get("c"):
+            r = parent_list_of(n["c"], pred)
+            if r is not None:
+                return r
+    return None
+
+is_toggle = lambda name: (lambda n: n.get("t") == "TOGGLE" and name in (n.get("x") or ""))
+
+# pull the toggles / image we're relocating
+diff_toggle  = pop_by(items, is_toggle("차별화"))
+touch_toggle = pop_by(items, is_toggle("터치포인트"))
+flow_toggle  = pop_by(items, is_toggle("전체 시나리오"))
+wire_toggle  = pop_by(items, is_toggle("와이어프레임"))
+img14 = pop_by(items, lambda n: n.get("src") == "img_14")
+
+# "차별화 포인트" → next to "감각 Pack" toggle inside Solution
+sol_list = parent_list_of(items, is_toggle("감각 Pack"))
+if sol_list is not None and diff_toggle:
+    sol_list.append(diff_toggle)
+
+# delete the now-empty "Now Your Turn!" section (H3 + its emptied callout)
+pop_by(items, lambda n: n.get("t") == "H3" and "Now Your Turn" in (n.get("x") or ""))
+pop_by(items, lambda n: n.get("t") == "CALLOUT" and not n.get("x") and not n.get("c"))
+# remove the standalone "Play with Newton!" quote (promoted to its own page)
+pop_by(items, lambda n: n.get("t") == "QUOTE" and "Play with Newton" in (n.get("x") or ""))
+
 MARKERS = [
     "01 From Routine to Challenge",
     "02 Challenge Spark",
@@ -161,15 +225,7 @@ for i, m in enumerate(MARKERS):
         seg = items[start:end]
     sections.append((m, seg))
 
-# move "Play with Newton!" teaser from tail of section 07 to head of section 08
-sec07 = sections[6][1]
-sec08 = sections[7][1]
-if sec07 and sec07[-1].get("t") == "QUOTE" and sec07[-1].get("x") == "Play with Newton!":
-    teaser = sec07.pop()
-    sec08.insert(1, teaser)  # after the "08 Scenario" marker P itself (index 0)
-
-app_start = marker_idx[-1] + 4
-appendix_items = [n for n in items[app_start:] if n["t"] != "HR"]
+# appendix page is removed entirely (wireframe toggle relocated, simulator dropped)
 
 def extract_hero(items):
     for i, n in enumerate(items):
@@ -183,7 +239,7 @@ def first_paragraph(items):
             return n, items[:i] + items[i + 1:]
     return None, items
 
-def render_vertical(page_id, kicker, title_html, body_items, hero):
+def render_vertical(page_id, kicker, title_html, body_items, hero, scroll_hint=False):
     """549/827 layout: head (title left / intro-body right), content, optional big bottom image."""
     intro_p, rest = first_paragraph(body_items)
     intro_html = render_node(intro_p) if intro_p else ""
@@ -191,6 +247,8 @@ def render_vertical(page_id, kicker, title_html, body_items, hero):
     hero_html = f'<figure class="page-hero">{img_tag(hero["src"])}</figure>' if hero else ""
     data = f' data-page="{page_id}"' if page_id else ""
     kicker_html = f'<p class="kicker">{esc(kicker)}</p>' if kicker else ""
+    hint_html = ('<div class="scroll-hint" aria-hidden="true">'
+                 '<span class="scroll-mouse"></span><span class="scroll-txt">SCROLL</span></div>') if scroll_hint else ""
     return f'''
 <div class="page"{data}>
   <div class="page-scroll">
@@ -201,6 +259,7 @@ def render_vertical(page_id, kicker, title_html, body_items, hero):
     <div class="page-content">{content_html}</div>
     {hero_html}
   </div>
+  {hint_html}
 </div>'''
 
 def render_page(marker, seg):
@@ -209,9 +268,13 @@ def render_page(marker, seg):
     h4 = next((n for n in body if n["t"] in ("H4", "H3")), None)
     rest = [n for n in body if n is not h4]
     title_html = render_h4(h4["x"]) if h4 else ""
-    # Scenario page (08): vertical layout, lead image kept inline under the title
+    # Scenario page (08): vertical layout — toggle sits right under the body, image below it
     if num == "08":
-        return render_vertical(f"sec-{num}", kicker, title_html, rest, None)
+        hero, rest2 = extract_hero(rest)
+        ci = next((i for i, n in enumerate(rest2) if n.get("t") == "CALLOUT"), None)
+        if hero is not None:
+            rest2.insert(ci + 1 if ci is not None else 0, hero)
+        return render_vertical(f"sec-{num}", kicker, title_html, rest2, None, scroll_hint=True)
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
     media_html = img_tag(hero["src"]) if hero else ""
@@ -226,7 +289,25 @@ def render_page(marker, seg):
   </div>
 </div>'''
 
-sections_html = "".join(render_page(m, seg) for m, seg in sections)
+# "Play with Newton!" — new first Scenario page: two-column (left image + right text/toggles)
+playwith_toggles = [t for t in (touch_toggle, flow_toggle, wire_toggle) if t]
+playwith_media = img_tag(img14["src"]) if img14 else ""
+playwith_page = f'''
+<div class="page" data-page="playwith">
+  <div class="page-media">{playwith_media}</div>
+  <div class="page-text">
+    <p class="kicker">Scenario</p>
+    <h2 class="chapter-title">Play with Newton!</h2>
+    <div class="group">{render_children(playwith_toggles)}</div>
+  </div>
+</div>'''
+
+pages_out = []
+for m, seg in sections:
+    pages_out.append(render_page(m, seg))
+    if m.startswith("07"):
+        pages_out.append(playwith_page)
+sections_html = "".join(pages_out)
 
 # intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
 intro_hero, intro_rest = extract_hero(hero_items)
@@ -234,14 +315,12 @@ intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
 intro_page_html = render_vertical("intro", "Now, your turn!",
                                   '<h2 class="chapter-title">NEWTON</h2>', intro_body, intro_hero)
 
-appendix_html = render_children(appendix_items)
-
 # label, first page, member pages
 NAV_GROUPS = [
     ("Background", "sec-01", ["sec-01", "sec-02", "sec-03"]),
     ("Solution", "sec-04", ["sec-04"]),
     ("Products", "sec-05", ["sec-05", "sec-06", "sec-07"]),
-    ("Scenario", "sec-08", ["sec-08"]),
+    ("Scenario", "playwith", ["playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
 ]
 nav_html = "".join(
@@ -253,6 +332,6 @@ TEMPLATE = open(os.path.join(ROOT, "template.html")).read()
 out = (TEMPLATE.replace("{{NAV}}", nav_html)
        .replace("{{INTRO_PAGE}}", intro_page_html)
        .replace("{{SECTIONS}}", sections_html)
-       .replace("{{APPENDIX}}", appendix_html))
+       .replace("{{APPENDIX}}", ""))
 open(os.path.join(ROOT, "index.html"), "w").write(out)
-print("done", len(sections_html), len(intro_page_html), len(appendix_html))
+print("done", len(sections_html), len(intro_page_html))

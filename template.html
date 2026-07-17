@@ -163,6 +163,25 @@
   .page-scroll figure.figure, .page-scroll .page-hero{
     margin-left:calc(0.830cqw - 4.979cqw);margin-right:calc(0.830cqw - 4.979cqw);
   }
+  /* scroll hint (mouse + wheel) — hints that the page scrolls */
+  .scroll-hint{
+    position:absolute;left:50%;bottom:1.6cqw;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:0.5cqw;
+    pointer-events:none;z-index:5;transition:opacity .3s ease;
+  }
+  .scroll-hint .scroll-mouse{
+    width:1.55cqw;height:2.55cqw;border:0.13cqw solid rgba(0,0,0,.4);border-radius:1cqw;position:relative;
+  }
+  .scroll-hint .scroll-mouse::before{
+    content:"";position:absolute;left:50%;top:0.45cqw;width:0.24cqw;height:0.55cqw;
+    background:rgba(0,0,0,.4);border-radius:1cqw;transform:translateX(-50%);
+    animation:scrollWheel 1.5s ease-in-out infinite;
+  }
+  .scroll-hint .scroll-txt{font-size:0.83cqw;letter-spacing:.15em;color:rgba(0,0,0,.4);font-weight:700}
+  @keyframes scrollWheel{0%{opacity:0;transform:translate(-50%,-0.3cqw)}30%,60%{opacity:1}100%{opacity:0;transform:translate(-50%,0.65cqw)}}
+  .scroll-hint.hide{opacity:0}
+  @media (prefers-reduced-motion:reduce){.scroll-hint .scroll-mouse::before{animation:none}}
+
   /* intro: no scroll — image fills the remaining height as a wide crop */
   .page[data-page="intro"] .page-scroll{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0.830cqw}
   .page[data-page="intro"] .page-head{flex:0 0 auto}
@@ -200,10 +219,23 @@
   details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
 
   .finding{display:flex;gap:0.996cqw;background:#fff;border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
-  .finding-icon{font-size:1.660cqw;flex:none;width:2.656cqw;height:2.656cqw;display:flex;align-items:center;justify-content:center}
+  .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:#000;
+    -webkit-mask:url(assets/cursor.svg) center/contain no-repeat;
+    mask:url(assets/cursor.svg) center/contain no-repeat;}
   .finding-body{flex:1;min-width:0}
   .finding-label{font-size:1.079cqw;color:rgba(0,0,0,.4);font-weight:400;margin:0 0 0.332cqw}
   .finding-headline{font-size:1.328cqw;font-weight:700;margin:0 0 0.830cqw;line-height:1.4}
+  .finding-title{font-size:1.328cqw;font-weight:700;margin:0 0 0.664cqw;line-height:1.45}
+  .finding-caption{font-size:0.996cqw;color:rgba(0,0,0,.4);margin:0.664cqw 0 0}
+
+  /* APA / source lines: 12px, faintest grey, italic — draws the least attention */
+  .cite{font-size:0.996cqw;color:rgba(0,0,0,.3);font-style:italic;line-height:1.5;margin:0.664cqw 0}
+  .cite a{color:rgba(0,0,0,.3)}
+
+  /* inside toggles, everything is one step smaller than body (never larger than body) */
+  .toggle-body .body,.toggle-body .subhead,.toggle-body .list{font-size:1.328cqw}
+  .toggle-body .finding-headline,.toggle-body .finding-title{font-size:1.245cqw}
+  .toggle-body .quote{font-size:1.162cqw;line-height:1.4;margin:0.996cqw 0}
 
   .table-wrap{overflow-x:auto;margin:1.328cqw 0;border-radius:1.328cqw;border:1px solid rgba(0,0,0,.08)}
   table{width:100%;border-collapse:collapse;font-size:1.079cqw;min-width:52cqw}
@@ -270,8 +302,7 @@
   .pg-right .count{font-size:1.162cqw;letter-spacing:-.02em}
   .pg-right .count .cur{color:#6a6a6a;font-weight:700}
   .pg-right .count .tot{color:#c8c8c8;font-weight:400}
-  .book.is-cover .pg-right .count .cur{color:#1e1e1e}
-  .book.is-cover .pg-right .count .tot{color:rgba(0,0,0,.4)}
+  .book.is-cover .pg-right .count{visibility:hidden}   /* cover: arrows only, no 1/N */
 
   /* lightbox (Figma 이미지 확대) — anchored to the book so it stays inside the tablet screen */
   .lightbox{position:absolute;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100;border-radius:inherit;overflow:hidden}
@@ -333,14 +364,6 @@
 
     {{SECTIONS}}
 
-    <div class="page" data-page="appendix">
-      <div class="page-media"><img src="assets/img_43.png" alt=""></div>
-      <div class="page-text">
-        <p class="appendix-title">Wireframe &amp; Simulator</p>
-        {{APPENDIX}}
-      </div>
-    </div>
-
   </div>
   <div class="pager">
     <button id="prevBtn" class="pg-btn" aria-label="이전">
@@ -381,14 +404,20 @@
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');
     pills.forEach(p => p.classList.toggle('active', p.dataset.members.split(',').includes(ids[idx])));
-    counter.innerHTML = '<span class="cur">' + (idx + 1) + '</span><span class="tot"> / ' + pages.length + '</span>';
+    counter.innerHTML = '<span class="cur">' + idx + '</span><span class="tot"> / ' + (pages.length - 1) + '</span>';
     document.getElementById('prevBtn').disabled = idx === 0;   // next never disabled: wraps last → first
   }
 
   // stagger the page's own elements in from the top ("차라락"), any direction
   function staggerIn(page){
-    const items = [page.querySelector('.page-media'),
-                   ...page.querySelectorAll('.page-text > *')].filter(Boolean);
+    // one system: covers both layouts (two-column: media + text, vertical: head/content/hero)
+    const items = [
+      page.querySelector('.page-media'),
+      ...page.querySelectorAll('.page-text > *'),
+      ...page.querySelectorAll('.page-head > *'),
+      ...page.querySelectorAll('.page-content > *'),
+      page.querySelector('.page-hero'),
+    ].filter(Boolean);
     items.forEach((el, n) => {
       el.classList.remove('stagger');
       void el.offsetWidth;                    // restart animation
@@ -578,6 +607,14 @@
     cursor.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
     requestAnimationFrame(follow);
   })();
+
+  // fade the scroll hint once the page is scrolled
+  document.querySelectorAll('.page-scroll').forEach(sc => {
+    sc.addEventListener('scroll', () => {
+      const hint = sc.parentElement.querySelector('.scroll-hint');
+      if (hint) hint.classList.toggle('hide', sc.scrollTop > 20);
+    });
+  });
 
   // init: first page visible without a page-turn
   pages[0].classList.add('active');
