@@ -159,6 +159,15 @@
   /* on vertical pages, unify title sizes (scenario step titles matched to chapter title) */
   .page-scroll .step-title{font-size:2.656cqw;font-weight:700;letter-spacing:-.03em}
   .page-scroll .step-head{margin:3.320cqw 0 1.328cqw}
+  /* vertical-page images: near full-bleed, ~10px side gaps like Figma 549 */
+  .page-scroll figure.figure, .page-scroll .page-hero{
+    margin-left:calc(0.830cqw - 4.979cqw);margin-right:calc(0.830cqw - 4.979cqw);
+  }
+  /* intro: no scroll — image fills the remaining height as a wide crop */
+  .page[data-page="intro"] .page-scroll{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0.830cqw}
+  .page[data-page="intro"] .page-head{flex:0 0 auto}
+  .page[data-page="intro"] .page-hero{flex:1 1 auto;min-height:0;margin-top:2.324cqw}
+  .page[data-page="intro"] .page-hero img{width:100%;height:100%;object-fit:cover}
 
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
   .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}

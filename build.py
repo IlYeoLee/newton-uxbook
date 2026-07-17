@@ -209,10 +209,9 @@ def render_page(marker, seg):
     h4 = next((n for n in body if n["t"] in ("H4", "H3")), None)
     rest = [n for n in body if n is not h4]
     title_html = render_h4(h4["x"]) if h4 else ""
-    # Scenario page (08) uses the vertical layout with its lead image removed
+    # Scenario page (08): vertical layout, lead image kept inline under the title
     if num == "08":
-        _, rest_no_hero = extract_hero(rest)
-        return render_vertical(f"sec-{num}", kicker, title_html, rest_no_hero, None)
+        return render_vertical(f"sec-{num}", kicker, title_html, rest, None)
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
     media_html = img_tag(hero["src"]) if hero else ""
