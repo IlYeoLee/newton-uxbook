@@ -108,10 +108,9 @@
   .stagger-soft{opacity:0;animation:fadeSoft .42s ease both}
 
   .page-media{
-    width:32.780cqw;height:100%;flex:none;
-    border-radius:3.320cqw;overflow:hidden;background:#0a0a0a;position:relative;
+    width:32.780cqw;height:100%;flex:none;position:relative;
   }
-  .page-media img{width:100%;height:100%;object-fit:cover}
+  .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
 
   .page-text{
     flex:1;min-width:0;height:100%;overflow-y:auto;
@@ -128,8 +127,8 @@
   .list{margin:0.996cqw 0;padding-left:1.660cqw;color:rgba(0,0,0,.8);font-size:1.494cqw;font-weight:400}
   .list li{margin:0.415cqw 0}
 
-  figure.figure{margin:1.660cqw 0;border-radius:1.660cqw;overflow:hidden;cursor:zoom-in;line-height:0}
-  figure.figure img{width:100%;height:auto;display:block}
+  figure.figure{margin:1.660cqw 0;cursor:zoom-in;line-height:0}
+  figure.figure img{width:100%;height:auto;display:block;border-radius:1.660cqw}
 
   blockquote.quote{
     font-size:1.826cqw;font-weight:700;color:var(--red);
@@ -179,6 +178,17 @@
   @keyframes bgDrift{to{background-position:0 100%}}
   @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
   .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;-webkit-user-drag:none;-webkit-user-select:none}
+  /* glitch: RGB channel split + sliced jitter while touched/rubbed */
+  @keyframes glitch{
+    0%,100%{transform:translate(0);filter:none;clip-path:none}
+    10%{transform:translate(-3px,1px);filter:drop-shadow(3px 0 #ff0040) drop-shadow(-3px 0 #00e6ff)}
+    25%{transform:translate(3px,-1px);filter:drop-shadow(-4px 0 #ff0040) drop-shadow(4px 0 #00e6ff);clip-path:inset(8% 0 62% 0)}
+    40%{transform:translate(-2px,1px);filter:drop-shadow(3px 0 #ff0040) drop-shadow(-3px 0 #00e6ff);clip-path:inset(56% 0 18% 0)}
+    55%{transform:translate(2px,0);filter:drop-shadow(-2px 0 #ff0040) drop-shadow(2px 0 #00e6ff);clip-path:inset(34% 0 40% 0)}
+    70%{transform:translate(-1px,-1px);filter:drop-shadow(2px 0 #ff0040) drop-shadow(-2px 0 #00e6ff)}
+    85%{transform:translate(1px,1px);filter:none;clip-path:none}
+  }
+  .cover-slide .wordmark.glitch{animation:glitch .5s steps(2,end)}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
 
   /* ---- pager (Figma Frame 2147232169) — anchored to book so cover & content align ---- */
@@ -247,13 +257,6 @@
 </style>
 </head>
 <body>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="ink" x="-25%" y="-25%" width="150%" height="150%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="1" seed="7" result="n"/>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="0" id="inkDisp" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
 
 <div class="device">
 <div class="book is-cover" id="book">
@@ -374,28 +377,13 @@
     show(ids.indexOf(p.dataset.target));
   }));
 
-  // logo ink-bleed: rubbing/touching ripples the wordmark like wet ink.
-  // filter is off at rest (expensive) and only switched on while touched.
+  // logo glitch: touching/rubbing the wordmark fires a short RGB-split glitch
   const wm = document.querySelector('.cover-slide .wordmark');
-  const inkDisp = document.getElementById('inkDisp');
-  let inkRelax, relaxing = false;
-  function relax(){
-    relaxing = true;
-    let s = parseFloat(inkDisp.getAttribute('scale')) || 0;
-    s += (0 - s) * 0.16;
-    if (s > 0.4){ inkDisp.setAttribute('scale', s.toFixed(2)); requestAnimationFrame(relax); }
-    else { inkDisp.setAttribute('scale', '0'); wm.style.filter = ''; relaxing = false; }
-  }
-  function inkBoost(){
-    wm.style.filter = 'url(#ink)';
-    inkDisp.setAttribute('scale', '16');
-    relaxing = false;
-    clearTimeout(inkRelax);
-    inkRelax = setTimeout(() => { if (!relaxing) relax(); }, 110);
-  }
-  wm.addEventListener('pointerdown', inkBoost);
-  wm.addEventListener('pointermove', inkBoost);
-  wm.addEventListener('pointerenter', inkBoost);
+  function glitch(){ if (!wm.classList.contains('glitch')) wm.classList.add('glitch'); }
+  wm.addEventListener('animationend', () => wm.classList.remove('glitch'));
+  wm.addEventListener('pointerdown', glitch);
+  wm.addEventListener('pointerenter', glitch);
+  wm.addEventListener('pointermove', glitch);
 
   // toggle open → gently slide its inner elements in
   function staggerToggle(d){
