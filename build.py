@@ -75,6 +75,16 @@ def render_p(text):
     a = en_attr(text)
     if is_citation(text):
         return f'<p class="cite"{a}>{linkify(esc(text))}</p>'
+    # numbered sub-title "01 …" → bold heading (+ body when it carries a description line)
+    if re.match(r'^\d\d?\s', text):
+        segs = text.split("\n", 1)
+        head = segs[0].strip()
+        rest = segs[1].strip() if len(segs) > 1 else ""
+        html = f'<p class="subhead"{en_attr(head)}>{esc(head)}</p>'
+        if rest:
+            parts = [linkify(esc(p)) for p in rest.split("\n")]
+            html += f'<p class="body"{en_attr(rest)}>{"<br>".join(parts)}</p>'
+        return html
     if is_subhead(text) and not text.startswith("http"):
         return f'<p class="subhead"{a}>{esc(text)}</p>'
     parts = [linkify(esc(p)) for p in text.split("\n")]
@@ -100,7 +110,7 @@ def render_callout(node):
     x = node.get("x", "")
     children = node.get("c", [])
     if not x:
-        return f'<div class="group">{render_children(children)}</div>'
+        return render_children(children)   # toggles inside get grouped by render_children
     body_children = list(children)
     head_html = ""
     # first paragraph → bold title (or label + headline when it carries a \n)
@@ -162,6 +172,14 @@ def render_children(items):
                 i += 1
             lis = "".join(f"<li{en_attr(g.get('x',''))}>{esc(g.get('x',''))}</li>" for g in group)
             out.append(f"<ul class='list'>{lis}</ul>")
+            continue
+        if n["t"] == "TOGGLE":
+            # consecutive toggles always share one grey container
+            tg = []
+            while i < len(items) and items[i]["t"] == "TOGGLE":
+                tg.append(render_node(items[i]))
+                i += 1
+            out.append(f'<div class="group">{"".join(tg)}</div>')
             continue
         out.append(render_node(n))
         i += 1
@@ -337,9 +355,10 @@ def render_page(marker, seg):
     hero, rest = extract_hero(rest)
     if num == "02":
         # sec-02: 4-image cross-fade loop (2s each), 3-1..3-4
-        media_html = '<div class="fade-stack">' + "".join(
-            f'<img class="fade-img" src="assets/fade{i}.png" style="animation-delay:{(i-1)*2.5}s" alt="" loading="lazy">'
-            for i in range(1, 5)) + '</div>'
+        seq = [1, 2, 3, 4, 1]  # last = first, for a seamless loop with no white gap
+        media_html = ('<div class="fade-stack"><div class="fade-track">'
+                      + "".join(f'<img src="assets/fade{i}.png" alt="" loading="lazy">' for i in seq)
+                      + '</div></div>')
     else:
         media_html = img_tag(hero["src"]) if hero else ""
     content_html = render_children(rest)
@@ -362,7 +381,7 @@ playwith_page = f'''
   <div class="page-text">
     <p class="kicker">Scenario</p>
     <h2 class="chapter-title">Play with Newton!</h2>
-    <div class="group">{render_children(playwith_toggles)}</div>
+    {render_children(playwith_toggles)}
   </div>
 </div>'''
 
