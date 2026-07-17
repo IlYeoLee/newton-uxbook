@@ -204,9 +204,17 @@ intro_text_html = render_children(intro_rest)
 
 appendix_html = render_children(appendix_items)
 
+# label, first page, member pages
+NAV_GROUPS = [
+    ("Background", "sec-01", ["sec-01", "sec-02", "sec-03"]),
+    ("Solution", "sec-04", ["sec-04"]),
+    ("Products", "sec-05", ["sec-05", "sec-06", "sec-07"]),
+    ("Scenario", "sec-08", ["sec-08"]),
+    ("Extensibility", "sec-09", ["sec-09"]),
+]
 nav_html = "".join(
-    f'<button type="button" class="pill" data-sec="sec-{m.split(" ",1)[0]}">{esc(m.split(" ",1)[1])}</button>'
-    for m in MARKERS
+    f'<button type="button" class="pill" data-target="{target}" data-members="{",".join(members)}">{esc(label)}</button>'
+    for label, target, members in NAV_GROUPS
 )
 
 TEMPLATE = open(os.path.join(ROOT, "template.html")).read()

@@ -2,7 +2,11 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
 <title>NEWTON — UX Book</title>
 <style>
   @font-face{
@@ -31,7 +35,7 @@
 
   .book{
     position:relative;
-    width:min(96vw, 96vh * 1.6003);
+    width:min(100vw, 100vh * 1.6003);
     aspect-ratio:1205/753;
     background:#fff;
     overflow:hidden;
@@ -54,10 +58,10 @@
     flex:none;border:none;cursor:pointer;
     padding:0.664cqw 0.830cqw;border-radius:6.639cqw;
     background:rgba(245,245,245,.9);color:#484848;
-    font-size:1.079cqw;font-weight:700;white-space:nowrap;
+    font-size:1.079cqw;font-weight:400;white-space:nowrap;
     font-family:inherit;letter-spacing:-.03em;
   }
-  .pill.active{background:var(--red);color:#fff}
+  .pill.active{background:var(--red);color:#fff;font-weight:700}
 
   /* ---- stage ---- */
   .stage{position:relative;height:56.93cqw;overflow:hidden}
@@ -66,12 +70,13 @@
 
   .page{display:none;height:100%;padding:0.830cqw;gap:0;}
   .page.active{display:flex}
+  .page[data-page="cover"]{padding:0}
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;
     border-radius:3.320cqw;overflow:hidden;background:#0a0a0a;position:relative;
   }
-  .page-media img{width:100%;height:100%;object-fit:cover}
+  .page-media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
 
   .page-text{
     flex:1;min-width:0;height:100%;overflow-y:auto;
@@ -137,9 +142,9 @@
   .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
 
-  /* ---- pager (Figma Frame 2147232169) ---- */
+  /* ---- pager (Figma Frame 2147232169) — anchored to book so cover & content align ---- */
   .pager{
-    position:absolute;left:0.830cqw;right:0.830cqw;top:45.05%;
+    position:absolute;left:0.830cqw;right:0.830cqw;top:31cqw;
     display:flex;justify-content:space-between;align-items:flex-start;
     pointer-events:none;z-index:8;
   }
@@ -155,10 +160,39 @@
   .pg-right .count{font-size:1.162cqw;font-weight:700;color:#b0b0b0;letter-spacing:-.02em}
 
   /* lightbox (Figma 이미지 확대) */
-  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:100;cursor:zoom-out}
-  .lightbox.open{display:flex}
-  .lightbox img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:8px}
-  .lightbox button{position:absolute;top:24px;right:24px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:20px;cursor:pointer}
+  .lightbox{position:fixed;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100}
+  .lightbox.open{display:block}
+  .lb-stage{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none}
+  .lb-stage img{max-width:88vw;max-height:82vh;object-fit:contain;border-radius:8px;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;cursor:grab}
+  .lb-stage img.grabbing{cursor:grabbing}
+  .lb-controls{
+    position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:12px;z-index:2;
+    font-family:inherit;
+  }
+  .lb-stepper{
+    display:flex;align-items:stretch;height:48px;
+    background:#fff;border-radius:24px;overflow:hidden;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+  }
+  .lb-stepper button{
+    border:none;cursor:pointer;background:#fff;color:#000;
+    width:52px;font-size:22px;font-weight:400;line-height:1;
+    display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .lb-stepper button:hover{background:#f2f2f2}
+  #lbZoom{
+    display:flex;align-items:center;justify-content:center;min-width:64px;padding:0 6px;
+    font-size:15px;font-weight:700;color:#000;
+    border-left:1px solid #ececec;border-right:1px solid #ececec;
+  }
+  .lb-close{
+    width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;
+    background:#fff;color:#000;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+  }
+  .lb-close:hover{background:#f2f2f2}
+  .lb-close svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -191,21 +225,33 @@
       </div>
     </div>
 
-    <div class="pager">
-      <button id="prevBtn" class="pg-btn" aria-label="이전">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="pager">
+    <button id="prevBtn" class="pg-btn" aria-label="이전">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="pg-right">
+      <button id="nextBtn" class="pg-btn" aria-label="다음">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <div class="pg-right">
-        <button id="nextBtn" class="pg-btn" aria-label="다음">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <span class="count" id="counter">1 / 12</span>
-      </div>
+      <span class="count" id="counter">1 / 12</span>
     </div>
   </div>
 </div>
 
-<div class="lightbox" id="lightbox"><button id="lbClose">&times;</button><img id="lbImg" src="" alt=""></div>
+<div class="lightbox" id="lightbox">
+  <div class="lb-stage" id="lbStage"><img id="lbImg" src="" alt="" draggable="false"></div>
+  <div class="lb-controls">
+    <div class="lb-stepper">
+      <button id="lbMinus" aria-label="축소">&minus;</button>
+      <span id="lbZoom">100%</span>
+      <button id="lbPlus" aria-label="확대">+</button>
+    </div>
+    <button id="lbClose" class="lb-close" aria-label="닫기">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</div>
 
 <script>
   const book = document.getElementById('book');
@@ -219,7 +265,7 @@
     idx = Math.max(0, Math.min(pages.length - 1, i));
     pages.forEach((p, n) => p.classList.toggle('active', n === idx));
     book.classList.toggle('is-cover', ids[idx] === 'cover');
-    pills.forEach(p => p.classList.toggle('active', p.dataset.sec === ids[idx]));
+    pills.forEach(p => p.classList.toggle('active', p.dataset.members.split(',').includes(ids[idx])));
     counter.textContent = (idx + 1) + ' / ' + pages.length;
     document.getElementById('prevBtn').disabled = idx === 0;
     document.getElementById('nextBtn').disabled = idx === pages.length - 1;
@@ -231,20 +277,76 @@
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
-    show(ids.indexOf(p.dataset.sec));
+    show(ids.indexOf(p.dataset.target));
   }));
   window.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') show(idx + 1);
     if (e.key === 'ArrowLeft') show(idx - 1);
   });
 
+  // First user gesture → go fullscreen (browsers block auto-fullscreen on load)
+  document.addEventListener('click', () => {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen)
+      document.documentElement.requestFullscreen().catch(() => {});
+  }, { once: true });
+
+  // ---- lightbox with zoom / pan / pinch (Figma 이미지 확대) ----
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lbImg');
+  const lbZoom = document.getElementById('lbZoom');
+  let scale = 1, tx = 0, ty = 0;
+  const MIN = 1, MAX = 8, STEP = 0.1;   // +/- steps 10%
+
+  function apply(){
+    if (scale <= 1) { tx = 0; ty = 0; }
+    lbImg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+    lbZoom.textContent = Math.round(scale * 100) + '%';
+  }
+  function setScale(s){ scale = Math.min(MAX, Math.max(MIN, s)); apply(); }
+  function openLb(src){ lbImg.src = src; scale = 1; tx = 0; ty = 0; apply(); lightbox.classList.add('open'); }
+  function closeLb(){ lightbox.classList.remove('open'); }
+
   document.addEventListener('click', e => {
-    const fig = e.target.closest('figure.figure img');
-    if (fig) { lbImg.src = fig.src; lightbox.classList.add('open'); }
+    const fig = e.target.closest('figure.figure img, .page-media img');
+    if (fig) openLb(fig.src);
   });
-  lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+  document.getElementById('lbClose').addEventListener('click', closeLb);
+  document.getElementById('lbPlus').addEventListener('click', () => setScale(scale + STEP));
+  document.getElementById('lbMinus').addEventListener('click', () => setScale(scale - STEP));
+  window.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+  // wheel zoom
+  document.getElementById('lbStage').addEventListener('wheel', e => {
+    e.preventDefault();
+    setScale(scale + (e.deltaY < 0 ? STEP : -STEP));
+  }, { passive: false });
+
+  // drag pan (mouse)
+  let dragging = false, sx = 0, sy = 0;
+  lbImg.addEventListener('pointerdown', e => {
+    if (scale <= 1) return;
+    dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+    lbImg.classList.add('grabbing'); lbImg.setPointerCapture(e.pointerId);
+  });
+  lbImg.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    tx = e.clientX - sx; ty = e.clientY - sy; apply();
+  });
+  lbImg.addEventListener('pointerup', () => { dragging = false; lbImg.classList.remove('grabbing'); });
+
+  // pinch zoom (touch)
+  let pinchDist = 0, pinchBase = 1;
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  lbImg.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) { pinchDist = dist(e.touches); pinchBase = scale; }
+  }, { passive: false });
+  lbImg.addEventListener('touchmove', e => {
+    if (e.touches.length === 2 && pinchDist) {
+      e.preventDefault();
+      setScale(pinchBase * dist(e.touches) / pinchDist);
+    }
+  }, { passive: false });
+  lbImg.addEventListener('touchend', e => { if (e.touches.length < 2) pinchDist = 0; });
 
   show(0);
 </script>
