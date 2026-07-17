@@ -266,6 +266,7 @@
   details.toggle[open]>summary::before{transform:rotate(90deg)}
   details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.494cqw}
   details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
+  :root[data-theme="dark"] details.toggle details.toggle{background:rgba(255,255,255,.055)}
 
   .finding{display:flex;gap:0.996cqw;background:var(--card);border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
   .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:var(--icon);
@@ -548,6 +549,7 @@
   const wm = document.querySelector('.cover-slide .wordmark');
   function glitch(){ if (!wm.classList.contains('glitch')) wm.classList.add('glitch'); }
   wm.addEventListener('animationend', () => wm.classList.remove('glitch'));
+  glitch();                    // fire immediately on load (cover)
   setInterval(glitch, 5000);
 
   // toggle: springy height grow + single fade (no per-child flicker)
