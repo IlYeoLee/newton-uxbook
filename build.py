@@ -63,10 +63,15 @@ def linkify(escaped_text):
     return URL_RE.sub(lambda m: f'<a href="{m.group(1)}" target="_blank" rel="noopener">{m.group(1)}</a>', escaped_text)
 
 def is_citation(text):
-    # APA-style source line: (year) + a couple of periods + fairly long, or a bare DOI/URL line
+    # a real reference line: has a URL/DOI, or is mostly Latin with a (year).
+    # Korean explanatory body that merely cites "Author et al.(2025)은 …했다" is NOT a source.
+    if "doi.org" in text or "http" in text:
+        return True
+    kr = sum(1 for c in text if "가" <= c <= "힣")
+    if kr >= 10:
+        return False
     has_year = bool(re.search(r'\(\d{4}', text))
-    has_link = "doi.org" in text or text.startswith("http")
-    return (has_year and text.count(".") >= 2 and len(text) > 40) or (has_link and len(text) < 130)
+    return has_year and text.count(".") >= 2 and len(text) > 40
 
 def render_p(text):
     text = text.strip()
