@@ -21,8 +21,24 @@
   @property --s2{syntax:'<percentage>';inherits:false;initial-value:83%}
   @property --s3{syntax:'<percentage>';inherits:false;initial-value:93.5%}
   :root{
-    --red:#FA3030;
-    --gray-bg:#F6F6F6;
+    /* Brand */
+    --red:#FA3030;--coral:#FE6E3C;--sand:#FEC389;--prism:#D1FEFF;
+    --void:#091212;--oxblood:#511815;--crimson:#920F0F;
+    /* semantic — light (default) */
+    --bg:#fff;--nav-bg:#fff;--gray-bg:#F2F2F2;--card:#fff;--border:rgba(0,0,0,.06);
+    --text:#141A1A;--text-body:rgba(0,0,0,.8);--muted:rgba(0,0,0,.4);--faint:rgba(0,0,0,.3);
+    --tab:#9a9a9a;--tab-on:#111;--icon:#000;
+    --cover-grad:linear-gradient(180deg,var(--red) var(--s1,58%),var(--coral) var(--s2,83%),var(--sand) var(--s3,93.5%),var(--prism) 100%);
+    --wordmark:#000;--uxbook:#000;
+    color-scheme:light;
+  }
+  :root[data-theme="dark"]{
+    --bg:#091212;--nav-bg:#091212;--gray-bg:#141A1A;--card:#1c2424;--border:rgba(255,255,255,.1);
+    --text:#fff;--text-body:rgba(255,255,255,.82);--muted:rgba(255,255,255,.45);--faint:rgba(255,255,255,.35);
+    --tab:rgba(255,255,255,.4);--tab-on:#fff;--icon:rgba(255,255,255,.85);
+    --cover-grad:linear-gradient(180deg,var(--void) var(--s1,55%),var(--oxblood) var(--s2,78%),var(--crimson) var(--s3,90%),var(--red) 100%);
+    --wordmark:var(--red);--uxbook:#fff;
+    color-scheme:dark;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -49,7 +65,7 @@
     margin:0;
     font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
     font-weight:400;
-    background:#000;
+    background:#000;color:var(--text);
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
   }
@@ -61,7 +77,7 @@
     width:min(100vw, 100vh * 1.6003);
     width:min(100vw, 100dvh * 1.6003);   /* dvh: fills tablet screen under changing browser chrome */
     aspect-ratio:1205/753;
-    background:#fff;
+    background:var(--bg);
     overflow:hidden;
     container-type:inline-size;
     /* no shadow at rest — on a full-bleed tablet it showed as a faint grey line at the top edge */
@@ -91,28 +107,41 @@
   .book-nav{
     height:5.394cqw;display:flex;align-items:center;justify-content:space-between;
     padding:0 3.320cqw;
-    border-bottom:1px solid rgba(0,0,0,.06);
-    background:#fff;position:relative;z-index:6;
+    border-bottom:1px solid var(--border);
+    background:var(--nav-bg);position:relative;z-index:6;
   }
   .brand{display:flex;align-items:center;cursor:pointer;text-decoration:none;flex:none}
-  .brand img{height:1.742cqw;width:auto}
+  .brand-logo{display:block;height:1.742cqw;aspect-ratio:872/125;background:var(--wordmark);
+    -webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
+  .nav-tools{display:flex;align-items:center;gap:0.83cqw;margin-left:1.66cqw;flex:none}
+  .tool-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:0.4cqw;
+    border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text);
+    padding:0.5cqw 0.83cqw;border-radius:999px;font-family:inherit;font-size:1.079cqw;font-weight:700;line-height:1;
+    transition:transform .14s cubic-bezier(.34,1.56,.64,1)}
+  .tool-btn:active{transform:scale(.92)}
+  .tool-ic{width:1.245cqw;height:1.245cqw;background:currentColor;flex:none;
+    -webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;
+    mask-position:center;mask-repeat:no-repeat;mask-size:contain}
+  .ic-theme{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10c0-.34-.02-.67-.05-1A7 7 0 0 1 13 3.05C13 3 12.5 2 12 2z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10c0-.34-.02-.67-.05-1A7 7 0 0 1 13 3.05C13 3 12.5 2 12 2z'/%3E%3C/svg%3E")}
+  .ic-lang{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E")}
+  .tool-txt{font-size:1.079cqw}
   .pillbar{display:flex;gap:1.66cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end;align-self:stretch;align-items:stretch}
   .pillbar::-webkit-scrollbar{display:none}
   /* underline tab (two-weight style): grey→black text, FA3030 underline sitting on the bar's bottom outline */
   .pill{
-    flex:none;border:none;cursor:pointer;position:relative;
-    background:transparent;padding:0;display:inline-flex;align-items:center;
-    color:#9a9a9a;font-size:1.245cqw;font-weight:400;white-space:nowrap;
+    flex:none;border:none;cursor:pointer;position:relative;overflow:hidden;
+    background:transparent;padding:0 0.2cqw;display:inline-flex;align-items:center;
+    color:var(--tab);font-size:1.245cqw;font-weight:400;white-space:nowrap;
     font-family:inherit;letter-spacing:-.02em;
     transition:color .3s ease;
   }
   .pill::after{
-    content:"";position:absolute;left:0;bottom:-1px;width:100%;height:0.2cqw;
+    content:"";position:absolute;left:0;bottom:0;width:100%;height:0.2cqw;
     background:var(--red);transform:scaleX(0);transform-origin:left;
     transition:transform .45s cubic-bezier(.65,0,.35,1);
   }
-  .pill:hover{color:#000}
-  .pill.active{color:#000;font-weight:700}
+  .pill:hover{color:var(--tab-on)}
+  .pill.active{color:var(--tab-on);font-weight:700}
   .pill.active::after{transform:scaleX(1)}
 
   /* ---- stage ---- */
@@ -136,10 +165,17 @@
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
   .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
-  /* sec-02: 4-image cross-fade loop (2s each) */
-  .fade-stack{position:relative;width:100%;height:100%}
-  .fade-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;opacity:0;animation:crossFade 8s linear infinite}
-  @keyframes crossFade{0%{opacity:0}4%{opacity:1}21%{opacity:1}25%{opacity:0}100%{opacity:0}}
+  /* sec-02: 4-image slide carousel (1→2→3→4→1), smooth in/out */
+  .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
+  .fade-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
+    animation:slideCarousel 10s cubic-bezier(.65,0,.35,1) infinite;}
+  @keyframes slideCarousel{
+    0%{transform:translateX(105%);opacity:0}
+    4%{transform:translateX(0);opacity:1}
+    21%{transform:translateX(0);opacity:1}
+    25%{transform:translateX(-105%);opacity:0}
+    100%{transform:translateX(-105%);opacity:0}
+  }
 
   .page-text{
     flex:1;min-width:0;height:100%;overflow-y:auto;
@@ -203,11 +239,11 @@
 
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
   .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}
-  .body{font-size:1.494cqw;font-weight:400;color:rgba(0,0,0,.8);line-height:1.55;margin:0 0 1.328cqw}
+  .body{font-size:1.494cqw;font-weight:400;color:var(--text-body);line-height:1.55;margin:0 0 1.328cqw}
   .body a{color:var(--red);text-decoration:underline}
   .subhead{font-size:1.494cqw;font-weight:700;margin:1.992cqw 0 0.498cqw}
   .subhead:first-child{margin-top:0}
-  .list{margin:0.996cqw 0;padding-left:1.660cqw;color:rgba(0,0,0,.8);font-size:1.494cqw;font-weight:400}
+  .list{margin:0.996cqw 0;padding-left:1.660cqw;color:var(--text-body);font-size:1.494cqw;font-weight:400}
   .list li{margin:0.415cqw 0}
 
   figure.figure{margin:1.660cqw 0;cursor:zoom-in;line-height:0}
@@ -231,20 +267,20 @@
   details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.494cqw}
   details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
 
-  .finding{display:flex;gap:0.996cqw;background:#fff;border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
-  .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:#000;
+  .finding{display:flex;gap:0.996cqw;background:var(--card);border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
+  .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:var(--icon);
     -webkit-mask:url(assets/cursor.svg) center/contain no-repeat;
     mask:url(assets/cursor.svg) center/contain no-repeat;}
   .finding-body{flex:1;min-width:0}
-  .finding-label{font-size:1.079cqw;color:rgba(0,0,0,.4);font-weight:400;margin:0 0 0.332cqw}
+  .finding-label{font-size:1.079cqw;color:var(--muted);font-weight:400;margin:0 0 0.332cqw}
   .finding-headline{font-size:1.328cqw;font-weight:700;margin:0 0 0.830cqw;line-height:1.4}
   .finding-title{font-size:1.328cqw;font-weight:700;margin:0 0 0.664cqw;line-height:1.45}
-  .finding-caption{font-size:0.996cqw;color:rgba(0,0,0,.4);margin:0.664cqw 0 0}
+  .finding-caption{font-size:0.996cqw;color:var(--muted);margin:0.664cqw 0 0}
 
   /* APA / source lines: 12px, faintest grey, italic — draws the least attention */
-  .cite{font-size:0.996cqw;color:rgba(0,0,0,.3);font-style:italic;line-height:1.5;margin:0.664cqw 0}
-  .cite a{color:rgba(0,0,0,.3)}
-  .credit{font-size:1.079cqw;color:rgba(0,0,0,.4);margin:0.996cqw 0 0;letter-spacing:.02em}
+  .cite{font-size:0.996cqw;color:var(--faint);font-style:italic;line-height:1.5;margin:0.664cqw 0}
+  .cite a{color:var(--faint)}
+  .credit{font-size:1.079cqw;color:var(--muted);margin:0.996cqw 0 0;letter-spacing:.02em}
 
   /* inside toggles, everything is one step smaller than body (never larger than body) */
   .toggle-body .body,.toggle-body .subhead,.toggle-body .list{font-size:1.328cqw}
@@ -253,7 +289,7 @@
 
   .table-wrap{overflow-x:auto;margin:1.328cqw 0;border-radius:1.328cqw;border:1px solid rgba(0,0,0,.08)}
   table{width:100%;border-collapse:collapse;font-size:1.079cqw;min-width:52cqw}
-  th,td{text-align:left;padding:0.996cqw;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;font-weight:400}
+  th,td{text-align:left;padding:0.996cqw;border-bottom:1px solid var(--border);vertical-align:top;font-weight:400}
   th{background:#fafafa;font-weight:700;white-space:nowrap}
   tr:last-child td{border-bottom:none}
 
@@ -270,7 +306,7 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     /* Figma colors; #D1FEFF pinned at 100% so the bright bottom is never clipped.
        Middle stops sweep for a clear flowing motion. */
-    background:linear-gradient(180deg,#FA3030 var(--s1,58%),#FE6E3C var(--s2,83%),#FEC389 var(--s3,93.5%),#D1FEFF 100%);
+    background:var(--cover-grad);
     animation:gradFlow 8s ease-in-out infinite alternate;
   }
   @keyframes gradFlow{
@@ -278,7 +314,8 @@
     to{--s1:65%;--s2:91%;--s3:97%}
   }
   @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
-  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;-webkit-user-drag:none;-webkit-user-select:none}
+  .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
+    background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
   /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
   @keyframes glitch{
     0%,100%{transform:translate(0);clip-path:none}
@@ -290,7 +327,7 @@
     85%{transform:translate(1px,1px);clip-path:none}
   }
   .cover-slide .wordmark.glitch{animation:glitch .38s steps(2,end)}
-  .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
+  .cover-slide p{font-size:1.577cqw;font-weight:700;color:var(--uxbook);margin:0;letter-spacing:-.02em}
 
   /* side page-turn zones: whole left/right strip flips pages; blocks image-zoom there */
   .nav-zone{
@@ -372,13 +409,17 @@
 <div class="device">
 <div class="book is-cover" id="book">
   <div class="book-nav">
-    <a class="brand" href="#" data-nav="cover"><img src="assets/wordmark.svg" alt="NEWTON"></a>
+    <a class="brand" href="#" data-nav="cover"><span class="brand-logo" role="img" aria-label="NEWTON"></span></a>
     <div class="pillbar"><button type="button" class="pill" data-target="sec-01" data-members="sec-01,sec-02,sec-03">Background</button><button type="button" class="pill" data-target="sec-04" data-members="sec-04">Solution</button><button type="button" class="pill" data-target="sec-05" data-members="sec-05,sec-06,sec-07">Products</button><button type="button" class="pill" data-target="playwith" data-members="playwith,sec-08">Scenario</button><button type="button" class="pill" data-target="sec-09" data-members="sec-09">Extensibility</button></div>
+    <div class="nav-tools">
+      <button class="tool-btn" id="themeToggle" aria-label="테마 전환"><span class="tool-ic ic-theme"></span></button>
+      <button class="tool-btn" id="langToggle" aria-label="언어 전환"><span class="tool-ic ic-lang"></span><span class="tool-txt" id="langLabel">EN</span></button>
+    </div>
   </div>
   <div class="stage">
     <div class="page active" data-page="cover">
       <div class="cover-slide">
-        <img class="wordmark" src="assets/wordmark.svg" alt="NEWTON" draggable="false">
+        <span class="wordmark" role="img" aria-label="NEWTON"></span>
         <p>UX Book</p>
       </div>
     </div>
@@ -406,7 +447,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-02">
-  <div class="page-media"><div class="fade-stack"><img class="fade-img" src="assets/fade1.png" style="animation-delay:0s" alt="" loading="lazy"><img class="fade-img" src="assets/fade2.png" style="animation-delay:2s" alt="" loading="lazy"><img class="fade-img" src="assets/fade3.png" style="animation-delay:4s" alt="" loading="lazy"><img class="fade-img" src="assets/fade4.png" style="animation-delay:6s" alt="" loading="lazy"></div></div>
+  <div class="page-media"><div class="fade-stack"><img class="fade-img" src="assets/fade1.png" style="animation-delay:0.0s" alt="" loading="lazy"><img class="fade-img" src="assets/fade2.png" style="animation-delay:2.5s" alt="" loading="lazy"><img class="fade-img" src="assets/fade3.png" style="animation-delay:5.0s" alt="" loading="lazy"><img class="fade-img" src="assets/fade4.png" style="animation-delay:7.5s" alt="" loading="lazy"></div></div>
   <div class="page-text">
     <p class="kicker">Challenge Spark</p>
     <h2 class="chapter-title">새로운 움직임은<br>다시 몸을 움직이게 한다</h2>
@@ -442,7 +483,7 @@
   <div class="page-media"><img class="media" src="assets/img_22.png" alt="" loading="lazy"></div>
   <div class="page-text">
     <p class="kicker">Station</p>
-    <h2 class="chapter-title">도전이 시작될 자리를 만드는 스테이션</h2>
+    <h2 class="chapter-title">도전이 시작될<br>자리를 만드는 스테이션</h2>
     <p class="body">스테이션은 하체 웨어러블을 충전하고 보관하며, 착용 전 준비 상태를 정돈하는 거치형 허브입니다. 운동을 시작할 때는 웨어러블의 상태를 확인하고, 프로젝션 유닛이 안정적으로 놓일 위치와 각도를 잡아줍니다. NEWTON의 다음 움직임은 이 자리에서 준비되고, 하체 웨어러블을 착용하는 순간 오늘의 도전으로 이어집니다.</p>
   </div>
 </div>
@@ -468,7 +509,7 @@
       <div class="head-left"><p class="kicker">(1) A Spark to Move</p><h2 class="chapter-title">마음이 먼저 움직이는 순간</h2></div>
       <div class="head-right"><p class="body">책상 앞에 오래 앉아 굳어 있던 몸 앞에, 포터블 스테이션은 지금 끌릴 만한 Challenge Pack을 짧게 띄웁니다. 어릴 때 배워봤던 복싱의 회피 스텝과 짧은 풋워크 하이라이트가 집 안에 펼쳐지고, 투사된 시작 버튼은 다시 움직여보고 싶은 마음을 당깁니다. 누르는 순간, 운동은 해야 할 일이 아니라 지금 바로 시작해보고 싶은 도전이 됩니다</p></div>
     </div>
-    <div class="page-content"><div class="group"><details class="toggle"><summary>운동을 마음먹게 시작하는 뉴턴의 넛지 설계</summary><div class="toggle-body"><div class="finding"><div class="finding-icon"></div><div class="finding-body"><p class="finding-title">NEWTON 넛지 설계</p><p class="body">NEWTON은 관심 운동, 저장한 Pack, 최근 본 콘텐츠, 중단한 세션과 생활 패턴을 바탕으로 추천을 만듭니다. 시간,장소,활동량,날씨까지 함께 판단해 지금 실행하기 좋은 Pack만 제안합니다.</p><p class="subhead">01 두가지 진입점</p><p class="subhead">NEWTON이 먼저 제안하거나 내가 고르거나</p><p class="body">앱을 탐색하지 않는 순간에는 관심 운동, 저장·시청 기록, 이전 세션을 바탕으로 개인화 알림이 적절한 Pack을 먼저 제안합니다. 콘텐츠 탭에서는 원하는 움직임을 직접 탐색해 Pack을 시작합니다.</p><p class="subhead">02 생활 속 접점</p><p class="subhead">책상에서 준비하고, 현관에서 행동으로</p><p class="body">책상에서는 추천 Pack을 확인하고 운동 직전 설정을 마칩니다. 현관에서는 외출 및 귀가 상황에 맞춰 실내외 운동을 제안하며, 웨어러블 착용과 발 두 번 탭까지 이어 실제 시작으로 전환합니다.</p><figure class="figure"><img class="media" src="assets/img_28.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_29.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_30.png" alt="" loading="lazy"></figure></div></div></div></details></div><figure class="figure"><img class="media" src="assets/img_27.png" alt="" loading="lazy"></figure><h2 class="chapter-title">(2) Step by Step, Into Play<br>처음의 한 걸음은, 집에서도 충분하니까</h2><p class="body">Pack을 고르면, 방 안의 벽면이 조용한 링으로 바뀝니다. 굳은 몸을 스트레칭으로 열고, Quiet On으로 발소리와 충격을 낮춥니다. 벽에는 복싱 고수의 리듬과 가상 상대의 공격 범위가 펼쳐지고, 한 발 피하고 다시 들어가며 짧은 스파링을 시작합니다. 소음 부담 없이 완성한 첫 움직임은, 또 다른 도전을 해보고 싶은 재미로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_31.png" alt="" loading="lazy"></figure><h2 class="chapter-title">한번 움직인 마음은,<br>바깥으로 이어진다</h2><p class="body">집에서 한 번 움직여본 감각은, 피드 속 러닝을 그냥 넘기지 못하게 만듭니다. 오늘의 Pack은 션과 함께 달리는 러닝메이트. NEWTON은 발밑에 페이스와 박자를 안내하고, 리듬이 꺼질 때는 Boost On으로 다음 한 발을 밀어줍니다. 피드에서 보던 러닝이 오늘 내 거리로 넘어오는 순간, 운동은 루틴이 아니라 따라가고 싶은 바깥 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_32.png" alt="" loading="lazy"></figure><h2 class="chapter-title">혼자 익힌 리듬이,<br>함께 움직일 자신감으로</h2><p class="body">혼자 달리던 몸은 이제 함께 움직이는 재미를 궁금해합니다. 오늘의 Pack은 스테판 커리의 스텝백. NEWTON은 첫 발, 백스텝, 복귀 리듬을 지면 위에 띄우고, Press On은 발을 빼고 돌아오는 순간에 묵직한 저항을 더해 순발력을 깨웁니다. 혼자 익힌 리듬이 쌓이면, 보기만 하던 플레이는 해볼 수 있는 감각이 됩니다. 그 감각은 친구들과 함께 움직여볼 자신감으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_33.png" alt="" loading="lazy"></figure><h2 class="chapter-title">혼자 익힌 설렘이,<br>함께 하는 재미가 되어</h2><p class="body">혼자 익힌 리듬은, 함께할 때 더 재밌어집니다. NEWTON의 빔프로젝터를 나란히 두는 순간, 거실은 둘만의 플레이 스테이지로 넓어집니다. 커진 투사면 안에서 서로의 움직임이 맞물리고, 운동은 게임처럼 가볍게 이어집니다. 혼자 쌓은 자신감은 친구와 주고받는 리듬이 되고, 연습은 함께 즐기는 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_34.png" alt="" loading="lazy"></figure><h2 class="chapter-title">(3) From Movement to Momentum<br>오늘의 두근거림을, 다음 도전으로</h2><p class="body">움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 오늘의 리듬과 흔들렸던 순간은 리포트로 남아 다음 도전의 단서가 됩니다. 하체 웨어러블은 다시 충전되고, 패브릭 파츠는 산뜻하게 관리됩니다. 오늘의 플레이는 그렇게 다음 움직임으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_35.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_36.png" alt="" loading="lazy"></figure></div>
+    <div class="page-content"><div class="group"><details class="toggle"><summary>운동을 마음먹게 시작하는 뉴턴의 넛지 설계</summary><div class="toggle-body"><div class="finding"><div class="finding-icon"></div><div class="finding-body"><p class="finding-title">NEWTON 넛지 설계</p><p class="body">NEWTON은 관심 운동, 저장한 Pack, 최근 본 콘텐츠, 중단한 세션과 생활 패턴을 바탕으로 추천을 만듭니다. 시간,장소,활동량,날씨까지 함께 판단해 지금 실행하기 좋은 Pack만 제안합니다.</p><p class="subhead">01 두가지 진입점</p><p class="subhead">NEWTON이 먼저 제안하거나 내가 고르거나</p><p class="body">앱을 탐색하지 않는 순간에는 관심 운동, 저장·시청 기록, 이전 세션을 바탕으로 개인화 알림이 적절한 Pack을 먼저 제안합니다. 콘텐츠 탭에서는 원하는 움직임을 직접 탐색해 Pack을 시작합니다.</p><p class="subhead">02 생활 속 접점</p><p class="subhead">책상에서 준비하고, 현관에서 행동으로</p><p class="body">책상에서는 추천 Pack을 확인하고 운동 직전 설정을 마칩니다. 현관에서는 외출 및 귀가 상황에 맞춰 실내외 운동을 제안하며, 웨어러블 착용과 발 두 번 탭까지 이어 실제 시작으로 전환합니다.</p><figure class="figure"><img class="media" src="assets/img_28.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_29.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_30.png" alt="" loading="lazy"></figure></div></div></div></details></div><figure class="figure"><img class="media" src="assets/img_27.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">(2) Step by Step, Into Play</p><h3 class="step-title">처음의 한 걸음은, 집에서도 충분하니까</h3></div><p class="body">Pack을 고르면, 방 안의 벽면이 조용한 링으로 바뀝니다. 굳은 몸을 스트레칭으로 열고, Quiet On으로 발소리와 충격을 낮춥니다. 벽에는 복싱 고수의 리듬과 가상 상대의 공격 범위가 펼쳐지고, 한 발 피하고 다시 들어가며 짧은 스파링을 시작합니다. 소음 부담 없이 완성한 첫 움직임은, 또 다른 도전을 해보고 싶은 재미로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_31.png" alt="" loading="lazy"></figure><h2 class="chapter-title">한번 움직인 마음은,<br>바깥으로 이어진다</h2><p class="body">집에서 한 번 움직여본 감각은, 피드 속 러닝을 그냥 넘기지 못하게 만듭니다. 오늘의 Pack은 션과 함께 달리는 러닝메이트. NEWTON은 발밑에 페이스와 박자를 안내하고, 리듬이 꺼질 때는 Boost On으로 다음 한 발을 밀어줍니다. 피드에서 보던 러닝이 오늘 내 거리로 넘어오는 순간, 운동은 루틴이 아니라 따라가고 싶은 바깥 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_32.png" alt="" loading="lazy"></figure><h2 class="chapter-title">혼자 익힌 리듬이,<br>함께 움직일 자신감으로</h2><p class="body">혼자 달리던 몸은 이제 함께 움직이는 재미를 궁금해합니다. 오늘의 Pack은 스테판 커리의 스텝백. NEWTON은 첫 발, 백스텝, 복귀 리듬을 지면 위에 띄우고, Press On은 발을 빼고 돌아오는 순간에 묵직한 저항을 더해 순발력을 깨웁니다. 혼자 익힌 리듬이 쌓이면, 보기만 하던 플레이는 해볼 수 있는 감각이 됩니다. 그 감각은 친구들과 함께 움직여볼 자신감으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_33.png" alt="" loading="lazy"></figure><h2 class="chapter-title">혼자 익힌 설렘이,<br>함께 하는 재미가 되어</h2><p class="body">혼자 익힌 리듬은, 함께할 때 더 재밌어집니다. NEWTON의 빔프로젝터를 나란히 두는 순간, 거실은 둘만의 플레이 스테이지로 넓어집니다. 커진 투사면 안에서 서로의 움직임이 맞물리고, 운동은 게임처럼 가볍게 이어집니다. 혼자 쌓은 자신감은 친구와 주고받는 리듬이 되고, 연습은 함께 즐기는 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_34.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">(3) From Movement to Momentum</p><h3 class="step-title">오늘의 두근거림을, 다음 도전으로</h3></div><p class="body">움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 오늘의 리듬과 흔들렸던 순간은 리포트로 남아 다음 도전의 단서가 됩니다. 하체 웨어러블은 다시 충전되고, 패브릭 파츠는 산뜻하게 관리됩니다. 오늘의 플레이는 그렇게 다음 움직임으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_35.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_36.png" alt="" loading="lazy"></figure></div>
     
   </div>
   <div class="scroll-hint" aria-hidden="true"><span class="scroll-mouse"></span><span class="chevs"><i class="chev"></i><i class="chev"></i><i class="chev"></i></span></div>
@@ -579,8 +620,24 @@
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
+    addRipple(e);
     show(ids.indexOf(p.dataset.target));
   }));
+
+  // theme toggle (light ↔ dark)
+  document.getElementById('themeToggle').addEventListener('click', e => {
+    addRipple(e);
+    const root = document.documentElement;
+    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  // language toggle (KO ↔ EN) — translation content wired in a later step
+  let lang = 'ko';
+  document.getElementById('langToggle').addEventListener('click', e => {
+    addRipple(e);
+    lang = lang === 'ko' ? 'en' : 'ko';
+    document.getElementById('langLabel').textContent = lang === 'ko' ? 'EN' : 'KO';
+    document.documentElement.setAttribute('data-lang', lang);
+  });
 
   // logo glitch: fires automatically once every 5s
   const wm = document.querySelector('.cover-slide .wordmark');

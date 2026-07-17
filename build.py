@@ -62,7 +62,7 @@ def render_p(text):
 
 def render_h4(text):
     lines = text.split("\n")
-    if lines[0].strip().startswith("{"):
+    if lines[0].strip()[:1] in ("{", "("):   # "(1)…" and "{1}…" → red caption (label) + title
         label = lines[0].strip()
         headline = lines[1].strip() if len(lines) > 1 else ""
         return f'<div class="step-head"><p class="step-label">{esc(label)}</p><h3 class="step-title">{esc(headline)}</h3></div>'
@@ -152,6 +152,7 @@ items = copy.deepcopy(data)
 TEXT_PATCHES = {
     "보던 움직임을, \n해보는 움직임으로": "내 플레이를 깨우는\n하체 웨어러블 로보틱스",
     "내가 있는 곳이, 바로 도전의 필드": "공간을 도전의 필드로\n바꾸는 프로젝션 유닛",
+    "도전이 시작될 자리를 만드는 스테이션": "도전이 시작될\n자리를 만드는 스테이션",
     "{1} Home First Trial\n처음의 한 걸음은, 집에서도 충분하니까":
         "(2) Step by Step, Into Play\n처음의 한 걸음은, 집에서도 충분하니까",
     "{2} Outdoor Running\n한번 움직인 마음은, 바깥으로 이어진다":
@@ -316,7 +317,7 @@ def render_page(marker, seg):
     if num == "02":
         # sec-02: 4-image cross-fade loop (2s each), 3-1..3-4
         media_html = '<div class="fade-stack">' + "".join(
-            f'<img class="fade-img" src="assets/fade{i}.png" style="animation-delay:{(i-1)*2}s" alt="" loading="lazy">'
+            f'<img class="fade-img" src="assets/fade{i}.png" style="animation-delay:{(i-1)*2.5}s" alt="" loading="lazy">'
             for i in range(1, 5)) + '</div>'
     else:
         media_html = img_tag(hero["src"]) if hero else ""

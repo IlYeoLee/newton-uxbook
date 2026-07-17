@@ -21,8 +21,24 @@
   @property --s2{syntax:'<percentage>';inherits:false;initial-value:83%}
   @property --s3{syntax:'<percentage>';inherits:false;initial-value:93.5%}
   :root{
-    --red:#FA3030;
-    --gray-bg:#F6F6F6;
+    /* Brand */
+    --red:#FA3030;--coral:#FE6E3C;--sand:#FEC389;--prism:#D1FEFF;
+    --void:#091212;--oxblood:#511815;--crimson:#920F0F;
+    /* semantic — light (default) */
+    --bg:#fff;--nav-bg:#fff;--gray-bg:#F2F2F2;--card:#fff;--border:rgba(0,0,0,.06);
+    --text:#141A1A;--text-body:rgba(0,0,0,.8);--muted:rgba(0,0,0,.4);--faint:rgba(0,0,0,.3);
+    --tab:#9a9a9a;--tab-on:#111;--icon:#000;
+    --cover-grad:linear-gradient(180deg,var(--red) var(--s1,58%),var(--coral) var(--s2,83%),var(--sand) var(--s3,93.5%),var(--prism) 100%);
+    --wordmark:#000;--uxbook:#000;
+    color-scheme:light;
+  }
+  :root[data-theme="dark"]{
+    --bg:#091212;--nav-bg:#091212;--gray-bg:#141A1A;--card:#1c2424;--border:rgba(255,255,255,.1);
+    --text:#fff;--text-body:rgba(255,255,255,.82);--muted:rgba(255,255,255,.45);--faint:rgba(255,255,255,.35);
+    --tab:rgba(255,255,255,.4);--tab-on:#fff;--icon:rgba(255,255,255,.85);
+    --cover-grad:linear-gradient(180deg,var(--void) var(--s1,55%),var(--oxblood) var(--s2,78%),var(--crimson) var(--s3,90%),var(--red) 100%);
+    --wordmark:var(--red);--uxbook:#fff;
+    color-scheme:dark;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -49,7 +65,7 @@
     margin:0;
     font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
     font-weight:400;
-    background:#000;
+    background:#000;color:var(--text);
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
   }
@@ -61,7 +77,7 @@
     width:min(100vw, 100vh * 1.6003);
     width:min(100vw, 100dvh * 1.6003);   /* dvh: fills tablet screen under changing browser chrome */
     aspect-ratio:1205/753;
-    background:#fff;
+    background:var(--bg);
     overflow:hidden;
     container-type:inline-size;
     /* no shadow at rest — on a full-bleed tablet it showed as a faint grey line at the top edge */
@@ -91,28 +107,41 @@
   .book-nav{
     height:5.394cqw;display:flex;align-items:center;justify-content:space-between;
     padding:0 3.320cqw;
-    border-bottom:1px solid rgba(0,0,0,.06);
-    background:#fff;position:relative;z-index:6;
+    border-bottom:1px solid var(--border);
+    background:var(--nav-bg);position:relative;z-index:6;
   }
   .brand{display:flex;align-items:center;cursor:pointer;text-decoration:none;flex:none}
-  .brand img{height:1.742cqw;width:auto}
+  .brand-logo{display:block;height:1.742cqw;aspect-ratio:872/125;background:var(--wordmark);
+    -webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
+  .nav-tools{display:flex;align-items:center;gap:0.83cqw;margin-left:1.66cqw;flex:none}
+  .tool-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:0.4cqw;
+    border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text);
+    padding:0.5cqw 0.83cqw;border-radius:999px;font-family:inherit;font-size:1.079cqw;font-weight:700;line-height:1;
+    transition:transform .14s cubic-bezier(.34,1.56,.64,1)}
+  .tool-btn:active{transform:scale(.92)}
+  .tool-ic{width:1.245cqw;height:1.245cqw;background:currentColor;flex:none;
+    -webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;
+    mask-position:center;mask-repeat:no-repeat;mask-size:contain}
+  .ic-theme{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10c0-.34-.02-.67-.05-1A7 7 0 0 1 13 3.05C13 3 12.5 2 12 2z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10c0-.34-.02-.67-.05-1A7 7 0 0 1 13 3.05C13 3 12.5 2 12 2z'/%3E%3C/svg%3E")}
+  .ic-lang{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E")}
+  .tool-txt{font-size:1.079cqw}
   .pillbar{display:flex;gap:1.66cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end;align-self:stretch;align-items:stretch}
   .pillbar::-webkit-scrollbar{display:none}
   /* underline tab (two-weight style): grey→black text, FA3030 underline sitting on the bar's bottom outline */
   .pill{
-    flex:none;border:none;cursor:pointer;position:relative;
-    background:transparent;padding:0;display:inline-flex;align-items:center;
-    color:#9a9a9a;font-size:1.245cqw;font-weight:400;white-space:nowrap;
+    flex:none;border:none;cursor:pointer;position:relative;overflow:hidden;
+    background:transparent;padding:0 0.2cqw;display:inline-flex;align-items:center;
+    color:var(--tab);font-size:1.245cqw;font-weight:400;white-space:nowrap;
     font-family:inherit;letter-spacing:-.02em;
     transition:color .3s ease;
   }
   .pill::after{
-    content:"";position:absolute;left:0;bottom:-1px;width:100%;height:0.2cqw;
+    content:"";position:absolute;left:0;bottom:0;width:100%;height:0.2cqw;
     background:var(--red);transform:scaleX(0);transform-origin:left;
     transition:transform .45s cubic-bezier(.65,0,.35,1);
   }
-  .pill:hover{color:#000}
-  .pill.active{color:#000;font-weight:700}
+  .pill:hover{color:var(--tab-on)}
+  .pill.active{color:var(--tab-on);font-weight:700}
   .pill.active::after{transform:scaleX(1)}
 
   /* ---- stage ---- */
@@ -136,10 +165,17 @@
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
   .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
-  /* sec-02: 4-image cross-fade loop (2s each) */
-  .fade-stack{position:relative;width:100%;height:100%}
-  .fade-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;opacity:0;animation:crossFade 8s linear infinite}
-  @keyframes crossFade{0%{opacity:0}4%{opacity:1}21%{opacity:1}25%{opacity:0}100%{opacity:0}}
+  /* sec-02: 4-image slide carousel (1→2→3→4→1), smooth in/out */
+  .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
+  .fade-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
+    animation:slideCarousel 10s cubic-bezier(.65,0,.35,1) infinite;}
+  @keyframes slideCarousel{
+    0%{transform:translateX(105%);opacity:0}
+    4%{transform:translateX(0);opacity:1}
+    21%{transform:translateX(0);opacity:1}
+    25%{transform:translateX(-105%);opacity:0}
+    100%{transform:translateX(-105%);opacity:0}
+  }
 
   .page-text{
     flex:1;min-width:0;height:100%;overflow-y:auto;
@@ -203,11 +239,11 @@
 
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
   .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}
-  .body{font-size:1.494cqw;font-weight:400;color:rgba(0,0,0,.8);line-height:1.55;margin:0 0 1.328cqw}
+  .body{font-size:1.494cqw;font-weight:400;color:var(--text-body);line-height:1.55;margin:0 0 1.328cqw}
   .body a{color:var(--red);text-decoration:underline}
   .subhead{font-size:1.494cqw;font-weight:700;margin:1.992cqw 0 0.498cqw}
   .subhead:first-child{margin-top:0}
-  .list{margin:0.996cqw 0;padding-left:1.660cqw;color:rgba(0,0,0,.8);font-size:1.494cqw;font-weight:400}
+  .list{margin:0.996cqw 0;padding-left:1.660cqw;color:var(--text-body);font-size:1.494cqw;font-weight:400}
   .list li{margin:0.415cqw 0}
 
   figure.figure{margin:1.660cqw 0;cursor:zoom-in;line-height:0}
@@ -231,20 +267,20 @@
   details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.494cqw}
   details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
 
-  .finding{display:flex;gap:0.996cqw;background:#fff;border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
-  .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:#000;
+  .finding{display:flex;gap:0.996cqw;background:var(--card);border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
+  .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:var(--icon);
     -webkit-mask:url(assets/cursor.svg) center/contain no-repeat;
     mask:url(assets/cursor.svg) center/contain no-repeat;}
   .finding-body{flex:1;min-width:0}
-  .finding-label{font-size:1.079cqw;color:rgba(0,0,0,.4);font-weight:400;margin:0 0 0.332cqw}
+  .finding-label{font-size:1.079cqw;color:var(--muted);font-weight:400;margin:0 0 0.332cqw}
   .finding-headline{font-size:1.328cqw;font-weight:700;margin:0 0 0.830cqw;line-height:1.4}
   .finding-title{font-size:1.328cqw;font-weight:700;margin:0 0 0.664cqw;line-height:1.45}
-  .finding-caption{font-size:0.996cqw;color:rgba(0,0,0,.4);margin:0.664cqw 0 0}
+  .finding-caption{font-size:0.996cqw;color:var(--muted);margin:0.664cqw 0 0}
 
   /* APA / source lines: 12px, faintest grey, italic — draws the least attention */
-  .cite{font-size:0.996cqw;color:rgba(0,0,0,.3);font-style:italic;line-height:1.5;margin:0.664cqw 0}
-  .cite a{color:rgba(0,0,0,.3)}
-  .credit{font-size:1.079cqw;color:rgba(0,0,0,.4);margin:0.996cqw 0 0;letter-spacing:.02em}
+  .cite{font-size:0.996cqw;color:var(--faint);font-style:italic;line-height:1.5;margin:0.664cqw 0}
+  .cite a{color:var(--faint)}
+  .credit{font-size:1.079cqw;color:var(--muted);margin:0.996cqw 0 0;letter-spacing:.02em}
 
   /* inside toggles, everything is one step smaller than body (never larger than body) */
   .toggle-body .body,.toggle-body .subhead,.toggle-body .list{font-size:1.328cqw}
@@ -253,7 +289,7 @@
 
   .table-wrap{overflow-x:auto;margin:1.328cqw 0;border-radius:1.328cqw;border:1px solid rgba(0,0,0,.08)}
   table{width:100%;border-collapse:collapse;font-size:1.079cqw;min-width:52cqw}
-  th,td{text-align:left;padding:0.996cqw;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;font-weight:400}
+  th,td{text-align:left;padding:0.996cqw;border-bottom:1px solid var(--border);vertical-align:top;font-weight:400}
   th{background:#fafafa;font-weight:700;white-space:nowrap}
   tr:last-child td{border-bottom:none}
 
@@ -270,7 +306,7 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     /* Figma colors; #D1FEFF pinned at 100% so the bright bottom is never clipped.
        Middle stops sweep for a clear flowing motion. */
-    background:linear-gradient(180deg,#FA3030 var(--s1,58%),#FE6E3C var(--s2,83%),#FEC389 var(--s3,93.5%),#D1FEFF 100%);
+    background:var(--cover-grad);
     animation:gradFlow 8s ease-in-out infinite alternate;
   }
   @keyframes gradFlow{
@@ -278,7 +314,8 @@
     to{--s1:65%;--s2:91%;--s3:97%}
   }
   @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
-  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;-webkit-user-drag:none;-webkit-user-select:none}
+  .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
+    background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
   /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
   @keyframes glitch{
     0%,100%{transform:translate(0);clip-path:none}
@@ -290,7 +327,7 @@
     85%{transform:translate(1px,1px);clip-path:none}
   }
   .cover-slide .wordmark.glitch{animation:glitch .38s steps(2,end)}
-  .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
+  .cover-slide p{font-size:1.577cqw;font-weight:700;color:var(--uxbook);margin:0;letter-spacing:-.02em}
 
   /* side page-turn zones: whole left/right strip flips pages; blocks image-zoom there */
   .nav-zone{
@@ -372,13 +409,17 @@
 <div class="device">
 <div class="book is-cover" id="book">
   <div class="book-nav">
-    <a class="brand" href="#" data-nav="cover"><img src="assets/wordmark.svg" alt="NEWTON"></a>
+    <a class="brand" href="#" data-nav="cover"><span class="brand-logo" role="img" aria-label="NEWTON"></span></a>
     <div class="pillbar">{{NAV}}</div>
+    <div class="nav-tools">
+      <button class="tool-btn" id="themeToggle" aria-label="테마 전환"><span class="tool-ic ic-theme"></span></button>
+      <button class="tool-btn" id="langToggle" aria-label="언어 전환"><span class="tool-ic ic-lang"></span><span class="tool-txt" id="langLabel">EN</span></button>
+    </div>
   </div>
   <div class="stage">
     <div class="page active" data-page="cover">
       <div class="cover-slide">
-        <img class="wordmark" src="assets/wordmark.svg" alt="NEWTON" draggable="false">
+        <span class="wordmark" role="img" aria-label="NEWTON"></span>
         <p>UX Book</p>
       </div>
     </div>
@@ -484,8 +525,24 @@
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
+    addRipple(e);
     show(ids.indexOf(p.dataset.target));
   }));
+
+  // theme toggle (light ↔ dark)
+  document.getElementById('themeToggle').addEventListener('click', e => {
+    addRipple(e);
+    const root = document.documentElement;
+    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  // language toggle (KO ↔ EN) — translation content wired in a later step
+  let lang = 'ko';
+  document.getElementById('langToggle').addEventListener('click', e => {
+    addRipple(e);
+    lang = lang === 'ko' ? 'en' : 'ko';
+    document.getElementById('langLabel').textContent = lang === 'ko' ? 'EN' : 'KO';
+    document.documentElement.setAttribute('data-lang', lang);
+  });
 
   // logo glitch: fires automatically once every 5s
   const wm = document.querySelector('.cover-slide .wordmark');
