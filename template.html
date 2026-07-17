@@ -103,6 +103,9 @@
   /* per-element slide-in ("차라락") — soft ease-out, a touch slower */
   @keyframes slideInItem{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
   .stagger{opacity:0;animation:slideInItem .62s cubic-bezier(.22,.61,.36,1) both}
+  /* toggle contents: gentler fade, minimal travel so it doesn't bounce as the panel expands */
+  @keyframes slideInSoft{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .stagger-soft{opacity:0;animation:slideInSoft .45s ease-out both}
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;
@@ -175,7 +178,7 @@
   }
   @keyframes bgDrift{to{background-position:0 100%}}
   @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
-  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none}
+  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;-webkit-user-drag:none;-webkit-user-select:none}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
 
   /* ---- pager (Figma Frame 2147232169) — anchored to book so cover & content align ---- */
@@ -261,7 +264,7 @@
   <div class="stage">
     <div class="page active" data-page="cover">
       <div class="cover-slide">
-        <img class="wordmark" src="assets/wordmark.svg" alt="NEWTON">
+        <img class="wordmark" src="assets/wordmark.svg" alt="NEWTON" draggable="false">
         <p>UX Book</p>
       </div>
     </div>
@@ -399,10 +402,10 @@
     const body = d.querySelector(':scope > .toggle-body');
     if (!body) return;
     [...body.children].forEach((el, n) => {
-      el.classList.remove('stagger');
+      el.classList.remove('stagger-soft');
       void el.offsetWidth;
-      el.style.animationDelay = (n * 45) + 'ms';
-      el.classList.add('stagger');
+      el.style.animationDelay = (n * 35) + 'ms';
+      el.classList.add('stagger-soft');
     });
   }
   document.querySelectorAll('details.toggle').forEach(d => {
