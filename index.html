@@ -42,7 +42,7 @@
     background:#fff;
     overflow:hidden;
     container-type:inline-size;
-    box-shadow:0 40px 140px rgba(0,0,0,.65);
+    /* no shadow at rest — on a full-bleed tablet it showed as a faint grey line at the top edge */
   }
 
   /* Desktop/laptop (mouse): wrap the book in a Galaxy-Tab-style bezel.
@@ -56,7 +56,7 @@
       box-shadow:0 3vh 9vh rgba(0,0,0,.6), inset 0 0 0 .2vh #2d2d31;
     }
     .book{
-      width:min(100vw - 9vh, (100vh - 9vh) * 1.6003);
+      width:min(100vw - 20vh, (100vh - 20vh) * 1.6003);   /* smaller tablet, more black margin around it */
       border-radius:1vh;
     }
     .device::after{
@@ -103,9 +103,9 @@
   /* per-element slide-in ("차라락") — soft ease-out, a touch slower */
   @keyframes slideInItem{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
   .stagger{opacity:0;animation:slideInItem .62s cubic-bezier(.22,.61,.36,1) both}
-  /* toggle contents: gentler fade, minimal travel so it doesn't bounce as the panel expands */
-  @keyframes slideInSoft{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .stagger-soft{opacity:0;animation:slideInSoft .45s ease-out both}
+  /* toggle contents: pure fade, no travel — the panel already expands, so any Y-move reads as a bounce */
+  @keyframes fadeSoft{from{opacity:0}to{opacity:1}}
+  .stagger-soft{opacity:0;animation:fadeSoft .42s ease both}
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;
