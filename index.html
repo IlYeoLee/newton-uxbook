@@ -77,12 +77,14 @@
   .pillbar{display:flex;gap:0.664cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end}
   .pillbar::-webkit-scrollbar{display:none}
   .pill{
-    flex:none;border:none;cursor:pointer;
+    flex:none;border:none;cursor:pointer;position:relative;overflow:hidden;
     padding:0.664cqw 0.830cqw;border-radius:6.639cqw;
     background:rgba(245,245,245,.9);color:#484848;
     font-size:1.079cqw;font-weight:400;white-space:nowrap;
     font-family:inherit;letter-spacing:-.03em;
+    transition:transform .14s cubic-bezier(.34,1.56,.64,1);
   }
+  .pill:active{transform:scale(.92)}
   .pill.active{background:var(--red);color:#fff;font-weight:700}
 
   /* ---- stage ---- */
@@ -139,7 +141,7 @@
     font-weight:700;font-size:1.328cqw;padding:0.996cqw 0.664cqw;border-radius:1.162cqw;
   }
   details.toggle>summary::-webkit-details-marker{display:none}
-  details.toggle>summary::before{content:"▸";display:inline-block;transition:transform .15s}
+  details.toggle>summary::before{content:"▸";display:inline-block;font-size:1.25em;line-height:1;transition:transform .15s}
   details.toggle[open]>summary::before{transform:rotate(90deg)}
   details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.494cqw}
   details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
@@ -168,8 +170,12 @@
     position:relative;width:100%;height:100%;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     background:linear-gradient(180deg,#FA3030 59.24%,#FE6E3C 84.478%,#FEC389 94.982%,#D1FEFF 101.57%);
+    background-size:100% 128%;background-position:0 0;
+    animation:bgDrift 14s ease-in-out infinite alternate;
   }
-  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw}
+  @keyframes bgDrift{to{background-position:0 100%}}
+  @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
+  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
 
   /* ---- pager (Figma Frame 2147232169) — anchored to book so cover & content align ---- */
@@ -238,6 +244,13 @@
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="ink" x="-25%" y="-25%" width="150%" height="150%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="1" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="0" id="inkDisp" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
 <div class="device">
 <div class="book is-cover" id="book">
@@ -426,8 +439,47 @@
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
+    addRipple(e);
     show(ids.indexOf(p.dataset.target));
   }));
+
+  // logo ink-bleed: rubbing/touching ripples the wordmark like wet ink.
+  // filter is off at rest (expensive) and only switched on while touched.
+  const wm = document.querySelector('.cover-slide .wordmark');
+  const inkDisp = document.getElementById('inkDisp');
+  let inkRelax, relaxing = false;
+  function relax(){
+    relaxing = true;
+    let s = parseFloat(inkDisp.getAttribute('scale')) || 0;
+    s += (0 - s) * 0.16;
+    if (s > 0.4){ inkDisp.setAttribute('scale', s.toFixed(2)); requestAnimationFrame(relax); }
+    else { inkDisp.setAttribute('scale', '0'); wm.style.filter = ''; relaxing = false; }
+  }
+  function inkBoost(){
+    wm.style.filter = 'url(#ink)';
+    inkDisp.setAttribute('scale', '16');
+    relaxing = false;
+    clearTimeout(inkRelax);
+    inkRelax = setTimeout(() => { if (!relaxing) relax(); }, 110);
+  }
+  wm.addEventListener('pointerdown', inkBoost);
+  wm.addEventListener('pointermove', inkBoost);
+  wm.addEventListener('pointerenter', inkBoost);
+
+  // toggle open → gently slide its inner elements in
+  function staggerToggle(d){
+    const body = d.querySelector(':scope > .toggle-body');
+    if (!body) return;
+    [...body.children].forEach((el, n) => {
+      el.classList.remove('stagger');
+      void el.offsetWidth;
+      el.style.animationDelay = (n * 45) + 'ms';
+      el.classList.add('stagger');
+    });
+  }
+  document.querySelectorAll('details.toggle').forEach(d => {
+    d.addEventListener('toggle', () => { if (d.open) staggerToggle(d); });
+  });
   window.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') show(nextIdx());
     if (e.key === 'ArrowLeft') show(idx - 1);
