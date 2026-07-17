@@ -17,13 +17,29 @@
     font-family:'Pretendard';font-weight:700;font-style:normal;font-display:swap;
     src:url('fonts/Pretendard-Bold.woff2') format('woff2');
   }
-  @property --grad-angle{syntax:'<angle>';inherits:false;initial-value:180deg}
+  @property --s1{syntax:'<percentage>';inherits:false;initial-value:58%}
+  @property --s2{syntax:'<percentage>';inherits:false;initial-value:83%}
+  @property --s3{syntax:'<percentage>';inherits:false;initial-value:93.5%}
   :root{
     --red:#FA3030;
     --gray-bg:#F6F6F6;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
+
+  /* custom cursor = the vector logo, FA3030 with Figma "exclusion" blend, on desktop only */
+  .cursor{
+    position:fixed;top:0;left:0;z-index:9999;pointer-events:none;display:none;
+    width:42px;height:18px;background:#FA3030;
+    -webkit-mask:url(assets/cursor.svg) center/contain no-repeat;
+    mask:url(assets/cursor.svg) center/contain no-repeat;
+    mix-blend-mode:exclusion;
+    transform:translate(-9999px,-9999px);will-change:transform;
+  }
+  @media (hover:hover) and (pointer:fine){
+    .cursor{display:block}
+    html,body,a,button,summary,.pill,.pg-btn,img,.wordmark,figure.figure{cursor:none}
+  }
   body{
     margin:0;
     font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
@@ -167,13 +183,17 @@
 
   /* ---- cover (Figma 표지) ---- */
   .cover-slide{
-    position:relative;width:100%;height:100%;
+    position:relative;width:100%;height:100%;overflow:hidden;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    /* exact Figma gradient — stops untouched; only the angle drifts for gentle motion */
-    background:linear-gradient(var(--grad-angle,180deg),#FA3030 59.24%,#FE6E3C 84.478%,#FEC389 94.982%,#D1FEFF 101.57%);
-    animation:gradFlow 9s ease-in-out infinite alternate;
+    /* Figma colors; #D1FEFF pinned at 100% so the bright bottom is never clipped.
+       Middle stops sweep for a clear flowing motion. */
+    background:linear-gradient(180deg,#FA3030 var(--s1,58%),#FE6E3C var(--s2,83%),#FEC389 var(--s3,93.5%),#D1FEFF 100%);
+    animation:gradFlow 8s ease-in-out infinite alternate;
   }
-  @keyframes gradFlow{from{--grad-angle:176deg}to{--grad-angle:188deg}}
+  @keyframes gradFlow{
+    from{--s1:48%;--s2:72%;--s3:88%}
+    to{--s1:65%;--s2:91%;--s3:97%}
+  }
   @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
   .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;-webkit-user-drag:none;-webkit-user-select:none}
   /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
@@ -255,6 +275,8 @@
 </style>
 </head>
 <body>
+
+<div class="cursor" id="cursor" aria-hidden="true"></div>
 
 <div class="device">
 <div class="book is-cover" id="book">
@@ -375,13 +397,11 @@
     show(ids.indexOf(p.dataset.target));
   }));
 
-  // logo glitch: touching/rubbing the wordmark fires a short RGB-split glitch
+  // logo glitch: fires automatically once every 5s
   const wm = document.querySelector('.cover-slide .wordmark');
   function glitch(){ if (!wm.classList.contains('glitch')) wm.classList.add('glitch'); }
   wm.addEventListener('animationend', () => wm.classList.remove('glitch'));
-  wm.addEventListener('pointerdown', glitch);
-  wm.addEventListener('pointerenter', glitch);
-  wm.addEventListener('pointermove', glitch);
+  setInterval(glitch, 5000);
 
   // toggle: springy height grow + single fade (no per-child flicker)
   function expandToggle(d, body){
@@ -391,7 +411,7 @@
     const h = body.scrollHeight;
     body.style.height = '0px'; body.style.opacity = '0';
     void body.offsetHeight;   // commit start state, then transition
-    body.style.transition = 'height .42s cubic-bezier(.34,1.12,.64,1), opacity .34s ease';
+    body.style.transition = 'height .3s cubic-bezier(.22,.61,.36,1), opacity .26s ease';
     body.style.height = h + 'px'; body.style.opacity = '1';
     body.addEventListener('transitionend', function done(e){
       if (e.propertyName !== 'height') return;
@@ -403,7 +423,7 @@
     body.style.overflow = 'hidden';
     body.style.height = body.scrollHeight + 'px';
     void body.offsetHeight;
-    body.style.transition = 'height .32s cubic-bezier(.4,0,.2,1), opacity .24s ease';
+    body.style.transition = 'height .24s cubic-bezier(.4,0,.2,1), opacity .18s ease';
     body.style.height = '0px'; body.style.opacity = '0';
     body.addEventListener('transitionend', function done(e){
       if (e.propertyName !== 'height') return;
@@ -426,11 +446,21 @@
     if (e.key === 'ArrowLeft') show(idx - 1);
   });
 
-  // First user gesture → go fullscreen (browsers block auto-fullscreen on load)
-  document.addEventListener('click', () => {
-    if (!document.fullscreenElement && document.documentElement.requestFullscreen)
-      document.documentElement.requestFullscreen().catch(() => {});
-  }, { once: true });
+  // Double-tap on the COVER (page 1) only → go fullscreen.
+  // Browsers won't let us block exit (Esc/back is always allowed); on Android the
+  // physical back button is the intended way out, matching the kiosk request.
+  function goFullscreen(){
+    const el = document.documentElement;
+    if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+  }
+  let lastTap = 0;
+  const coverPage = document.querySelector('.page[data-page="cover"]');
+  coverPage.addEventListener('pointerup', () => {
+    if (ids[idx] !== 'cover') return;
+    const now = Date.now();
+    if (now - lastTap < 330){ goFullscreen(); lastTap = 0; }
+    else lastTap = now;
+  });
 
   // ---- lightbox with zoom / pan / pinch (Figma 이미지 확대) ----
   const lightbox = document.getElementById('lightbox');
@@ -496,6 +526,19 @@
     }
   }, { passive: false });
   lbImg.addEventListener('touchend', e => { if (e.touches.length < 2) pinchDist = 0; });
+
+  // smooth (lerped) custom cursor — desktop only
+  const cursor = document.getElementById('cursor');
+  let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my;
+  addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    mx = e.clientX; my = e.clientY;
+  });
+  (function follow(){
+    cx += (mx - cx) * 0.8; cy += (my - cy) * 0.8;   // near-instant, tiny smoothing only
+    cursor.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
+    requestAnimationFrame(follow);
+  })();
 
   // init: first page visible without a page-turn
   pages[0].classList.add('active');
