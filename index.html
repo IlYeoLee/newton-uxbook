@@ -96,18 +96,24 @@
   }
   .brand{display:flex;align-items:center;cursor:pointer;text-decoration:none;flex:none}
   .brand img{height:1.742cqw;width:auto}
-  .pillbar{display:flex;gap:0.664cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end}
+  .pillbar{display:flex;gap:1.66cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end;align-items:flex-end}
   .pillbar::-webkit-scrollbar{display:none}
+  /* underline tab (two-weight style): grey→black text, FA3030 underline on active */
   .pill{
-    flex:none;border:none;cursor:pointer;position:relative;overflow:hidden;
-    padding:0.664cqw 0.830cqw;border-radius:6.639cqw;
-    background:rgba(245,245,245,.9);color:#484848;
-    font-size:1.079cqw;font-weight:400;white-space:nowrap;
-    font-family:inherit;letter-spacing:-.03em;
-    transition:transform .14s cubic-bezier(.34,1.56,.64,1);
+    flex:none;border:none;cursor:pointer;position:relative;
+    background:transparent;padding:0 0 0.55cqw;
+    color:#9a9a9a;font-size:1.245cqw;font-weight:400;white-space:nowrap;
+    font-family:inherit;letter-spacing:-.02em;
+    transition:color .3s ease;
   }
-  .pill:active{transform:scale(.92)}
-  .pill.active{background:var(--red);color:#fff;font-weight:700}
+  .pill::after{
+    content:"";position:absolute;left:0;bottom:0;width:100%;height:0.166cqw;
+    background:var(--red);transform:scaleX(0);transform-origin:left;
+    transition:transform .45s cubic-bezier(.65,0,.35,1);
+  }
+  .pill:hover{color:#000}
+  .pill.active{color:#000;font-weight:700}
+  .pill.active::after{transform:scaleX(1)}
 
   /* ---- stage ---- */
   .stage{position:relative;height:56.93cqw;overflow:hidden}
@@ -470,7 +476,6 @@
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
-    addRipple(e);
     show(ids.indexOf(p.dataset.target));
   }));
 
@@ -611,8 +616,12 @@
     if (e.pointerType === 'touch') return;
     mx = e.clientX; my = e.clientY;
   });
-  addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') cursor.classList.add('clicking'); });
-  addEventListener('pointerup', () => cursor.classList.remove('clicking'));
+  // hovering an interactive element swaps to the click-cursor icon
+  addEventListener('pointerover', e => {
+    if (e.pointerType === 'touch') return;
+    const hit = e.target.closest && e.target.closest('button, summary, .pill, .pg-btn, figure.figure img, [data-nav], .lb-stepper button, .lb-close');
+    cursor.classList.toggle('clicking', !!hit);
+  });
   (function follow(){
     cx += (mx - cx) * 0.8; cy += (my - cy) * 0.8;   // near-instant, tiny smoothing only
     cursor.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
