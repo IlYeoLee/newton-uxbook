@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>NEWTON — UX Book</title>
+<style>
+  @font-face{
+    font-family:'Pretendard';font-weight:400;font-style:normal;font-display:swap;
+    src:url('fonts/Pretendard-Regular.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Pretendard';font-weight:700;font-style:normal;font-display:swap;
+    src:url('fonts/Pretendard-Bold.woff2') format('woff2');
+  }
+  :root{
+    --red:#FA3030;
+    --gray-bg:#F6F6F6;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-weight:400;
+    background:#000;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  img{max-width:100%;display:block}
+
+  .book{
+    position:relative;
+    width:min(96vw, 96vh * 1.6003);
+    aspect-ratio:1205/753;
+    background:#fff;
+    overflow:hidden;
+    container-type:inline-size;
+    box-shadow:0 40px 140px rgba(0,0,0,.65);
+  }
+
+  /* ---- top nav (Figma Frame 6) ---- */
+  .book-nav{
+    height:5.394cqw;display:flex;align-items:center;justify-content:space-between;
+    padding:0 3.320cqw;
+    border-bottom:1px solid rgba(0,0,0,.06);
+    background:#fff;position:relative;z-index:6;
+  }
+  .brand{display:flex;align-items:center;cursor:pointer;text-decoration:none;flex:none}
+  .brand img{height:1.742cqw;width:auto}
+  .pillbar{display:flex;gap:0.664cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end}
+  .pillbar::-webkit-scrollbar{display:none}
+  .pill{
+    flex:none;border:none;cursor:pointer;
+    padding:0.664cqw 0.830cqw;border-radius:6.639cqw;
+    background:rgba(245,245,245,.9);color:#484848;
+    font-size:1.079cqw;font-weight:700;white-space:nowrap;
+    font-family:inherit;letter-spacing:-.03em;
+  }
+  .pill.active{background:var(--red);color:#fff}
+
+  /* ---- stage ---- */
+  .stage{position:relative;height:56.93cqw;overflow:hidden}
+  .book.is-cover .stage{height:62.49cqw}
+  .book.is-cover .book-nav{display:none}
+
+  .page{display:none;height:100%;padding:0.830cqw;gap:0;}
+  .page.active{display:flex}
+
+  .page-media{
+    width:32.780cqw;height:100%;flex:none;
+    border-radius:3.320cqw;overflow:hidden;background:#0a0a0a;position:relative;
+  }
+  .page-media img{width:100%;height:100%;object-fit:cover}
+
+  .page-text{
+    flex:1;min-width:0;height:100%;overflow-y:auto;
+    padding:3.320cqw 6.639cqw;scrollbar-width:none;
+  }
+  .page-text::-webkit-scrollbar{display:none}
+
+  .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
+  .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}
+  .body{font-size:1.494cqw;font-weight:400;color:rgba(0,0,0,.8);line-height:1.55;margin:0 0 1.328cqw}
+  .body a{color:var(--red);text-decoration:underline}
+  .subhead{font-size:1.494cqw;font-weight:700;margin:1.992cqw 0 0.498cqw}
+  .subhead:first-child{margin-top:0}
+  .list{margin:0.996cqw 0;padding-left:1.660cqw;color:rgba(0,0,0,.8);font-size:1.494cqw;font-weight:400}
+  .list li{margin:0.415cqw 0}
+
+  figure.figure{margin:1.660cqw 0;border-radius:1.660cqw;overflow:hidden;background:var(--gray-bg);cursor:zoom-in}
+  figure.figure img{width:100%;height:auto}
+
+  blockquote.quote{
+    font-size:1.826cqw;font-weight:700;color:var(--red);
+    border-left:0.249cqw solid var(--red);
+    margin:1.992cqw 0;padding:0.332cqw 0 0.332cqw 1.494cqw;
+  }
+
+  .group{background:var(--gray-bg);border-radius:2.656cqw;padding:0.830cqw;margin:1.660cqw 0}
+  details.toggle{margin:0.664cqw}
+  details.toggle>summary{
+    list-style:none;cursor:pointer;display:flex;align-items:center;gap:0.830cqw;
+    font-weight:700;font-size:1.328cqw;padding:0.996cqw 0.664cqw;border-radius:1.162cqw;
+  }
+  details.toggle>summary::-webkit-details-marker{display:none}
+  details.toggle>summary::before{content:"▸";display:inline-block;transition:transform .15s}
+  details.toggle[open]>summary::before{transform:rotate(90deg)}
+  details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.494cqw}
+  details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
+
+  .finding{display:flex;gap:0.996cqw;background:#fff;border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
+  .finding-icon{font-size:1.660cqw;flex:none;width:2.656cqw;height:2.656cqw;display:flex;align-items:center;justify-content:center}
+  .finding-body{flex:1;min-width:0}
+  .finding-label{font-size:1.079cqw;color:rgba(0,0,0,.4);font-weight:400;margin:0 0 0.332cqw}
+  .finding-headline{font-size:1.328cqw;font-weight:700;margin:0 0 0.830cqw;line-height:1.4}
+
+  .table-wrap{overflow-x:auto;margin:1.328cqw 0;border-radius:1.328cqw;border:1px solid rgba(0,0,0,.08)}
+  table{width:100%;border-collapse:collapse;font-size:1.079cqw;min-width:52cqw}
+  th,td{text-align:left;padding:0.996cqw;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;font-weight:400}
+  th{background:#fafafa;font-weight:700;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+
+  .step-head{margin:3.320cqw 0 0.996cqw}
+  .step-head:first-child{margin-top:0.664cqw}
+  .step-label{color:var(--red);font-weight:700;font-size:1.162cqw;margin:0 0 0.498cqw}
+  .step-title{font-size:1.826cqw;font-weight:700;margin:0;letter-spacing:-.02em}
+
+  .appendix-title{font-size:2.656cqw;font-weight:700;margin:0 0 1.660cqw}
+
+  /* ---- cover (Figma 표지) ---- */
+  .cover-slide{
+    position:relative;width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,#FA3030 59.24%,#FE6E3C 84.478%,#FEC389 94.982%,#D1FEFF 101.57%);
+  }
+  .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw}
+  .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
+
+  /* ---- pager (Figma Frame 2147232169) ---- */
+  .pager{
+    position:absolute;left:0.830cqw;right:0.830cqw;top:45.05%;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    pointer-events:none;z-index:8;
+  }
+  .pg-btn{
+    pointer-events:auto;width:4.979cqw;height:4.979cqw;border-radius:6.639cqw;
+    background:rgba(255,255,255,.3);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:#000;padding:0;
+  }
+  .pg-btn svg{width:1.992cqw;height:1.992cqw;display:block}
+  .pg-btn:disabled{opacity:.3;cursor:default}
+  .pg-right{display:flex;flex-direction:column;align-items:center;gap:0.996cqw}
+  .pg-right .count{font-size:1.162cqw;font-weight:700;color:#b0b0b0;letter-spacing:-.02em}
+
+  /* lightbox (Figma 이미지 확대) */
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:100;cursor:zoom-out}
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:8px}
+  .lightbox button{position:absolute;top:24px;right:24px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:20px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="book is-cover" id="book">
+  <div class="book-nav">
+    <a class="brand" href="#" data-nav="cover"><img src="assets/wordmark.svg" alt="NEWTON"></a>
+    <div class="pillbar">{{NAV}}</div>
+  </div>
+  <div class="stage">
+    <div class="page active" data-page="cover">
+      <div class="cover-slide">
+        <img class="wordmark" src="assets/wordmark.svg" alt="NEWTON">
+        <p>UX Book</p>
+      </div>
+    </div>
+
+    <div class="page" data-page="intro">
+      <div class="page-media">{{INTRO_MEDIA}}</div>
+      <div class="page-text">{{INTRO_TEXT}}</div>
+    </div>
+
+    {{SECTIONS}}
+
+    <div class="page" data-page="appendix">
+      <div class="page-media"><img src="assets/img_43.png" alt=""></div>
+      <div class="page-text">
+        <p class="appendix-title">Wireframe &amp; Simulator</p>
+        {{APPENDIX}}
+      </div>
+    </div>
+
+    <div class="pager">
+      <button id="prevBtn" class="pg-btn" aria-label="이전">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="pg-right">
+        <button id="nextBtn" class="pg-btn" aria-label="다음">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="count" id="counter">1 / 12</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox"><button id="lbClose">&times;</button><img id="lbImg" src="" alt=""></div>
+
+<script>
+  const book = document.getElementById('book');
+  const pages = [...document.querySelectorAll('.page')];
+  const ids = pages.map(p => p.dataset.page);
+  const pills = [...document.querySelectorAll('.pill')];
+  const counter = document.getElementById('counter');
+  let idx = 0;
+
+  function show(i){
+    idx = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach((p, n) => p.classList.toggle('active', n === idx));
+    book.classList.toggle('is-cover', ids[idx] === 'cover');
+    pills.forEach(p => p.classList.toggle('active', p.dataset.sec === ids[idx]));
+    counter.textContent = (idx + 1) + ' / ' + pages.length;
+    document.getElementById('prevBtn').disabled = idx === 0;
+    document.getElementById('nextBtn').disabled = idx === pages.length - 1;
+    pages[idx].querySelector('.page-text')?.scrollTo(0, 0);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => show(idx - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => show(idx + 1));
+  document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
+  pills.forEach(p => p.addEventListener('click', e => {
+    e.preventDefault();
+    show(ids.indexOf(p.dataset.sec));
+  }));
+  window.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') show(idx + 1);
+    if (e.key === 'ArrowLeft') show(idx - 1);
+  });
+
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  document.addEventListener('click', e => {
+    const fig = e.target.closest('figure.figure img');
+    if (fig) { lbImg.src = fig.src; lightbox.classList.add('open'); }
+  });
+  lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+
+  show(0);
+</script>
+</body>
+</html>
