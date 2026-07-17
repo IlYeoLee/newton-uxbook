@@ -536,13 +536,20 @@
     const root = document.documentElement;
     root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   });
-  // language toggle (KO ↔ EN) — translation content wired in a later step
+  // language toggle (KO ↔ EN): swaps text to its data-en (prebuilt, free — no API at runtime)
   let lang = 'ko';
+  function setLang(l){
+    document.querySelectorAll('[data-en]').forEach(el => {
+      if (el._ko === undefined) el._ko = el.innerHTML;
+      el.innerHTML = (l === 'en') ? el.getAttribute('data-en') : el._ko;
+    });
+  }
   document.getElementById('langToggle').addEventListener('click', e => {
     addRipple(e);
     lang = lang === 'ko' ? 'en' : 'ko';
     document.getElementById('langLabel').textContent = lang === 'ko' ? 'EN' : 'KO';
     document.documentElement.setAttribute('data-lang', lang);
+    setLang(lang);
   });
 
   // logo glitch: fires automatically once every 5s

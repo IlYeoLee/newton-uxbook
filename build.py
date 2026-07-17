@@ -11,6 +11,25 @@ for f in os.listdir(ASSETS):
 def esc(s):
     return ihtml.escape(s or "", quote=False)
 
+# ---- translation cache (free): build reads translations.json and attaches data-en ----
+TRANS_PATH = os.path.join(ROOT, "translations.json")
+TRANS = json.load(open(TRANS_PATH, encoding="utf-8")) if os.path.exists(TRANS_PATH) else {}
+_missing = set()
+
+def _has_kr(s):
+    return any("가" <= c <= "힣" for c in (s or ""))
+
+def en_attr(ko):
+    """returns ' data-en=\"...\"' when an English translation exists for this Korean text."""
+    ko = (ko or "").strip()
+    if not ko or not _has_kr(ko):
+        return ""
+    e = TRANS.get(ko, "")
+    if not e:
+        _missing.add(ko)
+        return ""
+    return ' data-en="' + ihtml.escape(e, quote=True).replace("\n", " ") + '"'
+
 def img_tag(name, cls="media"):
     ext = EXT.get(name, ".png")
     return f'<img class="{cls}" src="assets/{name}{ext}" alt="" loading="lazy">'
@@ -53,24 +72,25 @@ def render_p(text):
     text = text.strip()
     if not text:
         return ""
+    a = en_attr(text)
     if is_citation(text):
-        return f'<p class="cite">{linkify(esc(text))}</p>'
+        return f'<p class="cite"{a}>{linkify(esc(text))}</p>'
     if is_subhead(text) and not text.startswith("http"):
-        return f'<p class="subhead">{esc(text)}</p>'
+        return f'<p class="subhead"{a}>{esc(text)}</p>'
     parts = [linkify(esc(p)) for p in text.split("\n")]
-    return f'<p class="body">{"<br>".join(parts)}</p>'
+    return f'<p class="body"{a}>{"<br>".join(parts)}</p>'
 
 def render_h4(text):
     lines = text.split("\n")
     if lines[0].strip()[:1] in ("{", "("):   # "(1)…" and "{1}…" → red caption (label) + title
         label = lines[0].strip()
         headline = lines[1].strip() if len(lines) > 1 else ""
-        return f'<div class="step-head"><p class="step-label">{esc(label)}</p><h3 class="step-title">{esc(headline)}</h3></div>'
-    return f'<h2 class="chapter-title">{"<br>".join(esc(l.strip()) for l in lines)}</h2>'
+        return f'<div class="step-head"><p class="step-label">{esc(label)}</p><h3 class="step-title"{en_attr(headline)}>{esc(headline)}</h3></div>'
+    return f'<h2 class="chapter-title"{en_attr(text)}>{"<br>".join(esc(l.strip()) for l in lines)}</h2>'
 
 def render_quote(node):
     inner = render_children(node.get("c", [])) if node.get("c") else ""
-    return f'<blockquote class="quote">{esc(node["x"])}</blockquote>{inner}'
+    return f'<blockquote class="quote"{en_attr(node["x"])}>{esc(node["x"])}</blockquote>{inner}'
 
 def render_toggle(node):
     body = render_children(node.get("c", []))
@@ -88,9 +108,10 @@ def render_callout(node):
         first = body_children[0].get("x", "")
         if "\n" in first:
             label, headline = first.split("\n", 1)
-            head_html = f'<p class="finding-label">{esc(label.strip())}</p><p class="finding-headline">{esc(headline.strip())}</p>'
+            head_html = (f'<p class="finding-label"{en_attr(label.strip())}>{esc(label.strip())}</p>'
+                         f'<p class="finding-headline"{en_attr(headline.strip())}>{esc(headline.strip())}</p>')
         else:
-            head_html = f'<p class="finding-title">{esc(first)}</p>'
+            head_html = f'<p class="finding-title"{en_attr(first)}>{esc(first)}</p>'
         body_children = body_children[1:]
     # trailing short "종목 / 이름" → caption
     caption_html = ""
@@ -98,7 +119,7 @@ def render_callout(node):
         last = body_children[-1].get("x", "")
         if "/" in last and len(last) <= 30:
             body_children = body_children[:-1]
-            caption_html = f'<p class="finding-caption">{esc(last)}</p>'
+            caption_html = f'<p class="finding-caption"{en_attr(last)}>{esc(last)}</p>'
     inner = render_children(body_children)
     # icon = newton symbol logo (CSS mask); original emoji dropped
     return (f'<div class="finding"><div class="finding-icon"></div>'
@@ -139,7 +160,7 @@ def render_children(items):
             while i < len(items) and items[i]["t"] == "LI":
                 group.append(items[i])
                 i += 1
-            lis = "".join(f"<li>{esc(g.get('x',''))}</li>" for g in group)
+            lis = "".join(f"<li{en_attr(g.get('x',''))}>{esc(g.get('x',''))}</li>" for g in group)
             out.append(f"<ul class='list'>{lis}</ul>")
             continue
         out.append(render_node(n))
@@ -379,3 +400,7 @@ out = (TEMPLATE.replace("{{NAV}}", nav_html)
        .replace("{{APPENDIX}}", ""))
 open(os.path.join(ROOT, "index.html"), "w").write(out)
 print("done", len(sections_html), len(intro_page_html))
+if _missing:
+    with open("/tmp/missing.json", "w", encoding="utf-8") as f:
+        json.dump(sorted(_missing, key=len), f, ensure_ascii=False, indent=0)
+    print(f"[i18n] 미번역 {len(_missing)}개 → /tmp/missing.json")
