@@ -110,6 +110,8 @@ def render_table_node():
 def render_node(n):
     t = n["t"]
     if t == "P":
+        if n.get("credit"):
+            return f'<p class="credit">{esc(n["x"])}</p>'
         return render_p(n.get("x", ""))
     if t == "H4" or t == "H3":
         return render_h4(n.get("x", ""))
@@ -145,6 +147,35 @@ def render_children(items):
     return "".join(out)
 
 items = copy.deepcopy(data)
+
+# ---- latest text (patches applied to node .x by exact match) ----
+TEXT_PATCHES = {
+    "보던 움직임을, \n해보는 움직임으로": "내 플레이를 깨우는\n하체 웨어러블 로보틱스",
+    "내가 있는 곳이, 바로 도전의 필드": "공간을 도전의 필드로\n바꾸는 프로젝션 유닛",
+    "{1} Home First Trial\n처음의 한 걸음은, 집에서도 충분하니까":
+        "(2) Step by Step, Into Play\n처음의 한 걸음은, 집에서도 충분하니까",
+    "{2} Outdoor Running\n한번 움직인 마음은, 바깥으로 이어진다":
+        "한번 움직인 마음은,\n바깥으로 이어진다",
+    "{3} Basketball Personal Practice\n혼자 익힌 리듬이, 함께 움직일 자신감으로":
+        "혼자 익힌 리듬이,\n함께 움직일 자신감으로",
+    "{4} Home Together Play\n혼자 익힌 설렘이, 함께 하는 재미가 되어":
+        "혼자 익힌 설렘이,\n함께 하는 재미가 되어",
+    "{5} Dock and Remember\n오늘의 두근거림을, 다음 도전으로":
+        "(3) From Movement to Momentum\n오늘의 두근거림을, 다음 도전으로",
+    "움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 하체 웨어러블은 포터블 스테이션에서 다시 충전되고, 패브릭 파츠는 분리해 산뜻하게 관리됩니다. 오늘 몸에 남은 리듬과 막혔던 순간은 다음 도전을 위한 단서가 됩니다. 오늘의 플레이는 여기서 멈추지 않고 더 가볍고, 더 익숙한 다음 움직임으로 이어집니다.":
+        "움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 오늘의 리듬과 흔들렸던 순간은 리포트로 남아 다음 도전의 단서가 됩니다. 하체 웨어러블은 다시 충전되고, 패브릭 파츠는 산뜻하게 관리됩니다. 오늘의 플레이는 그렇게 다음 움직임으로 이어집니다.",
+    "NEWTON은 스포츠를 시작하고 더 깊이 도전하는 경험에서 출발합니다.\n하지만 우리가 설계한 것은 특정 종목의 기술이 아니라, 낯선 움직임을 각자의 몸에 맞는 속도로 시작하게 하는 방식입니다. 이 방식은 새로운 스텝을 익히는 순간을 넘어, 처음 균형을 배우고 다시 걷는 감각을 되찾는 순간까지 확장될 수 있습니다.\n누구나 자신의 차례를 믿고, 다음 움직임을 시작할 수 있도록.":
+        "NEWTON은 스포츠를 시작하고 도전하는 경험에서 출발합니다.\n하지만 핵심은 하나의 종목이 아니라, 낯선 움직임을 내 몸의 속도로 시작하게 하는 구조에 있습니다. 이 구조는 러닝, 복싱, 농구를 넘어 균형을 배우고 다시 걷는 감각을 회복하는 순간까지 확장될 수 있습니다. 누구나 자신의 차례를 믿고, 새로운 움직임에 도전할 수 있도록.",
+}
+
+def apply_patches(nodes):
+    for n in nodes:
+        if n.get("x") in TEXT_PATCHES:
+            n["x"] = TEXT_PATCHES[n["x"]]
+        if n.get("c"):
+            apply_patches(n["c"])
+
+apply_patches(items)
 
 # ---- content re-arrangement ----
 def pop_by(container, pred):
@@ -264,8 +295,11 @@ def render_vertical(page_id, kicker, title_html, body_items, hero, scroll_hint=F
   {hint_html}
 </div>'''
 
+KICKER_OVERRIDE = {"03": "For Those Who Turn Trends Into Play", "08": "(1) A Spark to Move"}
+
 def render_page(marker, seg):
     num, kicker = marker.split(" ", 1)
+    kicker = KICKER_OVERRIDE.get(num, kicker)
     body = seg[1:]  # drop marker P
     h4 = next((n for n in body if n["t"] in ("H4", "H3")), None)
     rest = [n for n in body if n is not h4]
@@ -279,7 +313,13 @@ def render_page(marker, seg):
         return render_vertical(f"sec-{num}", kicker, title_html, rest2, None, scroll_hint=True)
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
-    media_html = img_tag(hero["src"]) if hero else ""
+    if num == "02":
+        # sec-02: 4-image cross-fade loop (2s each), 3-1..3-4
+        media_html = '<div class="fade-stack">' + "".join(
+            f'<img class="fade-img" src="assets/fade{i}.png" style="animation-delay:{(i-1)*2}s" alt="" loading="lazy">'
+            for i in range(1, 5)) + '</div>'
+    else:
+        media_html = img_tag(hero["src"]) if hero else ""
     content_html = render_children(rest)
     return f'''
 <div class="page" data-page="sec-{num}">
@@ -314,6 +354,7 @@ sections_html = "".join(pages_out)
 # intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
 intro_hero, intro_rest = extract_hero(hero_items)
 intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
+intro_body.append({"t": "P", "x": "송시헌, 이일여, 김소진, 박주원, 전다빈", "credit": True})
 intro_page_html = render_vertical("intro", "Now, your turn!",
                                   '<h2 class="chapter-title">NEWTON</h2>', intro_body, intro_hero)
 

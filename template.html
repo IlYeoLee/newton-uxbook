@@ -136,6 +136,10 @@
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
   .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
+  /* sec-02: 4-image cross-fade loop (2s each) */
+  .fade-stack{position:relative;width:100%;height:100%}
+  .fade-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;opacity:0;animation:crossFade 8s linear infinite}
+  @keyframes crossFade{0%{opacity:0}4%{opacity:1}21%{opacity:1}25%{opacity:0}100%{opacity:0}}
 
   .page-text{
     flex:1;min-width:0;height:100%;overflow-y:auto;
@@ -240,6 +244,7 @@
   /* APA / source lines: 12px, faintest grey, italic — draws the least attention */
   .cite{font-size:0.996cqw;color:rgba(0,0,0,.3);font-style:italic;line-height:1.5;margin:0.664cqw 0}
   .cite a{color:rgba(0,0,0,.3)}
+  .credit{font-size:1.079cqw;color:rgba(0,0,0,.4);margin:0.996cqw 0 0;letter-spacing:.02em}
 
   /* inside toggles, everything is one step smaller than body (never larger than body) */
   .toggle-body .body,.toggle-body .subhead,.toggle-body .list{font-size:1.328cqw}
@@ -286,6 +291,15 @@
   }
   .cover-slide .wordmark.glitch{animation:glitch .38s steps(2,end)}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
+
+  /* side page-turn zones: whole left/right strip flips pages; blocks image-zoom there */
+  .nav-zone{
+    position:absolute;top:5.394cqw;bottom:0;width:6cqw;z-index:7;
+    border:none;background:transparent;cursor:pointer;padding:0;
+  }
+  .book.is-cover .nav-zone{top:0}
+  .nav-zone.nz-left{left:0}
+  .nav-zone.nz-right{right:0}
 
   /* ---- pager (Figma Frame 2147232169) — anchored to book so cover & content align ---- */
   .pager{
@@ -386,6 +400,9 @@
     </div>
   </div>
 
+  <button class="nav-zone nz-left" id="nzLeft" aria-label="이전 페이지"></button>
+  <button class="nav-zone nz-right" id="nzRight" aria-label="다음 페이지"></button>
+
   <div class="lightbox" id="lightbox">
     <div class="lb-stage" id="lbStage"><img id="lbImg" src="" alt="" draggable="false"></div>
     <div class="lb-controls">
@@ -462,6 +479,8 @@
   const nextIdx = () => idx >= pages.length - 1 ? 0 : idx + 1;   // wrap last → first
   prevBtn.addEventListener('click', e => { addRipple(e); show(idx - 1); });
   nextBtn.addEventListener('click', e => { addRipple(e); show(nextIdx()); });
+  document.getElementById('nzLeft').addEventListener('click', () => show(idx - 1));
+  document.getElementById('nzRight').addEventListener('click', () => show(nextIdx()));
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
