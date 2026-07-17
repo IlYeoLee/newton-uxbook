@@ -21,7 +21,7 @@
     --red:#FA3030;
     --gray-bg:#F6F6F6;
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{
     margin:0;
@@ -37,6 +37,7 @@
   .book{
     position:relative;
     width:min(100vw, 100vh * 1.6003);
+    width:min(100vw, 100dvh * 1.6003);   /* dvh: fills tablet screen under changing browser chrome */
     aspect-ratio:1205/753;
     background:#fff;
     overflow:hidden;
@@ -122,8 +123,8 @@
   .list{margin:0.996cqw 0;padding-left:1.660cqw;color:rgba(0,0,0,.8);font-size:1.494cqw;font-weight:400}
   .list li{margin:0.415cqw 0}
 
-  figure.figure{margin:1.660cqw 0;border-radius:1.660cqw;overflow:hidden;background:var(--gray-bg);cursor:zoom-in}
-  figure.figure img{width:100%;height:auto}
+  figure.figure{margin:1.660cqw 0;border-radius:1.660cqw;overflow:hidden;cursor:zoom-in;line-height:0}
+  figure.figure img{width:100%;height:auto;display:block}
 
   blockquote.quote{
     font-size:1.826cqw;font-weight:700;color:var(--red);
@@ -184,7 +185,7 @@
     border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
     color:#000;padding:0;
   }
-  .pg-btn .ripple{
+  .ripple{
     position:absolute;border-radius:50%;background:rgba(0,0,0,.16);
     transform:scale(0);pointer-events:none;animation:ripple .6s ease-out;
   }
@@ -192,7 +193,11 @@
   .pg-btn svg{width:1.992cqw;height:1.992cqw;display:block}
   .pg-btn:disabled{opacity:.3;cursor:default}
   .pg-right{display:flex;flex-direction:column;align-items:center;gap:0.996cqw}
-  .pg-right .count{font-size:1.162cqw;font-weight:700;color:#b0b0b0;letter-spacing:-.02em}
+  .pg-right .count{font-size:1.162cqw;letter-spacing:-.02em}
+  .pg-right .count .cur{color:#6a6a6a;font-weight:700}
+  .pg-right .count .tot{color:#c8c8c8;font-weight:400}
+  .book.is-cover .pg-right .count .cur{color:#1e1e1e}
+  .book.is-cover .pg-right .count .tot{color:rgba(0,0,0,.4)}
 
   /* lightbox (Figma 이미지 확대) — anchored to the book so it stays inside the tablet screen */
   .lightbox{position:absolute;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100;border-radius:inherit;overflow:hidden}
@@ -214,6 +219,7 @@
     border:none;cursor:pointer;background:#fff;color:#000;
     width:52px;font-size:22px;font-weight:400;line-height:1;
     display:flex;align-items:center;justify-content:center;padding:0;
+    position:relative;overflow:hidden;
   }
   .lb-stepper button:hover{background:#f2f2f2}
   #lbZoom{
@@ -225,6 +231,7 @@
     width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;
     background:#fff;color:#000;display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 20px rgba(0,0,0,.25);
+    position:relative;overflow:hidden;
   }
   .lb-close:hover{background:#f2f2f2}
   .lb-close svg{width:20px;height:20px}
@@ -373,9 +380,8 @@
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');
     pills.forEach(p => p.classList.toggle('active', p.dataset.members.split(',').includes(ids[idx])));
-    counter.textContent = (idx + 1) + ' / ' + pages.length;
-    document.getElementById('prevBtn').disabled = idx === 0;
-    document.getElementById('nextBtn').disabled = idx === pages.length - 1;
+    counter.innerHTML = '<span class="cur">' + (idx + 1) + '</span><span class="tot"> / ' + pages.length + '</span>';
+    document.getElementById('prevBtn').disabled = idx === 0;   // next never disabled: wraps last → first
   }
 
   // stagger the page's own elements in from the top ("차라락"), any direction
@@ -414,15 +420,16 @@
   }
 
   const prevBtn = document.getElementById('prevBtn'), nextBtn = document.getElementById('nextBtn');
+  const nextIdx = () => idx >= pages.length - 1 ? 0 : idx + 1;   // wrap last → first
   prevBtn.addEventListener('click', e => { addRipple(e); show(idx - 1); });
-  nextBtn.addEventListener('click', e => { addRipple(e); show(idx + 1); });
+  nextBtn.addEventListener('click', e => { addRipple(e); show(nextIdx()); });
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
     show(ids.indexOf(p.dataset.target));
   }));
   window.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight') show(idx + 1);
+    if (e.key === 'ArrowRight') show(nextIdx());
     if (e.key === 'ArrowLeft') show(idx - 1);
   });
 
@@ -445,16 +452,23 @@
     lbZoom.textContent = Math.round(scale * 100) + '%';
   }
   function setScale(s){ scale = Math.min(MAX, Math.max(MIN, s)); apply(); }
-  function openLb(src){ lbImg.src = src; scale = 1; tx = 0; ty = 0; apply(); lightbox.classList.add('open'); }
+  function openLb(src){
+    lbImg.src = src; scale = 1; tx = 0; ty = 0; apply();
+    lightbox.classList.add('open');
+    // natural grow-in (it was a small thumbnail → gently scales up)
+    lightbox.animate([{opacity:0}, {opacity:1}], {duration:200, easing:'ease-out'});
+    lbImg.animate([{transform:'scale(.92)', opacity:.5}, {transform:'scale(1)', opacity:1}],
+                  {duration:340, easing:'cubic-bezier(.2,.7,.3,1)'});
+  }
   function closeLb(){ lightbox.classList.remove('open'); }
 
   document.addEventListener('click', e => {
     const fig = e.target.closest('figure.figure img, .page-media img');
     if (fig) openLb(fig.src);
   });
-  document.getElementById('lbClose').addEventListener('click', closeLb);
-  document.getElementById('lbPlus').addEventListener('click', () => setScale(scale + STEP));
-  document.getElementById('lbMinus').addEventListener('click', () => setScale(scale - STEP));
+  document.getElementById('lbClose').addEventListener('click', e => { addRipple(e); closeLb(); });
+  document.getElementById('lbPlus').addEventListener('click', e => { addRipple(e); setScale(scale + STEP); });
+  document.getElementById('lbMinus').addEventListener('click', e => { addRipple(e); setScale(scale - STEP); });
   window.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
 
   // wheel zoom
