@@ -85,23 +85,21 @@
   .pill.active{background:var(--red);color:#fff;font-weight:700}
 
   /* ---- stage ---- */
-  .stage{position:relative;height:56.93cqw;overflow:hidden;perspective:2600px}
+  .stage{position:relative;height:56.93cqw;overflow:hidden}
   .book.is-cover .stage{height:62.49cqw}
   .book.is-cover .book-nav{display:none}
 
-  /* pages stacked; visibility + 3D page-turn driven by classes */
+  /* pages stacked; simple cross-fade between them */
   .page{
     position:absolute;inset:0;padding:0.830cqw;display:flex;gap:0;
-    opacity:0;pointer-events:none;transform:rotateY(0deg);
-    transform-origin:left center;backface-visibility:hidden;
-    transition:transform .6s cubic-bezier(.36,0,.28,1), opacity .5s ease;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
   }
   .page[data-page="cover"]{padding:0}
   .page.active{opacity:1;pointer-events:auto;z-index:2}
-  /* the page-turn itself is driven by the Web Animations API in JS */
 
-  @keyframes slideInItem{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-  .stagger{opacity:0;animation:slideInItem .5s cubic-bezier(.2,.7,.2,1) both}
+  /* per-element slide-in ("차라락") — soft ease-out, a touch slower */
+  @keyframes slideInItem{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .stagger{opacity:0;animation:slideInItem .62s cubic-bezier(.22,.61,.36,1) both}
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;
@@ -180,11 +178,17 @@
     pointer-events:none;z-index:8;
   }
   .pg-btn{
-    pointer-events:auto;width:4.979cqw;height:4.979cqw;border-radius:6.639cqw;
+    pointer-events:auto;position:relative;overflow:hidden;
+    width:4.979cqw;height:4.979cqw;border-radius:6.639cqw;
     background:rgba(255,255,255,.3);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
     color:#000;padding:0;
   }
+  .pg-btn .ripple{
+    position:absolute;border-radius:50%;background:rgba(0,0,0,.16);
+    transform:scale(0);pointer-events:none;animation:ripple .6s ease-out;
+  }
+  @keyframes ripple{to{transform:scale(2.6);opacity:0}}
   .pg-btn svg{width:1.992cqw;height:1.992cqw;display:block}
   .pg-btn:disabled{opacity:.3;cursor:default}
   .pg-right{display:flex;flex-direction:column;align-items:center;gap:0.996cqw}
@@ -364,7 +368,7 @@
   const ids = pages.map(p => p.dataset.page);
   const pills = [...document.querySelectorAll('.pill')];
   const counter = document.getElementById('counter');
-  let idx = 0, animating = false;
+  let idx = 0;
 
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');
@@ -374,58 +378,44 @@
     document.getElementById('nextBtn').disabled = idx === pages.length - 1;
   }
 
-  // stagger the page's own elements in from the top ("차라라락")
+  // stagger the page's own elements in from the top ("차라락"), any direction
   function staggerIn(page){
     const items = [page.querySelector('.page-media'),
                    ...page.querySelectorAll('.page-text > *')].filter(Boolean);
     items.forEach((el, n) => {
       el.classList.remove('stagger');
       void el.offsetWidth;                    // restart animation
-      el.style.animationDelay = (n * 45) + 'ms';
+      el.style.animationDelay = (n * 55) + 'ms';
       el.classList.add('stagger');
     });
   }
 
-  const FLAT = {transform:'rotateY(0deg)', opacity:1};
-  const TURNED = {transform:'rotateY(-120deg)', opacity:0};
-  const EASE = 'cubic-bezier(.36,0,.28,1)', DUR = 600;
-
   function show(i){
     i = Math.max(0, Math.min(pages.length - 1, i));
-    if (animating || i === idx) return;
-    const dir = i > idx ? 1 : -1;
-    const cur = pages[idx], nxt = pages[i];
-    nxt.querySelector('.page-text')?.scrollTo(0, 0);
-    animating = true;
-
-    if (dir > 0){
-      // next: new page underneath, current page turns off to the left
-      nxt.classList.add('active'); nxt.style.zIndex = '1';
-      cur.style.zIndex = '3';
-      const a = cur.animate([FLAT, TURNED], {duration:DUR, easing:EASE, fill:'forwards'});
-      a.onfinish = () => {
-        cur.classList.remove('active'); cur.style.zIndex = ''; nxt.style.zIndex = '';
-        cur.style.transform = ''; cur.style.opacity = ''; a.cancel();
-        animating = false;
-      };
-    } else {
-      // prev: incoming page turns in from the left over the current one
-      nxt.classList.add('active'); nxt.style.zIndex = '3';
-      cur.style.zIndex = '1';
-      const a = nxt.animate([TURNED, FLAT], {duration:DUR, easing:EASE, fill:'forwards'});
-      a.onfinish = () => {
-        nxt.style.zIndex = ''; nxt.style.transform = ''; nxt.style.opacity = ''; a.cancel();
-        cur.classList.remove('active'); cur.style.zIndex = '';
-        animating = false;
-      };
-    }
+    if (i === idx) return;
     idx = i;
+    pages.forEach((p, n) => p.classList.toggle('active', n === i));
+    pages[i].querySelector('.page-text')?.scrollTo(0, 0);
     updateChrome();
-    staggerIn(nxt);
+    staggerIn(pages[i]);   // slide-in plays going forward AND backward
   }
 
-  document.getElementById('prevBtn').addEventListener('click', () => show(idx - 1));
-  document.getElementById('nextBtn').addEventListener('click', () => show(idx + 1));
+  // ripple on the round chevron buttons
+  function addRipple(e){
+    const btn = e.currentTarget, rect = btn.getBoundingClientRect();
+    const d = Math.max(rect.width, rect.height);
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    r.style.width = r.style.height = d + 'px';
+    r.style.left = (e.clientX - rect.left - d / 2) + 'px';
+    r.style.top = (e.clientY - rect.top - d / 2) + 'px';
+    btn.appendChild(r);
+    r.addEventListener('animationend', () => r.remove());
+  }
+
+  const prevBtn = document.getElementById('prevBtn'), nextBtn = document.getElementById('nextBtn');
+  prevBtn.addEventListener('click', e => { addRipple(e); show(idx - 1); });
+  nextBtn.addEventListener('click', e => { addRipple(e); show(idx + 1); });
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
