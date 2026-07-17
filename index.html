@@ -143,6 +143,23 @@
   }
   .page-text::-webkit-scrollbar{display:none}
 
+  /* vertical layout (used ONLY on the intro + scenario pages): title/body on top, big image at bottom */
+  .page-scroll{
+    width:100%;height:100%;overflow-y:auto;scrollbar-width:none;
+    padding:3.320cqw 4.979cqw 3.984cqw;
+  }
+  .page-scroll::-webkit-scrollbar{display:none}
+  .page-head{display:flex;gap:3.320cqw;align-items:flex-start;margin-bottom:2.324cqw}
+  .head-left{flex:0 0 38%;max-width:38%}
+  .head-right{flex:1;min-width:0;padding-top:0.5cqw}
+  .head-right .body:first-child{margin-top:0}
+  .page-content{width:100%}
+  .page-hero{margin:2.656cqw 0 0;line-height:0}
+  .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
+  /* on vertical pages, unify title sizes (scenario step titles matched to chapter title) */
+  .page-scroll .step-title{font-size:2.656cqw;font-weight:700;letter-spacing:-.03em}
+  .page-scroll .step-head{margin:3.320cqw 0 1.328cqw}
+
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
   .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}
   .body{font-size:1.494cqw;font-weight:400;color:rgba(0,0,0,.8);line-height:1.55;margin:0 0 1.328cqw}
@@ -303,10 +320,17 @@
       </div>
     </div>
 
-    <div class="page" data-page="intro">
-      <div class="page-media"><img class="media" src="assets/img_03.png" alt="" loading="lazy"></div>
-      <div class="page-text"><p class="subhead">Now, your turn!</p><p class="body">NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!</p></div>
+    
+<div class="page" data-page="intro">
+  <div class="page-scroll">
+    <div class="page-head">
+      <div class="head-left"><p class="kicker">Now, your turn!</p><h2 class="chapter-title">NEWTON</h2></div>
+      <div class="head-right"><p class="body">NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!</p></div>
     </div>
+    <div class="page-content"></div>
+    <figure class="page-hero"><img class="media" src="assets/img_03.png" alt="" loading="lazy"></figure>
+  </div>
+</div>
 
     
 <div class="page" data-page="sec-01">
@@ -366,11 +390,13 @@
   </div>
 </div>
 <div class="page" data-page="sec-08">
-  <div class="page-media"><img class="media" src="assets/img_27.png" alt="" loading="lazy"></div>
-  <div class="page-text">
-    <p class="kicker">Scenario</p>
-    <h2 class="chapter-title">마음이 먼저 움직이는 순간</h2>
-    <p class="body">책상 앞에 오래 앉아 굳어 있던 몸 앞에, 포터블 스테이션은 지금 끌릴 만한 Challenge Pack을 짧게 띄웁니다. 어릴 때 배워봤던 복싱의 회피 스텝과 짧은 풋워크 하이라이트가 집 안에 펼쳐지고, 투사된 시작 버튼은 다시 움직여보고 싶은 마음을 당깁니다. 누르는 순간, 운동은 해야 할 일이 아니라 지금 바로 시작해보고 싶은 도전이 됩니다</p><div class="group"><details class="toggle"><summary>운동을 마음먹게 시작하는 뉴턴의 넛지 설계</summary><div class="toggle-body"><div class="finding"><div class="finding-icon">🔥</div><div class="finding-body"><p class="subhead">NEWTON 넛지 설계</p><p class="body">NEWTON은 관심 운동, 저장한 Pack, 최근 본 콘텐츠, 중단한 세션과 생활 패턴을 바탕으로 추천을 만듭니다. 시간,장소,활동량,날씨까지 함께 판단해 지금 실행하기 좋은 Pack만 제안합니다.</p><p class="subhead">01 두가지 진입점</p><p class="subhead">NEWTON이 먼저 제안하거나 내가 고르거나</p><p class="body">앱을 탐색하지 않는 순간에는 관심 운동, 저장·시청 기록, 이전 세션을 바탕으로 개인화 알림이 적절한 Pack을 먼저 제안합니다. 콘텐츠 탭에서는 원하는 움직임을 직접 탐색해 Pack을 시작합니다.</p><p class="subhead">02 생활 속 접점</p><p class="subhead">책상에서 준비하고, 현관에서 행동으로</p><p class="body">책상에서는 추천 Pack을 확인하고 운동 직전 설정을 마칩니다. 현관에서는 외출 및 귀가 상황에 맞춰 실내외 운동을 제안하며, 웨어러블 착용과 발 두 번 탭까지 이어 실제 시작으로 전환합니다.</p><figure class="figure"><img class="media" src="assets/img_28.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_29.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_30.png" alt="" loading="lazy"></figure></div></div></div></details></div><div class="step-head"><p class="step-label">{1} Home First Trial</p><h3 class="step-title">처음의 한 걸음은, 집에서도 충분하니까</h3></div><p class="body">Pack을 고르면, 방 안의 벽면이 조용한 링으로 바뀝니다. 굳은 몸을 스트레칭으로 열고, Quiet On으로 발소리와 충격을 낮춥니다. 벽에는 복싱 고수의 리듬과 가상 상대의 공격 범위가 펼쳐지고, 한 발 피하고 다시 들어가며 짧은 스파링을 시작합니다. 소음 부담 없이 완성한 첫 움직임은, 또 다른 도전을 해보고 싶은 재미로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_31.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{2} Outdoor Running</p><h3 class="step-title">한번 움직인 마음은, 바깥으로 이어진다</h3></div><p class="body">집에서 한 번 움직여본 감각은, 피드 속 러닝을 그냥 넘기지 못하게 만듭니다. 오늘의 Pack은 션과 함께 달리는 러닝메이트. NEWTON은 발밑에 페이스와 박자를 안내하고, 리듬이 꺼질 때는 Boost On으로 다음 한 발을 밀어줍니다. 피드에서 보던 러닝이 오늘 내 거리로 넘어오는 순간, 운동은 루틴이 아니라 따라가고 싶은 바깥 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_32.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{3} Basketball Personal Practice</p><h3 class="step-title">혼자 익힌 리듬이, 함께 움직일 자신감으로</h3></div><p class="body">혼자 달리던 몸은 이제 함께 움직이는 재미를 궁금해합니다. 오늘의 Pack은 스테판 커리의 스텝백. NEWTON은 첫 발, 백스텝, 복귀 리듬을 지면 위에 띄우고, Press On은 발을 빼고 돌아오는 순간에 묵직한 저항을 더해 순발력을 깨웁니다. 혼자 익힌 리듬이 쌓이면, 보기만 하던 플레이는 해볼 수 있는 감각이 됩니다. 그 감각은 친구들과 함께 움직여볼 자신감으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_33.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{4} Home Together Play</p><h3 class="step-title">혼자 익힌 설렘이, 함께 하는 재미가 되어</h3></div><p class="body">혼자 익힌 리듬은, 함께할 때 더 재밌어집니다. NEWTON의 빔프로젝터를 나란히 두는 순간, 거실은 둘만의 플레이 스테이지로 넓어집니다. 커진 투사면 안에서 서로의 움직임이 맞물리고, 운동은 게임처럼 가볍게 이어집니다. 혼자 쌓은 자신감은 친구와 주고받는 리듬이 되고, 연습은 함께 즐기는 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_34.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{5} Dock and Remember</p><h3 class="step-title">오늘의 두근거림을, 다음 도전으로</h3></div><p class="body">움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 하체 웨어러블은 포터블 스테이션에서 다시 충전되고, 패브릭 파츠는 분리해 산뜻하게 관리됩니다. 오늘 몸에 남은 리듬과 막혔던 순간은 다음 도전을 위한 단서가 됩니다. 오늘의 플레이는 여기서 멈추지 않고 더 가볍고, 더 익숙한 다음 움직임으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_35.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_36.png" alt="" loading="lazy"></figure>
+  <div class="page-scroll">
+    <div class="page-head">
+      <div class="head-left"><p class="kicker">Scenario</p><h2 class="chapter-title">마음이 먼저 움직이는 순간</h2></div>
+      <div class="head-right"><p class="body">책상 앞에 오래 앉아 굳어 있던 몸 앞에, 포터블 스테이션은 지금 끌릴 만한 Challenge Pack을 짧게 띄웁니다. 어릴 때 배워봤던 복싱의 회피 스텝과 짧은 풋워크 하이라이트가 집 안에 펼쳐지고, 투사된 시작 버튼은 다시 움직여보고 싶은 마음을 당깁니다. 누르는 순간, 운동은 해야 할 일이 아니라 지금 바로 시작해보고 싶은 도전이 됩니다</p></div>
+    </div>
+    <div class="page-content"><div class="group"><details class="toggle"><summary>운동을 마음먹게 시작하는 뉴턴의 넛지 설계</summary><div class="toggle-body"><div class="finding"><div class="finding-icon">🔥</div><div class="finding-body"><p class="subhead">NEWTON 넛지 설계</p><p class="body">NEWTON은 관심 운동, 저장한 Pack, 최근 본 콘텐츠, 중단한 세션과 생활 패턴을 바탕으로 추천을 만듭니다. 시간,장소,활동량,날씨까지 함께 판단해 지금 실행하기 좋은 Pack만 제안합니다.</p><p class="subhead">01 두가지 진입점</p><p class="subhead">NEWTON이 먼저 제안하거나 내가 고르거나</p><p class="body">앱을 탐색하지 않는 순간에는 관심 운동, 저장·시청 기록, 이전 세션을 바탕으로 개인화 알림이 적절한 Pack을 먼저 제안합니다. 콘텐츠 탭에서는 원하는 움직임을 직접 탐색해 Pack을 시작합니다.</p><p class="subhead">02 생활 속 접점</p><p class="subhead">책상에서 준비하고, 현관에서 행동으로</p><p class="body">책상에서는 추천 Pack을 확인하고 운동 직전 설정을 마칩니다. 현관에서는 외출 및 귀가 상황에 맞춰 실내외 운동을 제안하며, 웨어러블 착용과 발 두 번 탭까지 이어 실제 시작으로 전환합니다.</p><figure class="figure"><img class="media" src="assets/img_28.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_29.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_30.png" alt="" loading="lazy"></figure></div></div></div></details></div><div class="step-head"><p class="step-label">{1} Home First Trial</p><h3 class="step-title">처음의 한 걸음은, 집에서도 충분하니까</h3></div><p class="body">Pack을 고르면, 방 안의 벽면이 조용한 링으로 바뀝니다. 굳은 몸을 스트레칭으로 열고, Quiet On으로 발소리와 충격을 낮춥니다. 벽에는 복싱 고수의 리듬과 가상 상대의 공격 범위가 펼쳐지고, 한 발 피하고 다시 들어가며 짧은 스파링을 시작합니다. 소음 부담 없이 완성한 첫 움직임은, 또 다른 도전을 해보고 싶은 재미로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_31.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{2} Outdoor Running</p><h3 class="step-title">한번 움직인 마음은, 바깥으로 이어진다</h3></div><p class="body">집에서 한 번 움직여본 감각은, 피드 속 러닝을 그냥 넘기지 못하게 만듭니다. 오늘의 Pack은 션과 함께 달리는 러닝메이트. NEWTON은 발밑에 페이스와 박자를 안내하고, 리듬이 꺼질 때는 Boost On으로 다음 한 발을 밀어줍니다. 피드에서 보던 러닝이 오늘 내 거리로 넘어오는 순간, 운동은 루틴이 아니라 따라가고 싶은 바깥 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_32.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{3} Basketball Personal Practice</p><h3 class="step-title">혼자 익힌 리듬이, 함께 움직일 자신감으로</h3></div><p class="body">혼자 달리던 몸은 이제 함께 움직이는 재미를 궁금해합니다. 오늘의 Pack은 스테판 커리의 스텝백. NEWTON은 첫 발, 백스텝, 복귀 리듬을 지면 위에 띄우고, Press On은 발을 빼고 돌아오는 순간에 묵직한 저항을 더해 순발력을 깨웁니다. 혼자 익힌 리듬이 쌓이면, 보기만 하던 플레이는 해볼 수 있는 감각이 됩니다. 그 감각은 친구들과 함께 움직여볼 자신감으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_33.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{4} Home Together Play</p><h3 class="step-title">혼자 익힌 설렘이, 함께 하는 재미가 되어</h3></div><p class="body">혼자 익힌 리듬은, 함께할 때 더 재밌어집니다. NEWTON의 빔프로젝터를 나란히 두는 순간, 거실은 둘만의 플레이 스테이지로 넓어집니다. 커진 투사면 안에서 서로의 움직임이 맞물리고, 운동은 게임처럼 가볍게 이어집니다. 혼자 쌓은 자신감은 친구와 주고받는 리듬이 되고, 연습은 함께 즐기는 플레이가 됩니다.</p><figure class="figure"><img class="media" src="assets/img_34.png" alt="" loading="lazy"></figure><div class="step-head"><p class="step-label">{5} Dock and Remember</p><h3 class="step-title">오늘의 두근거림을, 다음 도전으로</h3></div><p class="body">움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 하체 웨어러블은 포터블 스테이션에서 다시 충전되고, 패브릭 파츠는 분리해 산뜻하게 관리됩니다. 오늘 몸에 남은 리듬과 막혔던 순간은 다음 도전을 위한 단서가 됩니다. 오늘의 플레이는 여기서 멈추지 않고 더 가볍고, 더 익숙한 다음 움직임으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_35.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_36.png" alt="" loading="lazy"></figure></div>
+    
   </div>
 </div>
 <div class="page" data-page="sec-09">

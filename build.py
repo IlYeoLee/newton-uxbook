@@ -177,13 +177,44 @@ def extract_hero(items):
             return n, items[:i] + items[i + 1:]
     return None, items
 
+def first_paragraph(items):
+    for i, n in enumerate(items):
+        if n["t"] == "P":
+            return n, items[:i] + items[i + 1:]
+    return None, items
+
+def render_vertical(page_id, kicker, title_html, body_items, hero):
+    """549/827 layout: head (title left / intro-body right), content, optional big bottom image."""
+    intro_p, rest = first_paragraph(body_items)
+    intro_html = render_node(intro_p) if intro_p else ""
+    content_html = render_children(rest)
+    hero_html = f'<figure class="page-hero">{img_tag(hero["src"])}</figure>' if hero else ""
+    data = f' data-page="{page_id}"' if page_id else ""
+    kicker_html = f'<p class="kicker">{esc(kicker)}</p>' if kicker else ""
+    return f'''
+<div class="page"{data}>
+  <div class="page-scroll">
+    <div class="page-head">
+      <div class="head-left">{kicker_html}{title_html}</div>
+      <div class="head-right">{intro_html}</div>
+    </div>
+    <div class="page-content">{content_html}</div>
+    {hero_html}
+  </div>
+</div>'''
+
 def render_page(marker, seg):
     num, kicker = marker.split(" ", 1)
     body = seg[1:]  # drop marker P
     h4 = next((n for n in body if n["t"] in ("H4", "H3")), None)
     rest = [n for n in body if n is not h4]
-    hero, rest = extract_hero(rest)
     title_html = render_h4(h4["x"]) if h4 else ""
+    # Scenario page (08) uses the vertical layout with its lead image removed
+    if num == "08":
+        _, rest_no_hero = extract_hero(rest)
+        return render_vertical(f"sec-{num}", kicker, title_html, rest_no_hero, None)
+    # everything else keeps the left-image / right-text two-column layout
+    hero, rest = extract_hero(rest)
     media_html = img_tag(hero["src"]) if hero else ""
     content_html = render_children(rest)
     return f'''
@@ -198,9 +229,11 @@ def render_page(marker, seg):
 
 sections_html = "".join(render_page(m, seg) for m, seg in sections)
 
+# intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
 intro_hero, intro_rest = extract_hero(hero_items)
-intro_media_html = img_tag(intro_hero["src"]) if intro_hero else ""
-intro_text_html = render_children(intro_rest)
+intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
+intro_page_html = render_vertical("intro", "Now, your turn!",
+                                  '<h2 class="chapter-title">NEWTON</h2>', intro_body, intro_hero)
 
 appendix_html = render_children(appendix_items)
 
@@ -219,9 +252,8 @@ nav_html = "".join(
 
 TEMPLATE = open(os.path.join(ROOT, "template.html")).read()
 out = (TEMPLATE.replace("{{NAV}}", nav_html)
-       .replace("{{INTRO_MEDIA}}", intro_media_html)
-       .replace("{{INTRO_TEXT}}", intro_text_html)
+       .replace("{{INTRO_PAGE}}", intro_page_html)
        .replace("{{SECTIONS}}", sections_html)
        .replace("{{APPENDIX}}", appendix_html))
 open(os.path.join(ROOT, "index.html"), "w").write(out)
-print("done", len(sections_html), len(intro_text_html), len(appendix_html))
+print("done", len(sections_html), len(intro_page_html), len(appendix_html))

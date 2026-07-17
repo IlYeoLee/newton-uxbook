@@ -143,6 +143,23 @@
   }
   .page-text::-webkit-scrollbar{display:none}
 
+  /* vertical layout (used ONLY on the intro + scenario pages): title/body on top, big image at bottom */
+  .page-scroll{
+    width:100%;height:100%;overflow-y:auto;scrollbar-width:none;
+    padding:3.320cqw 4.979cqw 3.984cqw;
+  }
+  .page-scroll::-webkit-scrollbar{display:none}
+  .page-head{display:flex;gap:3.320cqw;align-items:flex-start;margin-bottom:2.324cqw}
+  .head-left{flex:0 0 38%;max-width:38%}
+  .head-right{flex:1;min-width:0;padding-top:0.5cqw}
+  .head-right .body:first-child{margin-top:0}
+  .page-content{width:100%}
+  .page-hero{margin:2.656cqw 0 0;line-height:0}
+  .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
+  /* on vertical pages, unify title sizes (scenario step titles matched to chapter title) */
+  .page-scroll .step-title{font-size:2.656cqw;font-weight:700;letter-spacing:-.03em}
+  .page-scroll .step-head{margin:3.320cqw 0 1.328cqw}
+
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
   .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}
   .body{font-size:1.494cqw;font-weight:400;color:rgba(0,0,0,.8);line-height:1.55;margin:0 0 1.328cqw}
@@ -303,10 +320,7 @@
       </div>
     </div>
 
-    <div class="page" data-page="intro">
-      <div class="page-media">{{INTRO_MEDIA}}</div>
-      <div class="page-text">{{INTRO_TEXT}}</div>
-    </div>
+    {{INTRO_PAGE}}
 
     {{SECTIONS}}
 
