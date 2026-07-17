@@ -43,7 +43,7 @@
   }
   @media (hover:hover) and (pointer:fine){
     .cursor{display:block}
-    html,body,a,button,summary,.pill,.pg-btn,img,.wordmark,figure.figure{cursor:none}
+    *{cursor:none !important}
   }
   body{
     margin:0;
@@ -96,18 +96,18 @@
   }
   .brand{display:flex;align-items:center;cursor:pointer;text-decoration:none;flex:none}
   .brand img{height:1.742cqw;width:auto}
-  .pillbar{display:flex;gap:1.66cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end;align-items:flex-end}
+  .pillbar{display:flex;gap:1.66cqw;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;justify-content:flex-end;align-self:stretch;align-items:stretch}
   .pillbar::-webkit-scrollbar{display:none}
-  /* underline tab (two-weight style): grey→black text, FA3030 underline on active */
+  /* underline tab (two-weight style): grey→black text, FA3030 underline sitting on the bar's bottom outline */
   .pill{
     flex:none;border:none;cursor:pointer;position:relative;
-    background:transparent;padding:0 0 0.55cqw;
+    background:transparent;padding:0;display:inline-flex;align-items:center;
     color:#9a9a9a;font-size:1.245cqw;font-weight:400;white-space:nowrap;
     font-family:inherit;letter-spacing:-.02em;
     transition:color .3s ease;
   }
   .pill::after{
-    content:"";position:absolute;left:0;bottom:0;width:100%;height:0.166cqw;
+    content:"";position:absolute;left:0;bottom:-1px;width:100%;height:0.2cqw;
     background:var(--red);transform:scaleX(0);transform-origin:left;
     transition:transform .45s cubic-bezier(.65,0,.35,1);
   }
@@ -505,7 +505,7 @@
     body.style.overflow = 'hidden';
     body.style.height = body.scrollHeight + 'px';
     void body.offsetHeight;
-    body.style.transition = 'height .24s cubic-bezier(.4,0,.2,1), opacity .18s ease';
+    body.style.transition = 'height .26s cubic-bezier(.22,.61,.36,1), opacity .24s ease';
     body.style.height = '0px'; body.style.opacity = '0';
     body.addEventListener('transitionend', function done(e){
       if (e.propertyName !== 'height') return;
