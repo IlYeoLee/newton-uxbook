@@ -17,6 +17,7 @@
     font-family:'Pretendard';font-weight:700;font-style:normal;font-display:swap;
     src:url('fonts/Pretendard-Bold.woff2') format('woff2');
   }
+  @property --grad-angle{syntax:'<angle>';inherits:false;initial-value:180deg}
   :root{
     --red:#FA3030;
     --gray-bg:#F6F6F6;
@@ -103,9 +104,6 @@
   /* per-element slide-in ("차라락") — soft ease-out, a touch slower */
   @keyframes slideInItem{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
   .stagger{opacity:0;animation:slideInItem .62s cubic-bezier(.22,.61,.36,1) both}
-  /* toggle contents: pure fade, no travel — the panel already expands, so any Y-move reads as a bounce */
-  @keyframes fadeSoft{from{opacity:0}to{opacity:1}}
-  .stagger-soft{opacity:0;animation:fadeSoft .42s ease both}
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
@@ -171,24 +169,24 @@
   .cover-slide{
     position:relative;width:100%;height:100%;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:linear-gradient(180deg,#FA3030 59.24%,#FE6E3C 84.478%,#FEC389 94.982%,#D1FEFF 101.57%);
-    background-size:100% 128%;background-position:0 0;
-    animation:bgDrift 14s ease-in-out infinite alternate;
+    /* exact Figma gradient — stops untouched; only the angle drifts for gentle motion */
+    background:linear-gradient(var(--grad-angle,180deg),#FA3030 59.24%,#FE6E3C 84.478%,#FEC389 94.982%,#D1FEFF 101.57%);
+    animation:gradFlow 9s ease-in-out infinite alternate;
   }
-  @keyframes bgDrift{to{background-position:0 100%}}
+  @keyframes gradFlow{from{--grad-angle:176deg}to{--grad-angle:188deg}}
   @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
   .cover-slide .wordmark{width:72.20cqw;height:auto;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;-webkit-user-drag:none;-webkit-user-select:none}
-  /* glitch: RGB channel split + sliced jitter while touched/rubbed */
+  /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
   @keyframes glitch{
-    0%,100%{transform:translate(0);filter:none;clip-path:none}
-    10%{transform:translate(-3px,1px);filter:drop-shadow(3px 0 #ff0040) drop-shadow(-3px 0 #00e6ff)}
-    25%{transform:translate(3px,-1px);filter:drop-shadow(-4px 0 #ff0040) drop-shadow(4px 0 #00e6ff);clip-path:inset(8% 0 62% 0)}
-    40%{transform:translate(-2px,1px);filter:drop-shadow(3px 0 #ff0040) drop-shadow(-3px 0 #00e6ff);clip-path:inset(56% 0 18% 0)}
-    55%{transform:translate(2px,0);filter:drop-shadow(-2px 0 #ff0040) drop-shadow(2px 0 #00e6ff);clip-path:inset(34% 0 40% 0)}
-    70%{transform:translate(-1px,-1px);filter:drop-shadow(2px 0 #ff0040) drop-shadow(-2px 0 #00e6ff)}
-    85%{transform:translate(1px,1px);filter:none;clip-path:none}
+    0%,100%{transform:translate(0);clip-path:none}
+    10%{transform:translate(-3px,1px)}
+    25%{transform:translate(3px,-1px);clip-path:inset(8% 0 62% 0)}
+    40%{transform:translate(-2px,1px);clip-path:inset(56% 0 18% 0)}
+    55%{transform:translate(2px,0);clip-path:inset(34% 0 40% 0)}
+    70%{transform:translate(-1px,-1px)}
+    85%{transform:translate(1px,1px);clip-path:none}
   }
-  .cover-slide .wordmark.glitch{animation:glitch .5s steps(2,end)}
+  .cover-slide .wordmark.glitch{animation:glitch .38s steps(2,end)}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:#000;margin:0;letter-spacing:-.02em}
 
   /* ---- pager (Figma Frame 2147232169) — anchored to book so cover & content align ---- */
@@ -457,19 +455,43 @@
   wm.addEventListener('pointerenter', glitch);
   wm.addEventListener('pointermove', glitch);
 
-  // toggle open → gently slide its inner elements in
-  function staggerToggle(d){
-    const body = d.querySelector(':scope > .toggle-body');
-    if (!body) return;
-    [...body.children].forEach((el, n) => {
-      el.classList.remove('stagger-soft');
-      void el.offsetWidth;
-      el.style.animationDelay = (n * 35) + 'ms';
-      el.classList.add('stagger-soft');
+  // toggle: springy height grow + single fade (no per-child flicker)
+  function expandToggle(d, body){
+    d.open = true;
+    body.style.overflow = 'hidden';
+    body.style.height = 'auto';
+    const h = body.scrollHeight;
+    body.style.height = '0px'; body.style.opacity = '0';
+    void body.offsetHeight;   // commit start state, then transition
+    body.style.transition = 'height .42s cubic-bezier(.34,1.12,.64,1), opacity .34s ease';
+    body.style.height = h + 'px'; body.style.opacity = '1';
+    body.addEventListener('transitionend', function done(e){
+      if (e.propertyName !== 'height') return;
+      body.style.height = 'auto'; body.style.overflow = ''; body.style.transition = '';
+      body.removeEventListener('transitionend', done);
+    });
+  }
+  function collapseToggle(d, body){
+    body.style.overflow = 'hidden';
+    body.style.height = body.scrollHeight + 'px';
+    void body.offsetHeight;
+    body.style.transition = 'height .32s cubic-bezier(.4,0,.2,1), opacity .24s ease';
+    body.style.height = '0px'; body.style.opacity = '0';
+    body.addEventListener('transitionend', function done(e){
+      if (e.propertyName !== 'height') return;
+      d.open = false;
+      body.style.height = ''; body.style.opacity = ''; body.style.overflow = ''; body.style.transition = '';
+      body.removeEventListener('transitionend', done);
     });
   }
   document.querySelectorAll('details.toggle').forEach(d => {
-    d.addEventListener('toggle', () => { if (d.open) staggerToggle(d); });
+    const sum = d.querySelector(':scope > summary');
+    const body = d.querySelector(':scope > .toggle-body');
+    if (!sum || !body) return;
+    sum.addEventListener('click', e => {
+      e.preventDefault();
+      d.open ? collapseToggle(d, body) : expandToggle(d, body);
+    });
   });
   window.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') show(nextIdx());
