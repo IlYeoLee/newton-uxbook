@@ -208,9 +208,10 @@
   .page-content{width:100%}
   .page-hero{margin:2.656cqw 0 0;line-height:0}
   .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
-  /* on vertical pages, unify title sizes (scenario step titles matched to chapter title) */
-  .page-scroll .step-title{font-size:2.656cqw;font-weight:700;letter-spacing:-.03em}
-  .page-scroll .step-head{margin:3.320cqw 0 1.328cqw}
+  /* on vertical pages, scenario steps match the (1) caption+title hierarchy */
+  .page-scroll .step-head{margin:3.320cqw 0 1.328cqw}          /* ~40px breathing room after the image above */
+  .page-scroll .step-label{font-size:1.494cqw;font-weight:700;color:var(--red);letter-spacing:-.02em;margin:0 0 1.328cqw}
+  .page-scroll .step-title{font-size:2.656cqw;font-weight:700;letter-spacing:-.03em;line-height:1.38;margin:0}
   /* vertical-page images: near full-bleed, ~10px side gaps like Figma 549 */
   .page-scroll figure.figure, .page-scroll .page-hero{
     margin-left:calc(0.830cqw - 4.979cqw);margin-right:calc(0.830cqw - 4.979cqw);
