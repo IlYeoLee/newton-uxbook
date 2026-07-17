@@ -106,7 +106,7 @@
     width:32.780cqw;height:100%;flex:none;
     border-radius:3.320cqw;overflow:hidden;background:#0a0a0a;position:relative;
   }
-  .page-media img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+  .page-media img{width:100%;height:100%;object-fit:cover}
 
   .page-text{
     flex:1;min-width:0;height:100%;overflow-y:auto;
@@ -444,7 +444,7 @@
   const lbImg = document.getElementById('lbImg');
   const lbZoom = document.getElementById('lbZoom');
   let scale = 1, tx = 0, ty = 0;
-  const MIN = 1, MAX = 8, STEP = 0.1;   // +/- steps 10%
+  const MIN = 1, MAX = 8, STEP = 0.3;   // +/- steps 30%
 
   function apply(){
     if (scale <= 1) { tx = 0; ty = 0; }
@@ -463,7 +463,7 @@
   function closeLb(){ lightbox.classList.remove('open'); }
 
   document.addEventListener('click', e => {
-    const fig = e.target.closest('figure.figure img, .page-media img');
+    const fig = e.target.closest('figure.figure img');   // only inline content images, not the fixed media panel
     if (fig) openLb(fig.src);
   });
   document.getElementById('lbClose').addEventListener('click', e => { addRipple(e); closeLb(); });
