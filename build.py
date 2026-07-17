@@ -248,7 +248,9 @@ def render_vertical(page_id, kicker, title_html, body_items, hero, scroll_hint=F
     data = f' data-page="{page_id}"' if page_id else ""
     kicker_html = f'<p class="kicker">{esc(kicker)}</p>' if kicker else ""
     hint_html = ('<div class="scroll-hint" aria-hidden="true">'
-                 '<span class="scroll-mouse"></span><span class="scroll-txt">SCROLL</span></div>') if scroll_hint else ""
+                 '<span class="scroll-mouse"></span>'
+                 '<span class="chevs"><i class="chev"></i><i class="chev"></i><i class="chev"></i></span>'
+                 '</div>') if scroll_hint else ""
     return f'''
 <div class="page"{data}>
   <div class="page-scroll">
