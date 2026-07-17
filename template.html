@@ -36,6 +36,11 @@
     mix-blend-mode:exclusion;
     transform:translate(-9999px,-9999px);will-change:transform;
   }
+  .cursor.clicking{
+    width:26px;height:26px;
+    -webkit-mask-image:url(assets/cursor-click.svg);
+    mask-image:url(assets/cursor-click.svg);
+  }
   @media (hover:hover) and (pointer:fine){
     .cursor{display:block}
     html,body,a,button,summary,.pill,.pg-btn,img,.wordmark,figure.figure{cursor:none}
@@ -534,6 +539,8 @@
     if (e.pointerType === 'touch') return;
     mx = e.clientX; my = e.clientY;
   });
+  addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') cursor.classList.add('clicking'); });
+  addEventListener('pointerup', () => cursor.classList.remove('clicking'));
   (function follow(){
     cx += (mx - cx) * 0.8; cy += (my - cy) * 0.8;   // near-instant, tiny smoothing only
     cursor.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
