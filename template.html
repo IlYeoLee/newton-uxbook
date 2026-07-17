@@ -33,6 +33,7 @@
   }
   img{max-width:100%;display:block}
 
+  .device{display:flex;position:relative}
   .book{
     position:relative;
     width:min(100vw, 100vh * 1.6003);
@@ -41,6 +42,26 @@
     overflow:hidden;
     container-type:inline-size;
     box-shadow:0 40px 140px rgba(0,0,0,.65);
+  }
+
+  /* Desktop/laptop (mouse): wrap the book in a Galaxy-Tab-style bezel.
+     Touch tablets report pointer:coarse and stay fullscreen. */
+  @media (hover:hover) and (pointer:fine){
+    body{padding:2.4vh}
+    .device{
+      padding:1.4vh;
+      background:linear-gradient(150deg,#1a1a1e,#08080a);
+      border-radius:2.4vh;
+      box-shadow:0 3vh 9vh rgba(0,0,0,.6), inset 0 0 0 .2vh #2d2d31;
+    }
+    .book{
+      width:min(100vw - 9vh, (100vh - 9vh) * 1.6003);
+      border-radius:1vh;
+    }
+    .device::after{
+      content:"";position:absolute;top:50%;left:.65vh;
+      width:.7vh;height:.7vh;border-radius:50%;background:#3a3a3e;transform:translateY(-50%);
+    }
   }
 
   /* ---- top nav (Figma Frame 6) ---- */
@@ -159,14 +180,14 @@
   .pg-right{display:flex;flex-direction:column;align-items:center;gap:0.996cqw}
   .pg-right .count{font-size:1.162cqw;font-weight:700;color:#b0b0b0;letter-spacing:-.02em}
 
-  /* lightbox (Figma 이미지 확대) */
-  .lightbox{position:fixed;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100}
+  /* lightbox (Figma 이미지 확대) — anchored to the book so it stays inside the tablet screen */
+  .lightbox{position:absolute;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100;border-radius:inherit;overflow:hidden}
   .lightbox.open{display:block}
   .lb-stage{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none}
-  .lb-stage img{max-width:88vw;max-height:82vh;object-fit:contain;border-radius:8px;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;cursor:grab}
+  .lb-stage img{max-width:86%;max-height:78%;object-fit:contain;border-radius:8px;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;cursor:grab}
   .lb-stage img.grabbing{cursor:grabbing}
   .lb-controls{
-    position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+    position:absolute;left:50%;bottom:3cqw;transform:translateX(-50%);
     display:flex;align-items:center;gap:12px;z-index:2;
     font-family:inherit;
   }
@@ -197,6 +218,7 @@
 </head>
 <body>
 
+<div class="device">
 <div class="book is-cover" id="book">
   <div class="book-nav">
     <a class="brand" href="#" data-nav="cover"><img src="assets/wordmark.svg" alt="NEWTON"></a>
@@ -237,20 +259,21 @@
       <span class="count" id="counter">1 / 12</span>
     </div>
   </div>
-</div>
 
-<div class="lightbox" id="lightbox">
-  <div class="lb-stage" id="lbStage"><img id="lbImg" src="" alt="" draggable="false"></div>
-  <div class="lb-controls">
-    <div class="lb-stepper">
-      <button id="lbMinus" aria-label="축소">&minus;</button>
-      <span id="lbZoom">100%</span>
-      <button id="lbPlus" aria-label="확대">+</button>
+  <div class="lightbox" id="lightbox">
+    <div class="lb-stage" id="lbStage"><img id="lbImg" src="" alt="" draggable="false"></div>
+    <div class="lb-controls">
+      <div class="lb-stepper">
+        <button id="lbMinus" aria-label="축소">&minus;</button>
+        <span id="lbZoom">100%</span>
+        <button id="lbPlus" aria-label="확대">+</button>
+      </div>
+      <button id="lbClose" class="lb-close" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </div>
-    <button id="lbClose" class="lb-close" aria-label="닫기">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
   </div>
+</div>
 </div>
 
 <script>
