@@ -111,6 +111,9 @@ def render_toggle(node):
     body = render_children(node.get("c", []))
     return f'<details class="toggle"><summary>{esc(node["x"])}</summary><div class="toggle-body">{body}</div></details>'
 
+def strip_lead_emoji(s):
+    return re.sub(r'^[\U0001F000-\U0001FAFF☀-➿←-⇿️\s]+', '', s or "")
+
 def render_callout(node):
     x = node.get("x", "")
     children = node.get("c", [])
@@ -123,10 +126,10 @@ def render_callout(node):
         first = body_children[0].get("x", "")
         if "\n" in first:
             label, headline = first.split("\n", 1)
-            head_html = (f'<p class="finding-label"{en_attr(label.strip())}>{esc(label.strip())}</p>'
-                         f'<p class="finding-headline"{en_attr(headline.strip())}>{esc(headline.strip())}</p>')
+            head_html = (f'<p class="finding-label"{en_attr(label.strip())}>{esc(strip_lead_emoji(label.strip()))}</p>'
+                         f'<p class="finding-headline"{en_attr(headline.strip())}>{esc(strip_lead_emoji(headline.strip()))}</p>')
         else:
-            head_html = f'<p class="finding-title"{en_attr(first)}>{esc(first)}</p>'
+            head_html = f'<p class="finding-title"{en_attr(first)}>{esc(strip_lead_emoji(first))}</p>'
         body_children = body_children[1:]
     # trailing short "종목 / 이름" → caption
     caption_html = ""
@@ -135,7 +138,7 @@ def render_callout(node):
         if "/" in last and len(last) <= 30:
             body_children = body_children[:-1]
             caption_html = f'<p class="finding-caption"{en_attr(last)}>{esc(last)}</p>'
-    inner = render_children(body_children)
+    inner = render_children(body_children, group_toggles=False)
     # icon = newton symbol logo (CSS mask); original emoji dropped
     return (f'<div class="finding"><div class="finding-icon"></div>'
             f'<div class="finding-body">{head_html}{inner}{caption_html}</div></div>')
@@ -165,7 +168,7 @@ def render_node(n):
         return render_table_node()
     return ""
 
-def render_children(items):
+def render_children(items, group_toggles=True):
     out = []
     i = 0
     while i < len(items):
@@ -178,8 +181,8 @@ def render_children(items):
             lis = "".join(f"<li{en_attr(g.get('x',''))}>{esc(g.get('x',''))}</li>" for g in group)
             out.append(f"<ul class='list'>{lis}</ul>")
             continue
-        if n["t"] == "TOGGLE":
-            # consecutive toggles always share one grey container
+        if n["t"] == "TOGGLE" and group_toggles:
+            # consecutive toggles share one grey container (skipped inside a finding box)
             tg = []
             while i < len(items) and items[i]["t"] == "TOGGLE":
                 tg.append(render_node(items[i]))
@@ -315,14 +318,59 @@ def first_paragraph(items):
             return n, items[:i] + items[i + 1:]
     return None, items
 
-def render_vertical(page_id, kicker, title_html, body_items, hero, scroll_hint=False):
-    """549/827 layout: head (title left / intro-body right), content, optional big bottom image."""
-    intro_p, rest = first_paragraph(body_items)
-    intro_html = render_node(intro_p) if intro_p else ""
-    content_html = render_children(rest)
+def split_h4(text):
+    lines = text.split("\n")
+    if lines and lines[0].strip()[:1] in ("{", "("):
+        return lines[0].strip(), "\n".join(lines[1:]).strip()
+    return "", text
+
+def head_block(kicker, title, body, step=False):
+    """Figma 12:846 header: kicker (red) on top, then title-left(264px) / body-right(flex)."""
+    k = f'<p class="kicker"{en_attr(kicker)}>{esc(kicker)}</p>' if kicker else ""
+    tt = "<br>".join(esc(l.strip()) for l in title.split("\n"))
+    t = f'<h2 class="head-title"{en_attr(title)}>{tt}</h2>'
+    b = ""
+    if body:
+        bb = "<br>".join(linkify(esc(l)) for l in body.split("\n"))
+        b = f'<p class="head-body"{en_attr(body)}>{bb}</p>'
+    cls = "head-block step" if step else "head-block"
+    return f'<div class="{cls}">{k}<div class="head-row">{t}{b}</div></div>'
+
+def render_vertical_content(items):
+    """each title(+its following paragraph) becomes the same header component."""
+    out = []
+    i = 0
+    while i < len(items):
+        n = items[i]
+        t = n["t"]
+        if t in ("H4", "H3"):
+            kick, title = split_h4(n["x"])
+            body = ""
+            if i + 1 < len(items) and items[i + 1]["t"] == "P" and not is_citation(items[i + 1].get("x", "")):
+                body = items[i + 1].get("x", "")
+                i += 1
+            out.append(head_block(kick, title, body, step=True))
+            i += 1
+            continue
+        if t == "TOGGLE":
+            tg = []
+            while i < len(items) and items[i]["t"] == "TOGGLE":
+                tg.append(render_node(items[i]))
+                i += 1
+            out.append(f'<div class="group">{"".join(tg)}</div>')
+            continue
+        out.append(render_node(n))
+        i += 1
+    return "".join(out)
+
+def render_vertical(page_id, kicker, title_text, body_items, hero, scroll_hint=False):
+    """549/827: header component + content (each step reuses the same header), then big image."""
+    first_p, rest = first_paragraph(body_items)
+    first_body = first_p.get("x", "") if first_p else ""
+    head = head_block(kicker, title_text, first_body)
+    content_html = render_vertical_content(rest)
     hero_html = f'<figure class="page-hero">{img_tag(hero["src"])}</figure>' if hero else ""
     data = f' data-page="{page_id}"' if page_id else ""
-    kicker_html = f'<p class="kicker">{esc(kicker)}</p>' if kicker else ""
     hint_html = ('<div class="scroll-hint" aria-hidden="true">'
                  '<span class="scroll-mouse"></span>'
                  '<span class="chevs"><i class="chev"></i><i class="chev"></i><i class="chev"></i></span>'
@@ -330,10 +378,7 @@ def render_vertical(page_id, kicker, title_html, body_items, hero, scroll_hint=F
     return f'''
 <div class="page"{data}>
   <div class="page-scroll">
-    <div class="page-head">
-      <div class="head-left">{kicker_html}{title_html}</div>
-      <div class="head-right">{intro_html}</div>
-    </div>
+    {head}
     <div class="page-content">{content_html}</div>
     {hero_html}
   </div>
@@ -355,7 +400,7 @@ def render_page(marker, seg):
         ci = next((i for i, n in enumerate(rest2) if n.get("t") == "CALLOUT"), None)
         if hero is not None:
             rest2.insert(ci + 1 if ci is not None else 0, hero)
-        return render_vertical(f"sec-{num}", kicker, title_html, rest2, None, scroll_hint=True)
+        return render_vertical(f"sec-{num}", kicker, h4["x"] if h4 else "", rest2, None, scroll_hint=True)
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
     if num == "02":
@@ -402,7 +447,7 @@ intro_hero, intro_rest = extract_hero(hero_items)
 intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
 intro_body.append({"t": "P", "x": "송시헌, 이일여, 김소진, 박주원, 전다빈", "credit": True})
 intro_page_html = render_vertical("intro", "Now, your turn!",
-                                  '<h2 class="chapter-title">NEWTON</h2>', intro_body, intro_hero)
+                                  "NEWTON", intro_body, intro_hero)
 
 # label, first page, member pages
 NAV_GROUPS = [

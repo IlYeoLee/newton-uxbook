@@ -198,24 +198,21 @@
   /* vertical layout (used ONLY on the intro + scenario pages): title/body on top, big image at bottom */
   .page-scroll{
     width:100%;height:100%;overflow-y:auto;scrollbar-width:none;
-    padding:3.320cqw 4.979cqw 3.984cqw;
+    padding:0 0 3.984cqw;
   }
   .page-scroll::-webkit-scrollbar{display:none}
-  .page-head{display:flex;gap:3.320cqw;align-items:flex-start;margin-bottom:2.324cqw}
-  .head-left{flex:0 0 38%;max-width:38%}
-  .head-right{flex:1;min-width:0;padding-top:0.5cqw}
-  .head-right .body:first-child{margin-top:0}
-  .page-content{width:100%}
-  .page-hero{margin:2.656cqw 0 0;line-height:0}
+  /* header component (Figma 12:846): kicker(red) on top, then title-left(264px)/body-right(flex) */
+  .head-block{display:flex;flex-direction:column;gap:1.660cqw;padding:4.150cqw 6.639cqw 2.656cqw}
+  .head-block.step{padding-top:3.320cqw}                        /* ~40px breathing room after the image above */
+  .head-block .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em;margin:0}
+  .head-row{display:flex;gap:1.660cqw;align-items:flex-start}
+  .head-title{font-size:2.656cqw;font-weight:700;color:var(--text);width:21.90cqw;flex:none;line-height:1.4;letter-spacing:-.03em;margin:0}
+  .head-body{flex:1;min-width:0;font-size:1.494cqw;color:var(--text-body);line-height:1.5;margin:0}
+  .page-content{width:100%;padding:0 6.639cqw}
+  .page-hero{margin:2.656cqw 0.830cqw 0;line-height:0}
   .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
-  /* on vertical pages, scenario steps match the (1) caption+title hierarchy */
-  .page-scroll .step-head{margin:3.320cqw 0 1.328cqw}          /* ~40px breathing room after the image above */
-  .page-scroll .step-label{font-size:1.494cqw;font-weight:700;color:var(--red);letter-spacing:-.02em;margin:0 0 1.328cqw}
-  .page-scroll .step-title{font-size:2.656cqw;font-weight:700;letter-spacing:-.03em;line-height:1.38;margin:0}
-  /* vertical-page images: near full-bleed, ~10px side gaps like Figma 549 */
-  .page-scroll figure.figure, .page-scroll .page-hero{
-    margin-left:calc(0.830cqw - 4.979cqw);margin-right:calc(0.830cqw - 4.979cqw);
-  }
+  /* content images near full-bleed (~10px sides) against the 80px content padding */
+  .page-content figure.figure{margin-left:calc(0.830cqw - 6.639cqw);margin-right:calc(0.830cqw - 6.639cqw)}
   /* scroll hint: white mouse (wheel) + cascading chevrons */
   .scroll-hint{
     position:absolute;left:50%;bottom:1.4cqw;transform:translateX(-50%);
@@ -246,8 +243,8 @@
 
   /* intro: no scroll — image fills the remaining height as a wide crop */
   .page[data-page="intro"] .page-scroll{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0.830cqw}
-  .page[data-page="intro"] .page-head{flex:0 0 auto}
-  .page[data-page="intro"] .page-hero{flex:1 1 auto;min-height:0;margin-top:2.324cqw}
+  .page[data-page="intro"] .head-block{flex:0 0 auto}
+  .page[data-page="intro"] .page-hero{flex:1 1 auto;min-height:0;margin:2.656cqw 0.830cqw 0}
   .page[data-page="intro"] .page-hero img{width:100%;height:100%;object-fit:cover}
 
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
@@ -501,7 +498,7 @@
     const items = [
       page.querySelector('.page-media'),
       ...page.querySelectorAll('.page-text > *'),
-      ...page.querySelectorAll('.page-head > *'),
+      ...page.querySelectorAll('.head-block'),
       ...page.querySelectorAll('.page-content > *'),
       page.querySelector('.page-hero'),
     ].filter(Boolean);
@@ -513,12 +510,22 @@
     });
   }
 
+  function resetPage(p){
+    // fresh state on entry: close every toggle, clear inline anim, scroll to top
+    p.querySelectorAll('details.toggle').forEach(d => {
+      d.open = false;
+      const b = d.querySelector(':scope > .toggle-body');
+      if (b) { b.style.height = ''; b.style.opacity = ''; b.style.overflow = ''; b.style.transition = ''; }
+    });
+    p.querySelector('.page-text')?.scrollTo(0, 0);
+    p.querySelector('.page-scroll')?.scrollTo(0, 0);
+  }
   function show(i){
     i = Math.max(0, Math.min(pages.length - 1, i));
     if (i === idx) return;
     idx = i;
+    resetPage(pages[i]);
     pages.forEach((p, n) => p.classList.toggle('active', n === i));
-    pages[i].querySelector('.page-text')?.scrollTo(0, 0);
     updateChrome();
     staggerIn(pages[i]);   // slide-in plays going forward AND backward
   }
