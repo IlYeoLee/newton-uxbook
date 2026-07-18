@@ -835,12 +835,15 @@
   function goFullscreen(){
     const el = document.documentElement;
     if (document.fullscreenElement || !el.requestFullscreen) return;
-    el.requestFullscreen().then(() => {
-      // mobile: keep it portrait — the manifest/exhibition default is landscape
-      if (matchMedia('(max-width:640px)').matches && screen.orientation && screen.orientation.lock)
-        screen.orientation.lock('portrait').catch(() => {});
-    }).catch(() => {});
+    el.requestFullscreen().catch(() => {});
+    // orientation is locked in the fullscreenchange handler below (most reliable timing)
   }
+  // mobile: force portrait whenever we enter fullscreen (exhibition/manifest default is landscape)
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement && matchMedia('(max-width:640px)').matches
+        && screen.orientation && screen.orientation.lock)
+      screen.orientation.lock('portrait').catch(() => {});
+  });
   let lastTap = 0;
   const coverPage = document.querySelector('.page[data-page="cover"]');
   coverPage.addEventListener('pointerup', () => {
