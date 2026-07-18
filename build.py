@@ -109,7 +109,7 @@ def render_quote(node):
 
 def render_toggle(node):
     body = render_children(node.get("c", []))
-    return f'<details class="toggle"><summary>{esc(node["x"])}</summary><div class="toggle-body">{body}</div></details>'
+    return f'<details class="toggle"><summary{en_attr(node["x"])}>{esc(node["x"])}</summary><div class="toggle-body">{body}</div></details>'
 
 def strip_lead_emoji(s):
     return re.sub(r'^[\U0001F000-\U0001FAFF☀-➿←-⇿️\s]+', '', s or "")
