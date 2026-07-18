@@ -460,7 +460,7 @@
     .page-content figure.figure img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
     .page-hero{margin:5vw 5vw 0}
     .page-hero img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
-    .page[data-page="intro"] .page-hero img{border-radius:32px}   /* sits inside typical device corner radius (~30-44px) so it never fights the screen edge */
+    .page[data-page="intro"] .page-hero img{border-radius:28px}   /* sits inside typical device corner radius (~30-44px) so it never fights the screen edge */
 
     /* typography */
     .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
@@ -503,6 +503,21 @@
 
     /* explicit bottom arrows now handle paging → drop side tap-strips so they can't hijack content taps */
     .nav-zone{display:none}
+  }
+
+  /* fullscreen hint snackbar (mobile cover only; toggled by JS) */
+  .fs-hint{display:none;border:none;font-family:inherit}
+  @media (max-width:640px){
+    .fs-hint{
+      position:absolute;left:50%;bottom:22vw;transform:translate(-50%,2vw);
+      display:block;white-space:nowrap;cursor:pointer;
+      background:rgba(22,22,24,.94);color:#fff;
+      font-size:3.3vw;font-weight:600;letter-spacing:-.02em;
+      padding:3vw 5vw;border-radius:999px;z-index:30;
+      box-shadow:0 1.2vw 5vw rgba(0,0,0,.35);
+      opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease;
+    }
+    .fs-hint.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
   }
 </style>
 </head>
@@ -639,6 +654,8 @@
     </div>
   </div>
 
+  <button class="fs-hint" id="fsHint" type="button" data-en="Double-tap for fullscreen">더블탭하면 전체화면으로 볼 수 있어요</button>
+
   <button class="nav-zone nz-left" id="nzLeft" aria-label="이전 페이지"></button>
   <button class="nav-zone nz-right" id="nzRight" aria-label="다음 페이지"></button>
 
@@ -671,6 +688,7 @@
     pills.forEach(p => p.classList.toggle('active', p.dataset.members.split(',').includes(ids[idx])));
     counter.innerHTML = '<span class="cur">' + idx + '</span><span class="tot"> / ' + (pages.length - 1) + '</span>';
     document.getElementById('prevBtn').disabled = idx === 0;   // next never disabled: wraps last → first
+    if (typeof updateHint === 'function') updateHint();
   }
 
   // stagger the page's own elements in from the top ("차라락"), any direction
@@ -827,11 +845,18 @@
     else lastTap = now;
   });
 
-  // Mobile: enter fullscreen on the very first tap anywhere.
-  // (Browsers require a user gesture — a page can't auto-fullscreen on load.)
-  if (matchMedia('(max-width:640px)').matches){
-    const goFS = () => { goFullscreen(); document.removeEventListener('pointerdown', goFS); };
-    document.addEventListener('pointerdown', goFS, { once: false });
+  // Mobile: guide the user with a snackbar hint on the cover; double-tap enters fullscreen.
+  // (A page can't auto-fullscreen on load — browsers require a user gesture.)
+  const fsHint = document.getElementById('fsHint');
+  function updateHint(){
+    if (!fsHint) return;
+    const show = matchMedia('(max-width:640px)').matches && ids[idx] === 'cover' && !document.fullscreenElement;
+    fsHint.classList.toggle('show', show);
+  }
+  if (fsHint){
+    fsHint.addEventListener('click', goFullscreen);
+    document.addEventListener('fullscreenchange', updateHint);
+    setTimeout(() => { if (ids[idx] === 'cover') fsHint.classList.remove('show'); }, 7000);  // auto-dismiss
   }
 
   // ---- lightbox with zoom / pan / pinch (Figma 이미지 확대) ----
