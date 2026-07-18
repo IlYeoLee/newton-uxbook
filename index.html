@@ -421,29 +421,30 @@
     .book{width:100vw;height:100dvh;max-width:none;aspect-ratio:auto;border-radius:0;
       display:flex;flex-direction:column}
 
-    /* nav: compact, tabs scroll horizontally */
-    .book-nav{height:auto;padding:3vw 4vw;flex:none}
-    .brand-logo{height:4.4vw}
-    .pillbar{gap:4vw}
-    .pill{font-size:3.6vw}
+    /* nav: two rows — top app bar (logo + theme + EN), tab row below */
+    .book-nav{height:auto;padding:3.5vw 5vw;flex:none;flex-wrap:wrap;align-items:center;row-gap:3.5vw;border-bottom:1px solid var(--border)}
+    .brand{order:0}
+    .brand-logo{height:5vw}
+    .nav-tools{order:1;margin-left:auto;gap:2.5vw}
+    .pillbar{order:2;flex-basis:100%;justify-content:flex-start;gap:5vw}
+    .pill{font-size:3.8vw}
     .pill.active::after{height:0.6vw}
-    .nav-tools{gap:2vw;margin-left:3vw}
-    .tool-btn{font-size:3.2vw;padding:1.5vw 2.4vw;gap:1.2vw}
-    .tool-ic,.tool-txt{font-size:3.2vw}
-    .tool-ic{width:3.6vw;height:3.6vw}
-    .theme-toggle{padding:1.4vw}
-    .theme-toggle .sun-and-moon{width:5vw;height:5vw}
+    .tool-btn{font-size:3.4vw;padding:1.6vw 3vw;gap:1.4vw}
+    .tool-ic,.tool-txt{font-size:3.4vw}
+    .tool-ic{width:4vw;height:4vw}
+    .theme-toggle{padding:1.6vw}
+    .theme-toggle .sun-and-moon{width:5.4vw;height:5.4vw}
 
     .stage,.book.is-cover .stage{height:auto;flex:1;min-height:0}
     .page{padding:0;flex-direction:column}
 
-    /* two-column pages → image band on top, text scrolls below */
-    .page-media{width:100%;height:38%}
-    .page-media img,.fade-stack{border-radius:0}
-    .page-text{padding:5vw 5vw 8vw}
+    /* two-column pages → rounded image card on top, text scrolls below */
+    .page-media{width:auto;height:32vh;flex:none;margin:4.5vw 5vw 0}
+    .page-media img,.fade-stack{border-radius:5vw}
+    .page-text{padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
 
     /* vertical (intro/scenario) pages */
-    .page-scroll{flex:1;padding:0 0 8vw}
+    .page-scroll{flex:1;padding:0 0 20vw}
     .head-block{padding:6vw 5vw 4vw;gap:3vw}
     .head-block.step{padding-top:6vw}
     .head-row{flex-direction:column;gap:2.5vw}
@@ -451,9 +452,10 @@
     .head-body{font-size:4vw}
     .head-block .kicker,.kicker{font-size:3.6vw;margin-bottom:2vw}
     .page-content{padding:0 5vw}
-    .page-content figure.figure{margin-left:-5vw;margin-right:-5vw}
-    .page-hero{margin:5vw 0 0}
-    .page-hero img{border-radius:2.5vw}
+    .page-content figure.figure{margin-left:0;margin-right:0}   /* inset rounded cards, web-like */
+    .page-content figure.figure img{border-radius:5vw}
+    .page-hero{margin:5vw 5vw 0}
+    .page-hero img{border-radius:5vw}
 
     /* typography */
     .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
@@ -486,16 +488,16 @@
     .cover-slide .wordmark{width:78vw}
     .cover-slide p{font-size:4.4vw}
 
-    /* pager: bigger, vertically centered on the side rails */
-    .pager{top:50%;left:3vw;right:3vw;transform:translateY(-50%);align-items:center}
-    .pg-btn{width:11vw;height:11vw;border-radius:50%}
-    .pg-btn svg{width:4.4vw;height:4.4vw}
-    .pg-right{gap:2.5vw}
-    .pg-right .count{font-size:3.4vw}
+    /* pager: bottom-centered bar — ‹  n/N  › — so arrows never overlap content */
+    .pager{top:auto;bottom:4vw;left:0;right:0;transform:none;justify-content:center;align-items:center;gap:6vw}
+    .pg-btn{width:12vw;height:12vw;border-radius:50%}
+    .pg-btn svg{width:5vw;height:5vw}
+    .pg-right{display:contents}       /* unwrap so it reads ‹ n/N › */
+    #prevBtn{order:0} #counter{order:1} #nextBtn{order:2}
+    .pg-right .count{font-size:3.8vw}
 
-    /* side flip zones sit below the (now shorter) nav */
-    .nav-zone{top:13vw;width:12vw}
-    .book.is-cover .nav-zone{top:0}
+    /* explicit bottom arrows now handle paging → drop side tap-strips so they can't hijack content taps */
+    .nav-zone{display:none}
   }
 </style>
 </head>
