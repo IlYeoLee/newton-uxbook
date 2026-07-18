@@ -438,13 +438,14 @@
     .theme-toggle .sun-and-moon{width:4.6vw;height:4.6vw}
 
     .stage,.book.is-cover .stage{height:auto;flex:1;min-height:0}
-    .page{padding:0;flex-direction:column}
+    /* whole page scrolls as one column so the image scrolls away with the text */
+    .page{padding:0;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-    /* two-column pages → rounded 16:9 image card on top, text scrolls below.
+    /* two-column pages → rounded 16:9 image card on top, text below (both scroll together).
        children absolutely fill so the 16:9 box wins (img height can't dictate it) */
     .page-media{width:auto;height:auto;aspect-ratio:16/9;flex:none;margin:4.5vw 5vw 0;position:relative;border-radius:5vw;overflow:hidden}
     .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
-    .page-text{padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
+    .page-text{flex:none;height:auto;overflow:visible;padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
 
     /* vertical (intro/scenario) pages */
     .page-scroll{flex:1;padding:0 0 20vw}
@@ -459,6 +460,7 @@
     .page-content figure.figure img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
     .page-hero{margin:5vw 5vw 0}
     .page-hero img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
+    .page[data-page="intro"] .page-hero img{border-radius:40px}   /* bolder rounding on the "Now, your turn!" hero */
 
     /* typography */
     .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
@@ -608,6 +610,7 @@
       const b = d.querySelector(':scope > .toggle-body');
       if (b) { b.style.height = ''; b.style.opacity = ''; b.style.overflow = ''; b.style.transition = ''; }
     });
+    p.scrollTo(0, 0);   // mobile: the whole page scrolls
     p.querySelector('.page-text')?.scrollTo(0, 0);
     p.querySelector('.page-scroll')?.scrollTo(0, 0);
   }
@@ -735,6 +738,13 @@
     if (now - lastTap < 330){ goFullscreen(); lastTap = 0; }
     else lastTap = now;
   });
+
+  // Mobile: enter fullscreen on the very first tap anywhere.
+  // (Browsers require a user gesture — a page can't auto-fullscreen on load.)
+  if (matchMedia('(max-width:640px)').matches){
+    const goFS = () => { goFullscreen(); document.removeEventListener('pointerdown', goFS); };
+    document.addEventListener('pointerdown', goFS, { once: false });
+  }
 
   // ---- lightbox with zoom / pan / pinch (Figma 이미지 확대) ----
   const lightbox = document.getElementById('lightbox');
