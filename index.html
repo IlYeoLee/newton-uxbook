@@ -380,7 +380,8 @@
   .lightbox{position:absolute;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100;border-radius:inherit;overflow:hidden}
   .lightbox.open{display:block}
   .lb-stage{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none}
-  .lb-stage img{max-width:86%;max-height:78%;object-fit:contain;border-radius:8px;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;cursor:grab}
+  /* size is set in JS (width-based zoom re-rasterizes from the source → no pixelation) */
+  .lb-stage img{max-width:none;max-height:none;border-radius:8px;will-change:transform;user-select:none;-webkit-user-drag:none;cursor:grab}
   .lb-stage img.grabbing{cursor:grabbing}
   .lb-controls{
     position:absolute;left:50%;bottom:3cqw;transform:translateX(-50%);
@@ -900,22 +901,36 @@
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lbImg');
   const lbZoom = document.getElementById('lbZoom');
-  let scale = 1, tx = 0, ty = 0;
+  let scale = 1, tx = 0, ty = 0, baseW = 0;
   const MIN = 1, MAX = 8, STEP = 0.3;   // +/- steps 30%
+  const lbStage = document.getElementById('lbStage');
 
+  function computeBase(){
+    // fit the image inside 86% × 78% of the stage, preserving aspect
+    const sw = lbStage.clientWidth * 0.86, sh = lbStage.clientHeight * 0.78;
+    const ar = (lbImg.naturalWidth || 1) / (lbImg.naturalHeight || 1);
+    let bw = sw, bh = sw / ar;
+    if (bh > sh) { bw = sh * ar; }
+    baseW = bw;
+  }
   function apply(){
     if (scale <= 1) { tx = 0; ty = 0; }
-    lbImg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+    // width-based zoom: the browser re-rasterizes from the full-res source at each size
+    lbImg.style.width = (baseW * scale) + 'px';
+    lbImg.style.height = 'auto';
+    lbImg.style.transform = `translate(${tx}px,${ty}px)`;   // translate only → no raster stretching
     lbZoom.textContent = Math.round(scale * 100) + '%';
   }
   function setScale(s){ scale = Math.min(MAX, Math.max(MIN, s)); apply(); }
   function openLb(src){
-    lbImg.src = src; scale = 1; tx = 0; ty = 0; apply();
+    scale = 1; tx = 0; ty = 0;
     lightbox.classList.add('open');
-    // natural grow-in (it was a small thumbnail → gently scales up)
+    const ready = () => { computeBase(); apply(); };
+    lbImg.src = src;
+    if (lbImg.complete && lbImg.naturalWidth) ready();
+    else lbImg.onload = ready;
     lightbox.animate([{opacity:0}, {opacity:1}], {duration:200, easing:'ease-out'});
-    lbImg.animate([{transform:'scale(.92)', opacity:.5}, {transform:'scale(1)', opacity:1}],
-                  {duration:340, easing:'cubic-bezier(.2,.7,.3,1)'});
+    lbImg.animate([{opacity:.4}, {opacity:1}], {duration:300, easing:'ease-out'});
   }
   function closeLb(){ lightbox.classList.remove('open'); }
 
