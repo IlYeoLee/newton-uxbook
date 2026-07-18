@@ -411,6 +411,92 @@
   }
   .lb-close:hover{background:#f2f2f2}
   .lb-close svg{width:20px;height:20px}
+
+  /* ---- mobile: book = full portrait viewport; flow (nav + arrows) kept, layout reflowed to one column.
+     The book fills 100vw so 1cqw≈1vw (~2.5x smaller than tablet) → text bumped to vw. ---- */
+  @media (max-width:640px){
+    body{padding:0}
+    .device{padding:0;background:none;border-radius:0;box-shadow:none}
+    .device::after{display:none}
+    .book{width:100vw;height:100dvh;max-width:none;aspect-ratio:auto;border-radius:0;
+      display:flex;flex-direction:column}
+
+    /* nav: compact, tabs scroll horizontally */
+    .book-nav{height:auto;padding:3vw 4vw;flex:none}
+    .brand-logo{height:4.4vw}
+    .pillbar{gap:4vw}
+    .pill{font-size:3.6vw}
+    .pill.active::after{height:0.6vw}
+    .nav-tools{gap:2vw;margin-left:3vw}
+    .tool-btn{font-size:3.2vw;padding:1.5vw 2.4vw;gap:1.2vw}
+    .tool-ic,.tool-txt{font-size:3.2vw}
+    .tool-ic{width:3.6vw;height:3.6vw}
+    .theme-toggle{padding:1.4vw}
+    .theme-toggle .sun-and-moon{width:5vw;height:5vw}
+
+    .stage,.book.is-cover .stage{height:auto;flex:1;min-height:0}
+    .page{padding:0;flex-direction:column}
+
+    /* two-column pages → image band on top, text scrolls below */
+    .page-media{width:100%;height:38%}
+    .page-media img,.fade-stack{border-radius:0}
+    .page-text{padding:5vw 5vw 8vw}
+
+    /* vertical (intro/scenario) pages */
+    .page-scroll{flex:1;padding:0 0 8vw}
+    .head-block{padding:6vw 5vw 4vw;gap:3vw}
+    .head-block.step{padding-top:6vw}
+    .head-row{flex-direction:column;gap:2.5vw}
+    .head-title{width:auto;font-size:6vw;line-height:1.3}
+    .head-body{font-size:4vw}
+    .head-block .kicker,.kicker{font-size:3.6vw;margin-bottom:2vw}
+    .page-content{padding:0 5vw}
+    .page-content figure.figure{margin-left:-5vw;margin-right:-5vw}
+    .page-hero{margin:5vw 0 0}
+    .page-hero img{border-radius:2.5vw}
+
+    /* typography */
+    .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
+    .body,.subhead,.list{font-size:4vw}
+    blockquote.quote{font-size:4.6vw;border-left-width:1vw;padding-left:3.5vw;margin:4vw 0}
+    .step-label{font-size:3.4vw}
+    .step-title{font-size:5vw}
+
+    /* toggles */
+    .group{border-radius:4vw;padding:2vw;margin:3.5vw 0}
+    details.toggle{margin:1.4vw}
+    details.toggle>summary{font-size:3.9vw;gap:2vw;padding:2.6vw 1.6vw;border-radius:2.6vw}
+    details.toggle .toggle-body{padding:1vw 1.6vw 2.4vw 3.5vw}
+    details.toggle details.toggle{border-radius:2.6vw}
+    .toggle-body .body,.toggle-body .subhead,.toggle-body .list{font-size:3.8vw}
+    .toggle-body .finding-headline,.toggle-body .finding-title{font-size:3.6vw}
+    .toggle-body .quote{font-size:3.6vw}
+
+    /* finding card */
+    .finding{gap:2.6vw;border-radius:4vw;padding:3.4vw;margin:2vw 0}
+    .finding-icon{width:6vw;height:3.9vw}
+    .finding-label{font-size:3.2vw}
+    .finding-headline,.finding-title{font-size:3.8vw}
+    .finding-caption{font-size:3.2vw}
+    .cite{font-size:3.2vw}
+    .credit{font-size:3.2vw}
+    table{font-size:3.2vw;min-width:0}
+
+    /* cover */
+    .cover-slide .wordmark{width:78vw}
+    .cover-slide p{font-size:4.4vw}
+
+    /* pager: bigger, vertically centered on the side rails */
+    .pager{top:50%;left:3vw;right:3vw;transform:translateY(-50%);align-items:center}
+    .pg-btn{width:11vw;height:11vw;border-radius:50%}
+    .pg-btn svg{width:4.4vw;height:4.4vw}
+    .pg-right{gap:2.5vw}
+    .pg-right .count{font-size:3.4vw}
+
+    /* side flip zones sit below the (now shorter) nav */
+    .nav-zone{top:13vw;width:12vw}
+    .book.is-cover .nav-zone{top:0}
+  }
 </style>
 </head>
 <body>
