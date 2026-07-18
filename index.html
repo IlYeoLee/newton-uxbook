@@ -457,12 +457,12 @@
 
     /* vertical (intro/scenario) pages */
     .page-scroll{flex:1;padding:0 0 20vw}
-    .head-block{padding:6vw 5vw 4vw;gap:3vw}
+    .head-block{padding:6vw 5vw 4vw;gap:3.5vw}
     .head-block.step{padding-top:6vw}
-    .head-row{flex-direction:column;gap:2.5vw}
+    .head-row{flex-direction:column;gap:3vw}
     .head-title{width:auto;font-size:6vw;line-height:1.3}
     .head-body{font-size:4vw}
-    .head-block .kicker,.kicker{font-size:3.6vw;margin-bottom:2vw}
+    .head-block .kicker,.kicker{font-size:3.6vw;margin-bottom:2.5vw}
     .page-content{padding:0 5vw}
     .page-content figure.figure{margin-left:0;margin-right:0}   /* inset rounded cards, web-like */
     .page-content figure.figure img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
@@ -470,25 +470,29 @@
     .page-hero img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
     .page[data-page="intro"] .page-hero img{border-radius:32px}   /* sits inside typical device corner radius (~30-44px) so it never fights the screen edge */
 
-    /* typography */
-    .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
+    /* typography — a touch more breathing room between text blocks on mobile */
+    .chapter-title,.appendix-title{font-size:6vw;line-height:1.32;margin-bottom:2.2vw}
     .body,.subhead,.list{font-size:4vw}
-    blockquote.quote{font-size:4.6vw;border-left-width:1vw;padding-left:3.5vw;margin:4vw 0}
+    .body{margin-bottom:1.8vw}
+    .subhead{margin:2.5vw 0 0.7vw}
+    .list{margin:1.5vw 0}
+    .list li{margin:0.5vw 0}
+    blockquote.quote{font-size:4.6vw;border-left-width:1vw;padding-left:3.5vw;margin:4.5vw 0}
     .step-label{font-size:3.4vw}
     .step-title{font-size:5vw}
 
-    /* toggles */
-    .group{border-radius:4vw;padding:2vw;margin:3.5vw 0}
-    details.toggle{margin:1.4vw}
-    details.toggle>summary{font-size:3.9vw;gap:2vw;padding:2.6vw 1.6vw;border-radius:2.6vw}
-    details.toggle .toggle-body{padding:1vw 1.6vw 2.4vw 3.5vw}
+    /* toggles — slightly more spacing */
+    .group{border-radius:4vw;padding:2vw;margin:4vw 0}
+    details.toggle{margin:1.9vw}
+    details.toggle>summary{font-size:3.9vw;gap:2vw;padding:3vw 1.6vw;border-radius:2.6vw}
+    details.toggle .toggle-body{padding:1.4vw 1.6vw 3vw 3.5vw}
     details.toggle details.toggle{border-radius:2.6vw}
     .toggle-body .body,.toggle-body .subhead,.toggle-body .list{font-size:3.8vw}
     .toggle-body .finding-headline,.toggle-body .finding-title{font-size:3.6vw}
     .toggle-body .quote{font-size:3.6vw}
 
     /* finding card */
-    .finding{gap:2.6vw;border-radius:4vw;padding:3.4vw;margin:2vw 0}
+    .finding{gap:2.6vw;border-radius:4vw;padding:3.4vw;margin:2.5vw 0}
     .finding-icon{width:6vw;height:3.9vw}
     .finding-label{font-size:3.2vw}
     .finding-headline,.finding-title{font-size:3.8vw}
