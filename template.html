@@ -512,7 +512,7 @@
       position:absolute;left:50%;bottom:22vw;transform:translate(-50%,2vw);
       display:block;white-space:nowrap;cursor:pointer;
       background:rgba(22,22,24,.94);color:#fff;
-      font-size:3.3vw;font-weight:600;letter-spacing:-.02em;
+      font-size:3.3vw;font-weight:400;letter-spacing:-.02em;
       padding:3vw 5vw;border-radius:999px;z-index:30;
       box-shadow:0 1.2vw 5vw rgba(0,0,0,.35);
       opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease;
@@ -746,7 +746,12 @@
   // physical back button is the intended way out, matching the kiosk request.
   function goFullscreen(){
     const el = document.documentElement;
-    if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    if (document.fullscreenElement || !el.requestFullscreen) return;
+    el.requestFullscreen().then(() => {
+      // mobile: keep it portrait — the manifest/exhibition default is landscape
+      if (matchMedia('(max-width:640px)').matches && screen.orientation && screen.orientation.lock)
+        screen.orientation.lock('portrait').catch(() => {});
+    }).catch(() => {});
   }
   let lastTap = 0;
   const coverPage = document.querySelector('.page[data-page="cover"]');
