@@ -528,6 +528,7 @@
     pages.forEach((p, n) => p.classList.toggle('active', n === i));
     updateChrome();
     staggerIn(pages[i]);   // slide-in plays going forward AND backward
+    if (i === 0) glitch();  // entering cover by any path → glitch immediately
   }
 
   // ripple on the round chevron buttons
