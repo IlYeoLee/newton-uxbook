@@ -116,7 +116,7 @@
   .nav-tools{display:flex;align-items:center;gap:0.83cqw;margin-left:1.66cqw;flex:none}
   .tool-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:0.4cqw;
     border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text);
-    padding:0.5cqw 0.83cqw;border-radius:999px;font-family:inherit;font-size:1.079cqw;font-weight:700;line-height:1;
+    height:2.49cqw;box-sizing:border-box;padding:0 0.9cqw;border-radius:999px;font-family:inherit;font-size:1.079cqw;font-weight:700;line-height:1;
     transition:transform .14s cubic-bezier(.34,1.56,.64,1)}
   .tool-btn:active{transform:scale(.92)}
   .tool-ic{width:1.245cqw;height:1.245cqw;background:currentColor;flex:none;
@@ -126,7 +126,7 @@
   .ic-lang{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'/%3E%3C/svg%3E")}
   .tool-txt{font-size:1.079cqw}
   /* sun-and-moon theme icon (open-source component motion) */
-  .theme-toggle{padding:0.5cqw}
+  .theme-toggle{width:2.49cqw;padding:0;justify-content:center;border-radius:0.664cqw}   /* square, same height as EN pill */
   .theme-toggle .sun-and-moon{width:1.6cqw;height:1.6cqw;color:var(--text);stroke-linecap:round;display:block}
   .sun-and-moon>.moon,.sun-and-moon>.sun,.sun-and-moon>.sun-beams{transform-origin:center}
   .sun-and-moon>.sun{transition:transform .5s cubic-bezier(.5,1.25,.75,1.25)}
@@ -421,26 +421,29 @@
     .book{width:100vw;height:100dvh;max-width:none;aspect-ratio:auto;border-radius:0;
       display:flex;flex-direction:column}
 
-    /* nav: two rows — top app bar (logo + theme + EN), tab row below */
-    .book-nav{height:auto;padding:3.5vw 5vw;flex:none;flex-wrap:wrap;align-items:center;row-gap:3.5vw;border-bottom:1px solid var(--border)}
+    /* nav: two rows — top app bar (logo + theme + EN), then tablet-style underline tab row */
+    .book-nav{height:auto;padding:3.5vw 5vw 0;flex:none;flex-wrap:wrap;align-items:center;row-gap:3.5vw}
     .brand{order:0}
     .brand-logo{height:5vw}
     .nav-tools{order:1;margin-left:auto;gap:2.5vw}
-    .pillbar{order:2;flex-basis:100%;justify-content:flex-start;gap:5vw}
-    .pill{font-size:3.8vw}
-    .pill.active::after{height:0.6vw}
-    .tool-btn{font-size:3.4vw;padding:1.6vw 3vw;gap:1.4vw}
+    /* tab row: full-width baseline (like the tablet bar's bottom outline); active red underline sits on it */
+    .pillbar{order:2;flex-basis:100%;justify-content:flex-start;gap:6vw;
+      margin:0 -5vw;padding:0 5vw;border-bottom:1px solid var(--border)}
+    .pill{font-size:3.9vw;padding:0 0 2.5vw}
+    .pill::after{height:0.7vw}
+    .tool-btn{font-size:3.4vw;height:8vw;padding:0 3.2vw;gap:1.4vw}
     .tool-ic,.tool-txt{font-size:3.4vw}
     .tool-ic{width:4vw;height:4vw}
-    .theme-toggle{padding:1.6vw}
-    .theme-toggle .sun-and-moon{width:5.4vw;height:5.4vw}
+    .theme-toggle{width:8vw;padding:0;border-radius:2vw}   /* square, same height as EN pill */
+    .theme-toggle .sun-and-moon{width:4.6vw;height:4.6vw}
 
     .stage,.book.is-cover .stage{height:auto;flex:1;min-height:0}
     .page{padding:0;flex-direction:column}
 
-    /* two-column pages → rounded image card on top, text scrolls below */
-    .page-media{width:auto;height:32vh;flex:none;margin:4.5vw 5vw 0}
-    .page-media img,.fade-stack{border-radius:5vw}
+    /* two-column pages → rounded 16:9 image card on top, text scrolls below.
+       children absolutely fill so the 16:9 box wins (img height can't dictate it) */
+    .page-media{width:auto;height:auto;aspect-ratio:16/9;flex:none;margin:4.5vw 5vw 0;position:relative;border-radius:5vw;overflow:hidden}
+    .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
     .page-text{padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
 
     /* vertical (intro/scenario) pages */
@@ -453,9 +456,9 @@
     .head-block .kicker,.kicker{font-size:3.6vw;margin-bottom:2vw}
     .page-content{padding:0 5vw}
     .page-content figure.figure{margin-left:0;margin-right:0}   /* inset rounded cards, web-like */
-    .page-content figure.figure img{border-radius:5vw}
+    .page-content figure.figure img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
     .page-hero{margin:5vw 5vw 0}
-    .page-hero img{border-radius:5vw}
+    .page-hero img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
 
     /* typography */
     .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
