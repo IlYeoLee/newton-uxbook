@@ -855,16 +855,30 @@
 
   // Mobile: guide the user with a snackbar hint on the cover; double-tap enters fullscreen.
   // (A page can't auto-fullscreen on load — browsers require a user gesture.)
+  // In-app browsers (KakaoTalk, etc.) don't support Fullscreen / orientation lock at all,
+  // so there the hint becomes a "open in external browser" button instead.
   const fsHint = document.getElementById('fsHint');
+  const inApp = /KAKAOTALK|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
   function updateHint(){
     if (!fsHint) return;
-    const show = matchMedia('(max-width:640px)').matches && ids[idx] === 'cover' && !document.fullscreenElement;
+    const show = matchMedia('(max-width:640px)').matches && ids[idx] === 'cover'
+                 && !document.fullscreenElement;
     fsHint.classList.toggle('show', show);
   }
   if (fsHint){
-    fsHint.addEventListener('click', goFullscreen);
+    if (inApp){
+      fsHint.textContent = '전체화면은 브라우저에서 · 탭해서 열기';
+      fsHint.setAttribute('data-en', 'Fullscreen needs a browser — tap to open');
+      fsHint.addEventListener('click', () => {
+        // KakaoTalk: force-open the current URL in the device's default browser
+        if (/KAKAOTALK/i.test(navigator.userAgent))
+          location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+      });
+    } else {
+      fsHint.addEventListener('click', goFullscreen);
+      setTimeout(() => { if (ids[idx] === 'cover') fsHint.classList.remove('show'); }, 7000);  // auto-dismiss
+    }
     document.addEventListener('fullscreenchange', updateHint);
-    setTimeout(() => { if (ids[idx] === 'cover') fsHint.classList.remove('show'); }, 7000);  // auto-dismiss
   }
 
   // ---- lightbox with zoom / pan / pinch (Figma 이미지 확대) ----
