@@ -448,7 +448,8 @@
     /* two-column pages → rounded 16:9 image card on top, text below (both scroll together).
        children absolutely fill so the 16:9 box wins (img height can't dictate it) */
     .page-media{width:auto;height:auto;aspect-ratio:16/9;flex:none;margin:4.5vw 5vw 0;position:relative;border-radius:5vw;overflow:hidden}
-    .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
+    /* radius on the images themselves — parent overflow-clip can miss position:absolute children */
+    .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:5vw}
     .page-media .fade-stack{display:none}   /* sec-02: swap the carousel for the single mobile composite */
     .page-media .m-only{display:block}
     .page-text{flex:none;height:auto;overflow:visible;padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
