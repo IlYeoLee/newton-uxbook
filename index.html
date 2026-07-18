@@ -177,6 +177,7 @@
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
   .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
+  .page-media .m-only{display:none}   /* mobile-only single image (sec-02); shown via the mobile media query */
   /* sec-02: seamless track slide (1→2→3→4→loop), no white gap between frames */
   .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
   .fade-track{display:flex;width:500%;height:100%;animation:slideTrack 14s cubic-bezier(.7,0,.3,1) infinite}
@@ -448,6 +449,8 @@
        children absolutely fill so the 16:9 box wins (img height can't dictate it) */
     .page-media{width:auto;height:auto;aspect-ratio:16/9;flex:none;margin:4.5vw 5vw 0;position:relative;border-radius:5vw;overflow:hidden}
     .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
+    .page-media .fade-stack{display:none}   /* sec-02: swap the carousel for the single mobile composite */
+    .page-media .m-only{display:block}
     .page-text{flex:none;height:auto;overflow:visible;padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
 
     /* vertical (intro/scenario) pages */
@@ -564,7 +567,7 @@
 
     
 <div class="page" data-page="sec-01">
-  <div class="page-media"><img class="media" src="assets/img_04.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_04.png" alt="" loading="lazy" data-msrc="assets/m2.png"></div>
   <div class="page-text">
     <p class="kicker">From Routine to Challenge</p>
     <h2 class="chapter-title" data-en="You should. But it gets old.">운동은 해야 하지만,<br>반복은 금방 지루해</h2>
@@ -572,7 +575,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-02">
-  <div class="page-media"><div class="fade-stack"><div class="fade-track"><img src="assets/fade1.png" alt="" loading="lazy"><img src="assets/fade2.png" alt="" loading="lazy"><img src="assets/fade3.png" alt="" loading="lazy"><img src="assets/fade4.png" alt="" loading="lazy"><img src="assets/fade1.png" alt="" loading="lazy"></div></div></div>
+  <div class="page-media"><div class="fade-stack"><div class="fade-track"><img src="assets/fade1.png" alt="" loading="lazy"><img src="assets/fade2.png" alt="" loading="lazy"><img src="assets/fade3.png" alt="" loading="lazy"><img src="assets/fade4.png" alt="" loading="lazy"><img src="assets/fade1.png" alt="" loading="lazy"></div></div><img class="media m-only" src="assets/m3.png" alt="" loading="lazy"></div>
   <div class="page-text">
     <p class="kicker">Challenge Spark</p>
     <h2 class="chapter-title" data-en="A new move gets you going.">새로운 움직임은<br>다시 몸을 움직이게 한다</h2>
@@ -580,7 +583,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-03">
-  <div class="page-media"><img class="media" src="assets/img_06.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_06.png" alt="" loading="lazy" data-msrc="assets/m4.png"></div>
   <div class="page-text">
     <p class="kicker">For Those Who Turn Trends Into Play</p>
     <h2 class="chapter-title">Trend-to-Play Mover</h2>
@@ -588,7 +591,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-04">
-  <div class="page-media"><img class="media" src="assets/img_10.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_10.png" alt="" loading="lazy" data-msrc="assets/m5.png"></div>
   <div class="page-text">
     <p class="kicker">Solution</p>
     <h2 class="chapter-title" data-en="Pick moves, subscribe.">움직임도 이제 고르고,<br>구독하는 경험</h2>
@@ -596,7 +599,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-05">
-  <div class="page-media"><img class="media" src="assets/img_18.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_18.png" alt="" loading="lazy" data-msrc="assets/m6.png"></div>
   <div class="page-text">
     <p class="kicker">Wearable Robotics</p>
     <h2 class="chapter-title" data-en="Wearables that wake your play.">내 플레이를 깨우는<br>하체 웨어러블 로보틱스</h2>
@@ -604,7 +607,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-06">
-  <div class="page-media"><img class="media" src="assets/img_22.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_22.png" alt="" loading="lazy" data-msrc="assets/m7.png"></div>
   <div class="page-text">
     <p class="kicker">Station</p>
     <h2 class="chapter-title" data-en="Where the challenge begins.">도전이 시작될<br>자리를 만드는 스테이션</h2>
@@ -612,7 +615,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-07">
-  <div class="page-media"><img class="media" src="assets/img_23.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_23.png" alt="" loading="lazy" data-msrc="assets/m8.png"></div>
   <div class="page-text">
     <p class="kicker">Projection Unit</p>
     <h2 class="chapter-title" data-en="Space becomes your field.">공간을 도전의 필드로<br>바꾸는 프로젝션 유닛</h2>
@@ -636,7 +639,7 @@
   <div class="scroll-hint" aria-hidden="true"><span class="scroll-mouse"></span><span class="chevs"><i class="chev"></i><i class="chev"></i><i class="chev"></i></span></div>
 </div>
 <div class="page" data-page="sec-09">
-  <div class="page-media"><img class="media" src="assets/img_37.png" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/img_37.png" alt="" loading="lazy" data-msrc="assets/m11.png"></div>
   <div class="page-text">
     <p class="kicker">Extensibility</p>
     <h2 class="chapter-title">Now, Every Turn is Yours.</h2>
@@ -685,6 +688,10 @@
   const pills = [...document.querySelectorAll('.pill')];
   const counter = document.getElementById('counter');
   let idx = 0;
+
+  // mobile: swap hero cards to their hi-res 16:9 variants (desktop keeps the portrait crop)
+  if (matchMedia('(max-width:640px)').matches)
+    document.querySelectorAll('img[data-msrc]').forEach(im => { im.src = im.dataset.msrc; });
 
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');

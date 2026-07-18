@@ -177,6 +177,7 @@
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
   .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
+  .page-media .m-only{display:none}   /* mobile-only single image (sec-02); shown via the mobile media query */
   /* sec-02: seamless track slide (1→2→3→4→loop), no white gap between frames */
   .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
   .fade-track{display:flex;width:500%;height:100%;animation:slideTrack 14s cubic-bezier(.7,0,.3,1) infinite}
@@ -448,6 +449,8 @@
        children absolutely fill so the 16:9 box wins (img height can't dictate it) */
     .page-media{width:auto;height:auto;aspect-ratio:16/9;flex:none;margin:4.5vw 5vw 0;position:relative;border-radius:5vw;overflow:hidden}
     .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
+    .page-media .fade-stack{display:none}   /* sec-02: swap the carousel for the single mobile composite */
+    .page-media .m-only{display:block}
     .page-text{flex:none;height:auto;overflow:visible;padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
 
     /* vertical (intro/scenario) pages */
@@ -597,6 +600,10 @@
   const pills = [...document.querySelectorAll('.pill')];
   const counter = document.getElementById('counter');
   let idx = 0;
+
+  // mobile: swap hero cards to their hi-res 16:9 variants (desktop keeps the portrait crop)
+  if (matchMedia('(max-width:640px)').matches)
+    document.querySelectorAll('img[data-msrc]').forEach(im => { im.src = im.dataset.msrc; });
 
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');

@@ -30,9 +30,17 @@ def en_attr(ko):
         return ""
     return ' data-en="' + ihtml.escape(e, quote=True).replace("\n", " ") + '"'
 
+# hero images have hi-res 16:9 mobile variants (desktop keeps its portrait crop)
+MOBILE_SRC = {
+    "img_04": "m2", "img_06": "m4", "img_10": "m5", "img_18": "m6",
+    "img_22": "m7", "img_23": "m8", "img_37": "m11",
+}
+
 def img_tag(name, cls="media"):
     ext = EXT.get(name, ".png")
-    return f'<img class="{cls}" src="assets/{name}{ext}" alt="" loading="lazy">'
+    m = MOBILE_SRC.get(name)
+    mattr = f' data-msrc="assets/{m}.png"' if m else ""
+    return f'<img class="{cls}" src="assets/{name}{ext}" alt="" loading="lazy"{mattr}>'
 
 MODE_TABLE = [
     ("Pace On", "낯선 움직임을 무리 없이 시작하게 하는 기본 안전 모드", "착지, 방향 전환, 균형이 흔들리는 순간",
@@ -406,9 +414,11 @@ def render_page(marker, seg):
     if num == "02":
         # sec-02: 4-image cross-fade loop (2s each), 3-1..3-4
         seq = [1, 2, 3, 4, 1]  # last = first, for a seamless loop with no white gap
+        # desktop: carousel; mobile: single hi-res 16:9 composite (m3)
         media_html = ('<div class="fade-stack"><div class="fade-track">'
                       + "".join(f'<img src="assets/fade{i}.png" alt="" loading="lazy">' for i in seq)
-                      + '</div></div>')
+                      + '</div></div>'
+                      + '<img class="media m-only" src="assets/m3.png" alt="" loading="lazy">')
     else:
         media_html = img_tag(hero["src"]) if hero else ""
     content_html = render_children(rest)
