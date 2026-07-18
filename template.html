@@ -107,7 +107,7 @@
   .book-nav{
     height:5.394cqw;display:flex;align-items:center;justify-content:space-between;
     padding:0 3.320cqw;
-    border-bottom:1px solid var(--border);
+    box-shadow:inset 0 -1px 0 var(--border);   /* gray baseline at content-bottom → shares the red underline's bottom edge */
     background:var(--nav-bg);position:relative;z-index:6;
   }
   .brand{display:flex;align-items:center;cursor:pointer;text-decoration:none;flex:none}
@@ -252,10 +252,10 @@
   .chapter-title{font-size:2.656cqw;font-weight:700;line-height:1.38;margin:0 0 1.660cqw;letter-spacing:-.03em}
   .body{font-size:1.494cqw;font-weight:400;color:var(--text-body);line-height:1.55;margin:0 0 1.328cqw}
   .body a{color:var(--red);text-decoration:underline}
-  .subhead{font-size:1.494cqw;font-weight:700;margin:1.992cqw 0 0.498cqw}
+  .subhead{font-size:1.494cqw;font-weight:700;margin:1.992cqw 0 0.332cqw}
   .subhead:first-child{margin-top:0}
   .list{margin:0.996cqw 0;padding-left:1.660cqw;color:var(--text-body);font-size:1.494cqw;font-weight:400}
-  .list li{margin:0.415cqw 0}
+  .list li{margin:0.332cqw 0}
 
   figure.figure{margin:1.660cqw 0;cursor:zoom-in;line-height:0}
   figure.figure img{width:100%;height:auto;display:block;border-radius:1.660cqw}
@@ -266,7 +266,7 @@
     margin:1.992cqw 0;padding:0.332cqw 0 0.332cqw 1.494cqw;
   }
 
-  .group{background:var(--gray-bg);border-radius:2.656cqw;padding:0.830cqw;margin:1.660cqw 0}
+  .group{background:var(--gray-bg);border-radius:2.656cqw;padding:0.664cqw;margin:1.660cqw 0}
   details.toggle{margin:0.664cqw}
   details.toggle>summary{
     list-style:none;cursor:pointer;display:flex;align-items:center;gap:0.830cqw;
@@ -275,11 +275,11 @@
   details.toggle>summary::-webkit-details-marker{display:none}
   details.toggle>summary::before{content:"▸";display:inline-block;font-size:1.25em;line-height:1;transition:transform .15s}
   details.toggle[open]>summary::before{transform:rotate(90deg)}
-  details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.494cqw}
+  details.toggle .toggle-body{padding:0.332cqw 0.664cqw 0.996cqw 1.328cqw}
   details.toggle details.toggle{background:rgba(255,255,255,.55);border-radius:1.162cqw}
   :root[data-theme="dark"] details.toggle details.toggle{background:rgba(255,255,255,.055)}
 
-  .finding{display:flex;gap:0.996cqw;background:var(--card);border-radius:1.660cqw;padding:1.328cqw;margin:0.830cqw 0}
+  .finding{display:flex;gap:0.996cqw;background:var(--card);border-radius:1.660cqw;padding:1.328cqw;margin:0.996cqw 0}
   .finding-icon{flex:none;width:2.324cqw;height:1.494cqw;margin-top:0.25cqw;background:var(--icon);
     -webkit-mask:url(assets/cursor.svg) center/contain no-repeat;
     mask:url(assets/cursor.svg) center/contain no-repeat;}
@@ -430,8 +430,8 @@
     .nav-tools{order:1;margin-left:auto;gap:2.5vw}
     /* tab row: full-width baseline (like the tablet bar's bottom outline); active red underline sits on it */
     .pillbar{order:2;flex-basis:100%;justify-content:flex-start;gap:6vw;
-      margin:0 -5vw;padding:0 5vw;border-bottom:1px solid var(--border)}
-    .pill{font-size:3.9vw;padding:0 0 2.5vw}
+      margin:0 -5vw;padding:0 5vw;box-shadow:inset 0 -1px 0 var(--border)}
+    .pill{font-size:3.9vw;padding:0 0 12px}   /* more room between tab text and the underline */
     .pill::after{height:0.7vw}
     .tool-btn{font-size:3.4vw;height:8vw;padding:0 3.2vw;gap:1.4vw}
     .tool-ic,.tool-txt{font-size:3.4vw}
