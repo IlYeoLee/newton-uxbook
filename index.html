@@ -439,7 +439,10 @@
 
     .stage,.book.is-cover .stage{height:auto;flex:1;min-height:0}
     /* whole page scrolls as one column so the image scrolls away with the text */
-    .page{padding:0;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .page{padding:0;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .page::-webkit-scrollbar{display:none}
+    /* long URLs / citations must wrap, never push the layout wider than the screen */
+    .cite,.cite a,.body,.body a,.toggle-body{overflow-wrap:anywhere;word-break:break-word}
 
     /* two-column pages → rounded 16:9 image card on top, text below (both scroll together).
        children absolutely fill so the 16:9 box wins (img height can't dictate it) */
@@ -460,7 +463,7 @@
     .page-content figure.figure img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
     .page-hero{margin:5vw 5vw 0}
     .page-hero img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
-    .page[data-page="intro"] .page-hero img{border-radius:28px}   /* sits inside typical device corner radius (~30-44px) so it never fights the screen edge */
+    .page[data-page="intro"] .page-hero img{border-radius:32px}   /* sits inside typical device corner radius (~30-44px) so it never fights the screen edge */
 
     /* typography */
     .chapter-title,.appendix-title{font-size:6vw;line-height:1.32}
@@ -829,10 +832,15 @@
     if (e.key === 'ArrowLeft') show(idx - 1);
   });
 
+  // In-app browsers (KakaoTalk, Instagram, Line…) can't do real fullscreen; their webview
+  // instead jerks into a landscape "fullscreen-ish" mode. Detect them and skip fullscreen there.
+  const inApp = /KAKAOTALK|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+
   // Double-tap on the COVER (page 1) only → go fullscreen.
   // Browsers won't let us block exit (Esc/back is always allowed); on Android the
   // physical back button is the intended way out, matching the kiosk request.
   function goFullscreen(){
+    if (inApp) return;   // no-op in in-app browsers → prevents the KakaoTalk landscape flip
     const el = document.documentElement;
     if (document.fullscreenElement || !el.requestFullscreen) return;
     el.requestFullscreen().catch(() => {});
@@ -858,7 +866,6 @@
   // In-app browsers (KakaoTalk, etc.) don't support Fullscreen / orientation lock at all,
   // so there the hint becomes a "open in external browser" button instead.
   const fsHint = document.getElementById('fsHint');
-  const inApp = /KAKAOTALK|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
   function updateHint(){
     if (!fsHint) return;
     const show = matchMedia('(max-width:640px)').matches && ids[idx] === 'cover'
