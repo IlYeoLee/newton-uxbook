@@ -107,7 +107,7 @@
       box-shadow:0 3vh 9vh rgba(0,0,0,.6), inset 0 0 0 .2vh #2d2d31;
     }
     .book{
-      width:min(100vw - 20vh, (100vh - 20vh) * 1.6003);   /* smaller tablet, more black margin around it */
+      width:min(100vw - 26vh, (100vh - 26vh) * 1.6003);   /* smaller tablet, more black margin around it */
       border-radius:1vh;
     }
     .device::after{
@@ -1181,19 +1181,19 @@
     if (e.pointerType === 'touch') return;
     mx = e.clientX; my = e.clientY;
   });
-  // touch: same symbol follows the finger while pressed (rub-drag), driven by the same follow loop
-  let touchOn = false;
-  addEventListener('pointerdown', e => {
-    if (e.pointerType !== 'touch') return;
-    touchOn = true; mx = cx = e.clientX; my = cy = e.clientY;   // snap to finger
+  // touch: same symbol follows the finger while it drags — use touch events (touchmove keeps
+  // firing even during a light/scroll swipe, whereas pointermove cancels → needed a firm rub).
+  addEventListener('touchstart', e => {
+    const t = e.touches[0]; if (!t) return;
+    mx = cx = t.clientX; my = cy = t.clientY;   // snap to finger
     cursor.classList.add('touch-on');
   }, { passive: true });
-  addEventListener('pointermove', e => {
-    if (e.pointerType === 'touch' && touchOn) { mx = e.clientX; my = e.clientY; }
+  addEventListener('touchmove', e => {
+    const t = e.touches[0]; if (t) { mx = t.clientX; my = t.clientY; cursor.classList.add('touch-on'); }
   }, { passive: true });
-  const cursorTouchEnd = e => { if (e.pointerType === 'touch') { touchOn = false; cursor.classList.remove('touch-on'); } };
-  addEventListener('pointerup', cursorTouchEnd, { passive: true });
-  addEventListener('pointercancel', cursorTouchEnd, { passive: true });
+  const cursorTouchEnd = () => cursor.classList.remove('touch-on');
+  addEventListener('touchend', cursorTouchEnd, { passive: true });
+  addEventListener('touchcancel', cursorTouchEnd, { passive: true });
   // hovering an interactive element swaps to the click-cursor icon
   addEventListener('pointerover', e => {
     if (e.pointerType === 'touch') return;
@@ -1373,15 +1373,14 @@ void main(){
       foot++; lx = cxp; ly = cyp;
     }
     const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
-    let tDown = false;
-    addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { tDown = true; lx = e.clientX; ly = e.clientY; } }, {passive:true});
-    const stepEnd = e => { if (e.pointerType === 'touch') { tDown = false; lx = ly = null; } };
-    addEventListener('pointerup', stepEnd, {passive:true});
-    addEventListener('pointercancel', stepEnd, {passive:true});
-    addEventListener('pointermove', e => {
-      if (e.pointerType === 'touch') { if (tDown) dropStep(e.clientX, e.clientY); }
-      else if (fine) dropStep(e.clientX, e.clientY);
-    }, {passive:true});
+    // desktop mouse move
+    addEventListener('pointermove', e => { if (e.pointerType !== 'touch' && fine) dropStep(e.clientX, e.clientY); }, {passive:true});
+    // touch: touchmove fires throughout any drag (even light/scroll swipes) → light drag works
+    addEventListener('touchstart', e => { const t = e.touches[0]; if (t) { lx = t.clientX; ly = t.clientY; } }, {passive:true});
+    addEventListener('touchmove', e => { const t = e.touches[0]; if (t) dropStep(t.clientX, t.clientY); }, {passive:true});
+    const stepEnd = () => { lx = ly = null; };
+    addEventListener('touchend', stepEnd, {passive:true});
+    addEventListener('touchcancel', stepEnd, {passive:true});
   })();
 
   // init: first page visible without a page-turn
