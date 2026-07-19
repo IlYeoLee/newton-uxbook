@@ -810,23 +810,14 @@
     const prev = idx;
     idx = i;
     resetPage(pages[i]);
-    // ONLY cover transitions toggle is-cover (hides nav, resizes stage), which shifts the stage
-    // and reflows the still-visible fading page — its title/margins jump ~140px for 0.3s. Freeze
-    // the outgoing page as position:fixed (book's container-type makes that book-relative, and
-    // the book doesn't move) so it's detached from that reflow. Restricted to cover transitions
-    // because on normal content↔content moves there's no reflow, and position:fixed there would
-    // instead break the stage's overflow clip → clipped images spill outside the frame.
-    const coverTransition = (prev === 0 || i === 0);
-    const out = pages[prev];
-    if (coverTransition && out) {
-      clearTimeout(out._unfreeze);
-      const br = book.getBoundingClientRect(), pr = out.getBoundingClientRect();
-      out.style.position = 'fixed'; out.style.inset = 'auto';
-      out.style.top = (pr.top - br.top) + 'px'; out.style.left = (pr.left - br.left) + 'px';
-      out.style.width = pr.width + 'px'; out.style.height = pr.height + 'px';
-      out._unfreeze = setTimeout(() => {   // well after the .3s opacity fade → unpin while invisible
-        out.style.position = out.style.inset = out.style.top = out.style.left = out.style.width = out.style.height = '';
-      }, 460);
+    // Cover transitions toggle is-cover (hides nav, resizes stage), reflowing the still-visible
+    // fading page — its title jumps ~140px for the 0.3s fade. Swap cover transitions INSTANTLY
+    // (transition:none, no position tricks → nothing escapes the overflow clip, so no spill) so
+    // the opaque cover covers everything at once and no reflow is ever seen through the fade.
+    if (prev === 0 || i === 0) {
+      const a = pages[prev], b = pages[i];
+      a.style.transition = b.style.transition = 'none';
+      requestAnimationFrame(() => requestAnimationFrame(() => { a.style.transition = b.style.transition = ''; }));
     }
     pages.forEach((p, n) => p.classList.toggle('active', n === i));
     updateChrome();
@@ -1203,8 +1194,9 @@
   // left at 1.0 so the chips are reproduced unaltered.
   (function coverGrainient(){
     const cv = document.querySelector('.cover-canvas');
-    const gl = cv && cv.getContext('webgl2', {antialias:false, alpha:false});
-    if (!gl) return;                                  // CSS --cover-grad fallback shows
+    if (!cv) return;
+    const bookEl = document.getElementById('book');
+    let gl, prog, U, lost = false;
     const VS = `#version 300 es
 in vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
     const FS = `#version 300 es
@@ -1242,55 +1234,73 @@ void main(){
   float pos=clamp(0.5 - tuv.y + uColorBalance + ax*0.18, 0.0, 1.0);
   fragColor=vec4(grad4(pos),1.0);
 }`;
-    const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
-      if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.warn(gl.getShaderInfoLog(o));return o;};
-    const prog=gl.createProgram();
-    gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
-    gl.linkProgram(prog);gl.useProgram(prog);
-    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
-    const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    const U=n=>gl.getUniformLocation(prog,n);
-    // static params from the reference URL; contrast/gamma/sat kept at 1 (chips unaltered)
-    gl.uniform1f(U('uTimeSpeed'),2.0);      // a touch stronger
-    gl.uniform1f(U('uColorBalance'),-0.11);
-    gl.uniform1f(U('uWarpStrength'),1.0);   // warp ON = whole-surface undulation ("일렁임")
-    gl.uniform1f(U('uWarpFrequency'),3.2);  // finer, more detailed waves ("미세하게")
-    gl.uniform1f(U('uWarpSpeed'),1.2);
-    gl.uniform1f(U('uWarpAmplitude'),16.0); // stronger offset ("강하게")
-    gl.uniform1f(U('uBlendAngle'),0.0);
-    gl.uniform1f(U('uRotationAmount'),38.0); // modest sway (big rotation = the slosh she disliked)
-    gl.uniform1f(U('uNoiseScale'),1.2);
-    gl.uniform1f(U('uZoom'),0.9);
-    const cs=getComputedStyle(document.documentElement);
-    const hex=v=>{const h=cs.getPropertyValue(v).trim().replace('#','');
+    const cssVars=getComputedStyle(document.documentElement);
+    const hex=v=>{const h=cssVars.getPropertyValue(v).trim().replace('#','');
       return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];};
     function applyColors(){
+      if(!gl||lost) return;
       const dark=document.documentElement.getAttribute('data-theme')==='dark';
       const vars=dark?['--void','--oxblood','--crimson','--red']:['--red','--coral','--sand','--prism'];
       gl.uniform3fv(U('uC0'),hex(vars[0]));gl.uniform3fv(U('uC1'),hex(vars[1]));
       gl.uniform3fv(U('uC2'),hex(vars[2]));gl.uniform3fv(U('uC3'),hex(vars[3]));
-      // stops spread across the whole face so the gradient (and its motion) shows everywhere
       gl.uniform4f(U('uStops'),...(dark?[0.12,0.45,0.75,1.0]:[0.12,0.45,0.75,1.0]));
     }
     function resize(){
+      if(!gl||lost) return;
       const dpr=Math.min(devicePixelRatio||1,2);
       const w=Math.max(1,cv.clientWidth*dpr|0),h=Math.max(1,cv.clientHeight*dpr|0);
       if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);
         gl.uniform2f(U('iResolution'),w,h);}
     }
-    applyColors();resize();
+    // (Re)build every GL object — also called on context restore so the gradient never
+    // permanently disappears if the tablet GPU drops the context.
+    function initGL(){
+      gl=cv.getContext('webgl2',{antialias:false,alpha:false});
+      if(!gl) return false;                            // CSS --cover-grad fallback shows
+      const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
+        if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.warn(gl.getShaderInfoLog(o));return o;};
+      prog=gl.createProgram();
+      gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
+      gl.linkProgram(prog);gl.useProgram(prog);
+      const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+      const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+      U=n=>gl.getUniformLocation(prog,n);
+      gl.uniform1f(U('uTimeSpeed'),2.0);
+      gl.uniform1f(U('uColorBalance'),-0.11);
+      gl.uniform1f(U('uWarpStrength'),1.0);
+      gl.uniform1f(U('uWarpFrequency'),3.2);
+      gl.uniform1f(U('uWarpSpeed'),1.2);
+      gl.uniform1f(U('uWarpAmplitude'),16.0);
+      gl.uniform1f(U('uBlendAngle'),0.0);
+      gl.uniform1f(U('uRotationAmount'),38.0);
+      gl.uniform1f(U('uNoiseScale'),1.2);
+      gl.uniform1f(U('uZoom'),0.9);
+      cv.width=0;                                      // force resize() to re-apply viewport/res
+      applyColors(); resize();
+      return true;
+    }
+    // context-loss recovery: keep the default from making the loss permanent, rebuild on restore
+    cv.addEventListener('webglcontextlost',e=>{ e.preventDefault(); lost=true; }, false);
+    cv.addEventListener('webglcontextrestored',()=>{ lost=false; initGL(); }, false);
+    if(!initGL()) return;
     new MutationObserver(applyColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     addEventListener('resize',resize);
     const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const t0=performance.now();
-    function frame(now){resize();
-      gl.uniform1f(U('iTime'),(now-t0)*0.001);
-      gl.drawArrays(gl.TRIANGLES,0,3);
+    // Only DRAW while the cover is actually on screen. On content pages the expensive WebGL
+    // draw is skipped (huge GPU savings → no jank, far less chance of a context loss); the
+    // rAF tick itself stays alive but is nearly free.
+    function frame(now){
+      if(!lost && gl && bookEl.classList.contains('is-cover')){
+        resize();
+        gl.uniform1f(U('iTime'),(now-t0)*0.001);
+        gl.drawArrays(gl.TRIANGLES,0,3);
+      }
       if(!reduce)requestAnimationFrame(frame);
     }
-    if(reduce){gl.uniform1f(U('iTime'),8.0);frame(t0);}else requestAnimationFrame(frame);
+    if(reduce){ if(gl){gl.uniform1f(U('iTime'),8.0);} frame(t0); } else requestAnimationFrame(frame);
   })();
 
   // ---- click / touch spark + mouse footprint trail (reactbits ClickSpark + TextCursor) ----
