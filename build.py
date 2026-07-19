@@ -332,11 +332,14 @@ def split_h4(text):
         return lines[0].strip(), "\n".join(lines[1:]).strip()
     return "", text
 
-def head_block(kicker, title, body, step=False):
-    """Figma 12:846 header: kicker (red) on top, then title-left(264px) / body-right(flex)."""
+def head_block(kicker, title, body, step=False, sub=""):
+    """Figma 12:846 header: kicker (red) on top, then title-left(264px) / body-right(flex).
+    `sub` (e.g. a credit line) sits under the title in the left column."""
     k = f'<p class="kicker"{en_attr(kicker)}>{esc(kicker)}</p>' if kicker else ""
     tt = "<br>".join(esc(l.strip()) for l in title.split("\n"))
     t = f'<h2 class="head-title"{en_attr(title)}>{tt}</h2>'
+    if sub:
+        t = f'<div class="head-titlecol">{t}<p class="head-credit">{esc(sub)}</p></div>'
     b = ""
     if body:
         bb = "<br>".join(linkify(esc(l)) for l in body.split("\n"))
@@ -371,11 +374,11 @@ def render_vertical_content(items):
         i += 1
     return "".join(out)
 
-def render_vertical(page_id, kicker, title_text, body_items, hero, scroll_hint=False):
+def render_vertical(page_id, kicker, title_text, body_items, hero, scroll_hint=False, head_sub=""):
     """549/827: header component + content (each step reuses the same header), then big image."""
     first_p, rest = first_paragraph(body_items)
     first_body = first_p.get("x", "") if first_p else ""
-    head = head_block(kicker, title_text, first_body)
+    head = head_block(kicker, title_text, first_body, sub=head_sub)
     content_html = render_vertical_content(rest)
     hero_html = f'<figure class="page-hero">{img_tag(hero["src"])}</figure>' if hero else ""
     data = f' data-page="{page_id}"' if page_id else ""
@@ -455,9 +458,11 @@ sections_html = "".join(pages_out)
 # intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
 intro_hero, intro_rest = extract_hero(hero_items)
 intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
-intro_body.append({"t": "P", "x": "송시헌, 이일여, 김소진, 박주원, 전다빈", "credit": True})
+# credit sits under the NEWTON title (left column) instead of its own row below the header,
+# so the header stays compact and the hero image grows upward (face visible)
 intro_page_html = render_vertical("intro", "Now, Your Turn!",
-                                  "NEWTON", intro_body, intro_hero)
+                                  "NEWTON", intro_body, intro_hero,
+                                  head_sub="송시헌, 이일여, 김소진, 박주원, 전다빈")
 
 # label, first page, member pages
 NAV_GROUPS = [

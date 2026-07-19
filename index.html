@@ -257,6 +257,10 @@
   /* English titles render in Supreme (wider than the KO face) → tighten a touch, EN only */
   :root[data-lang="en"] .head-title,:root[data-lang="en"] .chapter-title,:root[data-lang="en"] .step-title{letter-spacing:-.045em}
   .head-body{flex:1;min-width:0;font-size:1.494cqw;color:var(--text-body);line-height:1.5;margin:0}
+  /* intro: credit under the title in the left column (keeps header compact → hero grows) */
+  .head-titlecol{width:21.90cqw;flex:none;display:flex;flex-direction:column}
+  .head-titlecol .head-title{width:auto}
+  .head-credit{font-size:1.079cqw;color:var(--muted);letter-spacing:.02em;margin:1.328cqw 0 0}
   .page-content{width:100%;padding:0 6.639cqw}
   .page-hero{margin:2.656cqw 0.830cqw 0;line-height:0}
   .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
@@ -514,6 +518,8 @@
     .head-block.step{padding-top:6vw}
     .head-row{flex-direction:column;gap:8px}
     .head-title{width:auto;font-size:6vw;line-height:1.3}
+    .head-titlecol{width:auto}
+    .head-credit{font-size:3.2vw;margin-top:2vw}
     .head-body{font-size:4vw}
     .head-block .kicker,.kicker{font-size:3.6vw;margin-bottom:12px}
     .page-content{padding:0 5vw}
@@ -630,8 +636,8 @@
     
 <div class="page" data-page="intro">
   <div class="page-scroll">
-    <div class="head-block"><p class="kicker">Now, Your Turn!</p><div class="head-row"><h2 class="head-title">NEWTON</h2><p class="head-body" data-en="NEWTON turns dream sports into challenges right where you are. Follow the cues on floor and wall and try moves you only watched; wearables tune your sense so new moves become your play. Now, your turn!">NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!</p></div></div>
-    <div class="page-content"><p class="credit">송시헌, 이일여, 김소진, 박주원, 전다빈</p></div>
+    <div class="head-block"><p class="kicker">Now, Your Turn!</p><div class="head-row"><div class="head-titlecol"><h2 class="head-title">NEWTON</h2><p class="head-credit">송시헌, 이일여, 김소진, 박주원, 전다빈</p></div><p class="head-body" data-en="NEWTON turns dream sports into challenges right where you are. Follow the cues on floor and wall and try moves you only watched; wearables tune your sense so new moves become your play. Now, your turn!">NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!</p></div></div>
+    <div class="page-content"></div>
     <figure class="page-hero"><img class="media" src="assets/img_03.png" alt="" loading="lazy"></figure>
   </div>
   
