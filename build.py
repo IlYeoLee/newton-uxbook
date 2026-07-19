@@ -24,7 +24,7 @@ def en_attr(ko):
     ko = (ko or "").strip()
     if not ko or not _has_kr(ko):
         return ""
-    e = TRANS.get(ko, "")
+    e = TRANS.get(ko) or TRANS.get(ko.replace("\n", " "), "")  # titles may carry a \n line-break; key is the space form
     if not e:
         _missing.add(ko)
         return ""

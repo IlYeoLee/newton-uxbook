@@ -9,13 +9,23 @@
 <link rel="manifest" href="manifest.json">
 <title>NEWTON — UX Book</title>
 <style>
+  /* Type system: Latin=Supreme, Korean=Freesentation (Latin font lacks Hangul,
+     so the browser falls through to Freesentation for KO glyphs automatically). */
   @font-face{
-    font-family:'Pretendard';font-weight:400;font-style:normal;font-display:swap;
-    src:url('fonts/Pretendard-Regular.woff2') format('woff2');
+    font-family:'Supreme';font-weight:400;font-style:normal;font-display:swap;
+    src:url('fonts/Supreme-Regular.woff2') format('woff2');
   }
   @font-face{
-    font-family:'Pretendard';font-weight:700;font-style:normal;font-display:swap;
-    src:url('fonts/Pretendard-Bold.woff2') format('woff2');
+    font-family:'Supreme';font-weight:700;font-style:normal;font-display:swap;
+    src:url('fonts/Supreme-Bold.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Freesentation';font-weight:400;font-style:normal;font-display:swap;
+    src:url('fonts/Freesentation-Regular.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Freesentation';font-weight:700;font-style:normal;font-display:swap;
+    src:url('fonts/Freesentation-Bold.woff2') format('woff2');
   }
   @property --s1{syntax:'<percentage>';inherits:false;initial-value:58%}
   @property --s2{syntax:'<percentage>';inherits:false;initial-value:83%}
@@ -63,8 +73,9 @@
   }
   body{
     margin:0;
-    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-family:'Supreme','Freesentation',-apple-system,BlinkMacSystemFont,sans-serif;
     font-weight:400;
+    letter-spacing:-0.015em;   /* web-standard body tracking: tightens the loose default without cramping */
     background:#000;color:var(--text);
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
@@ -172,6 +183,32 @@
   /* per-element slide-in ("차라락") — soft ease-out, a touch slower */
   @keyframes slideInItem{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
   .stagger{opacity:0;animation:slideInItem .62s cubic-bezier(.22,.61,.36,1) both}
+
+  /* language toggle → ShinyText is driven from JS via the Web Animations API
+     (NOT the CSS `animation` property) so it can't disturb the page's .stagger
+     entrance animation — that swap is what made text re-rise before. */
+
+  /* click / touch spark (reactbits ClickSpark, FA3030) */
+  .spark-burst{position:fixed;z-index:10000;pointer-events:none;left:0;top:0;transform:scale(.9)}
+  .spark-burst i{position:absolute;left:0;top:0;width:12px;height:2px;margin-top:-1px;border-radius:2px;
+    background:#FA3030;transform-origin:0 50%;animation:sparkFly .5s cubic-bezier(.25,1,.5,1) forwards}
+  @keyframes sparkFly{
+    0%{transform:rotate(var(--a)) translateX(4px) scaleX(1);opacity:1}
+    100%{transform:rotate(var(--a)) translateX(50px) scaleX(.35);opacity:0}
+  }
+
+  /* mouse footprint trail (reactbits TextCursor) — shoe silhouettes, FA3030, exclusion blend.
+     Blend + mask live on the same painted element (like .cursor) so exclusion hits the page. */
+  .footstep{position:fixed;z-index:9998;pointer-events:none;width:34px;height:34px;margin:-17px 0 0 -17px;
+    background:#FA3030;mix-blend-mode:exclusion;
+    -webkit-mask:url(assets/shoe-left.svg) center/contain no-repeat;mask:url(assets/shoe-left.svg) center/contain no-repeat;
+    transform:rotate(var(--r));animation:stepFade 1s linear forwards}
+  .footstep.right{-webkit-mask-image:url(assets/shoe-right.svg);mask-image:url(assets/shoe-right.svg)}
+  /* bright on drop → linear fade to 0, so a 5-step trail visibly ramps from solid to faint */
+  @keyframes stepFade{
+    0%{opacity:.9;transform:rotate(var(--r)) scale(1)}
+    100%{opacity:0;transform:rotate(var(--r)) scale(.9)}
+  }
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
@@ -316,16 +353,13 @@
   .cover-slide{
     position:relative;width:100%;height:100%;overflow:hidden;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    /* Figma colors; #D1FEFF pinned at 100% so the bright bottom is never clipped.
-       Middle stops sweep for a clear flowing motion. */
+    /* Figma colors; the animated grainient canvas (below) draws the moving gradient.
+       --cover-grad stays as a static fallback shown when WebGL is unavailable. */
     background:var(--cover-grad);
-    animation:gradFlow 8s ease-in-out infinite alternate;
   }
-  @keyframes gradFlow{
-    from{--s1:48%;--s2:72%;--s3:88%}
-    to{--s1:65%;--s2:91%;--s3:97%}
-  }
-  @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
+  /* grainient motion (reactbits): noise-driven gradient rotation, warp & grain off */
+  .cover-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+  .cover-slide .wordmark,.cover-slide p{position:relative;z-index:1}
   .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
     background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
   /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
@@ -556,6 +590,7 @@
   <div class="stage">
     <div class="page active" data-page="cover">
       <div class="cover-slide">
+        <canvas class="cover-canvas" aria-hidden="true"></canvas>
         <span class="wordmark" role="img" aria-label="NEWTON"></span>
         <p>UX Book</p>
       </div>
@@ -705,7 +740,35 @@
     document.getElementById('langLabel').textContent = lang === 'ko' ? 'EN' : 'KO';
     document.documentElement.setAttribute('data-lang', lang);
     setLang(lang);
+    retypePage(document.querySelector('.page.active'));
   });
+  // On language switch: a very faint ShinyText sweep across the visible page (reactbits
+  // ShinyText). Driven by the Web Animations API on background-position — no CSS `animation`
+  // property is touched, so the page's .stagger entrance never replays (no rise), and no DOM
+  // is rewritten (text can't break). A thin white glint keeps it subtle.
+  function retypePage(page){
+    if (!page) return;
+    page.querySelectorAll('h1,h2,h3,h4,h5,p,li,summary,.pill,.kicker,.tab').forEach(el => {
+      if (!el.textContent.trim() || el.offsetParent === null) return;
+      // drop the old sweep's handlers BEFORE cancelling — cancel() fires oncancel async,
+      // which would otherwise wipe the fresh styles we set below (that was the "no replay" bug).
+      if (el._shine) { el._shine.onfinish = el._shine.oncancel = null; el._shine.cancel(); }
+      const clear = () => {
+        el.style.backgroundImage = el.style.backgroundSize = '';
+        el.style.webkitBackgroundClip = el.style.backgroundClip = '';
+        el.style.webkitTextFillColor = '';
+        el._shine = null;
+      };
+      el.style.backgroundImage = 'linear-gradient(110deg,currentColor 44%,#fff 50%,currentColor 56%)';
+      el.style.backgroundSize = '200% 100%';
+      el.style.webkitBackgroundClip = 'text'; el.style.backgroundClip = 'text';
+      el.style.webkitTextFillColor = 'transparent';
+      // start with the glint already at the right edge → visible the instant you press; quick sweep out left
+      const a = el.animate([{ backgroundPosition: '0% 0' }, { backgroundPosition: '160% 0' }],
+                           { duration: 650, easing: 'linear' });
+      el._shine = a; a.onfinish = a.oncancel = clear;
+    });
+  }
 
   // logo glitch: fires automatically once every 5s
   const wm = document.querySelector('.cover-slide .wordmark');
@@ -918,6 +981,148 @@
       if (hint) hint.classList.toggle('hide', sc.scrollTop > 20);
     });
   });
+
+  // ---- cover grainient (reactbits motion port): noise-driven gradient rotation ----
+  // colors 100% from --cover-grad chips per theme; warp=0, grain=0; params from the
+  // reference URL (timeSpeed 2.8, colorBalance -0.11, rotation 170). contrast/gamma/sat
+  // left at 1.0 so the chips are reproduced unaltered.
+  (function coverGrainient(){
+    const cv = document.querySelector('.cover-canvas');
+    const gl = cv && cv.getContext('webgl2', {antialias:false, alpha:false});
+    if (!gl) return;                                  // CSS --cover-grad fallback shows
+    const VS = `#version 300 es
+in vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
+    const FS = `#version 300 es
+precision highp float;
+uniform vec2 iResolution; uniform float iTime;
+uniform float uTimeSpeed,uColorBalance,uWarpStrength,uWarpFrequency,uWarpSpeed,uWarpAmplitude,uBlendAngle,uRotationAmount,uNoiseScale,uZoom;
+uniform vec3 uC0,uC1,uC2,uC3; uniform vec4 uStops;
+out vec4 fragColor;
+#define S(a,b,t) smoothstep(a,b,t)
+mat2 Rot(float a){float s=sin(a),c=cos(a);return mat2(c,-s,s,c);}
+vec2 hash(vec2 p){p=vec2(dot(p,vec2(2127.1,81.17)),dot(p,vec2(1269.5,283.37)));return fract(sin(p)*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);float n=mix(mix(dot(-1.0+2.0*hash(i+vec2(0.,0.)),f-vec2(0.,0.)),dot(-1.0+2.0*hash(i+vec2(1.,0.)),f-vec2(1.,0.)),u.x),mix(dot(-1.0+2.0*hash(i+vec2(0.,1.)),f-vec2(0.,1.)),dot(-1.0+2.0*hash(i+vec2(1.,1.)),f-vec2(1.,1.)),u.x),u.y);return 0.5+0.5*n;}
+vec3 grad4(float t){
+  if(t<=uStops.x) return uC0;
+  if(t<=uStops.y) return mix(uC0,uC1,(t-uStops.x)/(uStops.y-uStops.x));
+  if(t<=uStops.z) return mix(uC1,uC2,(t-uStops.y)/(uStops.z-uStops.y));
+  if(t<=uStops.w) return mix(uC2,uC3,(t-uStops.z)/(uStops.w-uStops.z));
+  return uC3;
+}
+void main(){
+  float t=iTime*uTimeSpeed;
+  vec2 uv=gl_FragCoord.xy/iResolution.xy;
+  float ratio=iResolution.x/iResolution.y;
+  vec2 tuv=uv-0.5; tuv/=max(uZoom,0.001);
+  float degree=noise(vec2(t*0.1,tuv.x*tuv.y)*uNoiseScale);
+  tuv.y*=1.0/ratio;
+  tuv*=Rot(radians((degree-0.5)*uRotationAmount+0.0));   // base 0° = red top, bright bottom
+  tuv.y*=ratio;
+  float ws=max(uWarpStrength,0.001);
+  float amplitude=uWarpAmplitude/ws;   // warp≈0 when uWarpStrength=0
+  float warpTime=t*uWarpSpeed;
+  tuv.x+=sin(tuv.y*uWarpFrequency+warpTime)/amplitude;
+  tuv.y+=sin(tuv.x*(uWarpFrequency*1.5)+warpTime)/(amplitude*0.5);
+  float ax=(tuv*Rot(radians(uBlendAngle))).x;
+  float pos=clamp(0.5 - tuv.y + uColorBalance + ax*0.18, 0.0, 1.0);
+  fragColor=vec4(grad4(pos),1.0);
+}`;
+    const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
+      if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.warn(gl.getShaderInfoLog(o));return o;};
+    const prog=gl.createProgram();
+    gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
+    gl.linkProgram(prog);gl.useProgram(prog);
+    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    const U=n=>gl.getUniformLocation(prog,n);
+    // static params from the reference URL; contrast/gamma/sat kept at 1 (chips unaltered)
+    gl.uniform1f(U('uTimeSpeed'),2.0);      // a touch stronger
+    gl.uniform1f(U('uColorBalance'),-0.11);
+    gl.uniform1f(U('uWarpStrength'),1.0);   // warp ON = whole-surface undulation ("일렁임")
+    gl.uniform1f(U('uWarpFrequency'),3.2);  // finer, more detailed waves ("미세하게")
+    gl.uniform1f(U('uWarpSpeed'),1.2);
+    gl.uniform1f(U('uWarpAmplitude'),16.0); // stronger offset ("강하게")
+    gl.uniform1f(U('uBlendAngle'),0.0);
+    gl.uniform1f(U('uRotationAmount'),38.0); // modest sway (big rotation = the slosh she disliked)
+    gl.uniform1f(U('uNoiseScale'),1.2);
+    gl.uniform1f(U('uZoom'),0.9);
+    const cs=getComputedStyle(document.documentElement);
+    const hex=v=>{const h=cs.getPropertyValue(v).trim().replace('#','');
+      return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];};
+    function applyColors(){
+      const dark=document.documentElement.getAttribute('data-theme')==='dark';
+      const vars=dark?['--void','--oxblood','--crimson','--red']:['--red','--coral','--sand','--prism'];
+      gl.uniform3fv(U('uC0'),hex(vars[0]));gl.uniform3fv(U('uC1'),hex(vars[1]));
+      gl.uniform3fv(U('uC2'),hex(vars[2]));gl.uniform3fv(U('uC3'),hex(vars[3]));
+      // stops spread across the whole face so the gradient (and its motion) shows everywhere
+      gl.uniform4f(U('uStops'),...(dark?[0.12,0.45,0.75,1.0]:[0.12,0.45,0.75,1.0]));
+    }
+    function resize(){
+      const dpr=Math.min(devicePixelRatio||1,2);
+      const w=Math.max(1,cv.clientWidth*dpr|0),h=Math.max(1,cv.clientHeight*dpr|0);
+      if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);
+        gl.uniform2f(U('iResolution'),w,h);}
+    }
+    applyColors();resize();
+    new MutationObserver(applyColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    addEventListener('resize',resize);
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const t0=performance.now();
+    function frame(now){resize();
+      gl.uniform1f(U('iTime'),(now-t0)*0.001);
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      if(!reduce)requestAnimationFrame(frame);
+    }
+    if(reduce){gl.uniform1f(U('iTime'),8.0);frame(t0);}else requestAnimationFrame(frame);
+  })();
+
+  // ---- click / touch spark + mouse footprint trail (reactbits ClickSpark + TextCursor) ----
+  (function pointerFx(){
+    const noMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if (noMotion) return;
+    // ClickSpark: 9 FA3030 rays burst from the pointer on every press
+    addEventListener('pointerdown', e => {
+      const b = document.createElement('div');
+      b.className = 'spark-burst';
+      b.style.left = e.clientX + 'px'; b.style.top = e.clientY + 'px';
+      for (let i = 0; i < 9; i++) {
+        const s = document.createElement('i');
+        s.style.setProperty('--a', (i * 40) + 'deg');
+        b.appendChild(s);
+      }
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 560);
+    }, {passive:true});
+    // TextCursor: shoe silhouettes drop along the mouse path (left foot first),
+    // rotated toward motion, offset to alternate sides — FA3030, exclusion blend.
+    if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      let lx = null, ly = null, foot = 0;
+      const STEP = 28, SIDE = 7, MAX = 5;   // closer spacing, gentle side offset, short trail
+      const pool = [];
+      addEventListener('pointermove', e => {
+        if (e.pointerType === 'touch') return;
+        if (lx === null) { lx = e.clientX; ly = e.clientY; return; }
+        const dx = e.clientX - lx, dy = e.clientY - ly;
+        if (Math.hypot(dx, dy) < STEP) return;
+        const ang = Math.atan2(dy, dx);
+        const px = -Math.sin(ang), py = Math.cos(ang);        // perpendicular unit
+        const left = (foot % 2 === 0);                        // left foot first
+        const side = left ? -SIDE : SIDE;
+        const w = document.createElement('div');
+        w.className = 'footstep' + (left ? '' : ' right');
+        w.style.left = (e.clientX + px * side) + 'px';
+        w.style.top  = (e.clientY + py * side) + 'px';
+        w.style.setProperty('--r', (ang * 180 / Math.PI + 90) + 'deg');  // toe → motion dir
+        document.body.appendChild(w);
+        pool.push(w);
+        while (pool.length > MAX) pool.shift().remove();      // cap the trail length
+        setTimeout(() => { const k = pool.indexOf(w); if (k >= 0) pool.splice(k, 1); w.remove(); }, 1150);
+        foot++; lx = e.clientX; ly = e.clientY;
+      }, {passive:true});
+    }
+  })();
 
   // init: first page visible without a page-turn
   pages[0].classList.add('active');

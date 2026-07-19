@@ -9,13 +9,23 @@
 <link rel="manifest" href="manifest.json">
 <title>NEWTON — UX Book</title>
 <style>
+  /* Type system: Latin=Supreme, Korean=Freesentation (Latin font lacks Hangul,
+     so the browser falls through to Freesentation for KO glyphs automatically). */
   @font-face{
-    font-family:'Pretendard';font-weight:400;font-style:normal;font-display:swap;
-    src:url('fonts/Pretendard-Regular.woff2') format('woff2');
+    font-family:'Supreme';font-weight:400;font-style:normal;font-display:swap;
+    src:url('fonts/Supreme-Regular.woff2') format('woff2');
   }
   @font-face{
-    font-family:'Pretendard';font-weight:700;font-style:normal;font-display:swap;
-    src:url('fonts/Pretendard-Bold.woff2') format('woff2');
+    font-family:'Supreme';font-weight:700;font-style:normal;font-display:swap;
+    src:url('fonts/Supreme-Bold.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Freesentation';font-weight:400;font-style:normal;font-display:swap;
+    src:url('fonts/Freesentation-Regular.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'Freesentation';font-weight:700;font-style:normal;font-display:swap;
+    src:url('fonts/Freesentation-Bold.woff2') format('woff2');
   }
   @property --s1{syntax:'<percentage>';inherits:false;initial-value:58%}
   @property --s2{syntax:'<percentage>';inherits:false;initial-value:83%}
@@ -63,8 +73,9 @@
   }
   body{
     margin:0;
-    font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-family:'Supreme','Freesentation',-apple-system,BlinkMacSystemFont,sans-serif;
     font-weight:400;
+    letter-spacing:-0.015em;   /* web-standard body tracking: tightens the loose default without cramping */
     background:#000;color:var(--text);
     display:flex;align-items:center;justify-content:center;
     overflow:hidden;
@@ -172,6 +183,32 @@
   /* per-element slide-in ("차라락") — soft ease-out, a touch slower */
   @keyframes slideInItem{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
   .stagger{opacity:0;animation:slideInItem .62s cubic-bezier(.22,.61,.36,1) both}
+
+  /* language toggle → ShinyText is driven from JS via the Web Animations API
+     (NOT the CSS `animation` property) so it can't disturb the page's .stagger
+     entrance animation — that swap is what made text re-rise before. */
+
+  /* click / touch spark (reactbits ClickSpark, FA3030) */
+  .spark-burst{position:fixed;z-index:10000;pointer-events:none;left:0;top:0;transform:scale(.9)}
+  .spark-burst i{position:absolute;left:0;top:0;width:12px;height:2px;margin-top:-1px;border-radius:2px;
+    background:#FA3030;transform-origin:0 50%;animation:sparkFly .5s cubic-bezier(.25,1,.5,1) forwards}
+  @keyframes sparkFly{
+    0%{transform:rotate(var(--a)) translateX(4px) scaleX(1);opacity:1}
+    100%{transform:rotate(var(--a)) translateX(50px) scaleX(.35);opacity:0}
+  }
+
+  /* mouse footprint trail (reactbits TextCursor) — shoe silhouettes, FA3030, exclusion blend.
+     Blend + mask live on the same painted element (like .cursor) so exclusion hits the page. */
+  .footstep{position:fixed;z-index:9998;pointer-events:none;width:34px;height:34px;margin:-17px 0 0 -17px;
+    background:#FA3030;mix-blend-mode:exclusion;
+    -webkit-mask:url(assets/shoe-left.svg) center/contain no-repeat;mask:url(assets/shoe-left.svg) center/contain no-repeat;
+    transform:rotate(var(--r));animation:stepFade 1s linear forwards}
+  .footstep.right{-webkit-mask-image:url(assets/shoe-right.svg);mask-image:url(assets/shoe-right.svg)}
+  /* bright on drop → linear fade to 0, so a 5-step trail visibly ramps from solid to faint */
+  @keyframes stepFade{
+    0%{opacity:.9;transform:rotate(var(--r)) scale(1)}
+    100%{opacity:0;transform:rotate(var(--r)) scale(.9)}
+  }
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
@@ -316,16 +353,13 @@
   .cover-slide{
     position:relative;width:100%;height:100%;overflow:hidden;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    /* Figma colors; #D1FEFF pinned at 100% so the bright bottom is never clipped.
-       Middle stops sweep for a clear flowing motion. */
+    /* Figma colors; the animated grainient canvas (below) draws the moving gradient.
+       --cover-grad stays as a static fallback shown when WebGL is unavailable. */
     background:var(--cover-grad);
-    animation:gradFlow 8s ease-in-out infinite alternate;
   }
-  @keyframes gradFlow{
-    from{--s1:48%;--s2:72%;--s3:88%}
-    to{--s1:65%;--s2:91%;--s3:97%}
-  }
-  @media (prefers-reduced-motion:reduce){.cover-slide{animation:none}}
+  /* grainient motion (reactbits): noise-driven gradient rotation, warp & grain off */
+  .cover-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+  .cover-slide .wordmark,.cover-slide p{position:relative;z-index:1}
   .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
     background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
   /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
@@ -556,6 +590,7 @@
   <div class="stage">
     <div class="page active" data-page="cover">
       <div class="cover-slide">
+        <canvas class="cover-canvas" aria-hidden="true"></canvas>
         <span class="wordmark" role="img" aria-label="NEWTON"></span>
         <p>UX Book</p>
       </div>
@@ -638,8 +673,8 @@
 </div>
 <div class="page" data-page="sec-08">
   <div class="page-scroll">
-    <div class="head-block"><p class="kicker">(1) A Spark to Move</p><div class="head-row"><h2 class="head-title" data-en="When your heart moves first">마음이 먼저 움직이는 순간</h2><p class="head-body" data-en="To a body stiff from sitting, the portable station flashes a tempting Pack. Boxing slips you once learned unfold at home, and a projected start button pulls you in. Press it, and exercise becomes a challenge you want right now.">책상 앞에 오래 앉아 굳어 있던 몸 앞에, 포터블 스테이션은 지금 끌릴 만한 Challenge Pack을 짧게 띄웁니다. 어릴 때 배워봤던 복싱의 회피 스텝과 짧은 풋워크 하이라이트가 집 안에 펼쳐지고, 투사된 시작 버튼은 다시 움직여보고 싶은 마음을 당깁니다. 누르는 순간, 운동은 해야 할 일이 아니라 지금 바로 시작해보고 싶은 도전이 됩니다</p></div></div>
-    <div class="page-content"><div class="group"><details class="toggle"><summary data-en="How NEWTON nudges you">운동을 마음먹게 시작하는 뉴턴의 넛지 설계</summary><div class="toggle-body"><div class="finding"><div class="finding-icon"></div><div class="finding-body"><p class="finding-title" data-en="Nudge design">NEWTON 넛지 설계</p><p class="body" data-en="NEWTON recommends from your habits, and weighs time, place, activity and weather to suggest only what fits now.">NEWTON은 관심 운동, 저장한 Pack, 최근 본 콘텐츠, 중단한 세션과 생활 패턴을 바탕으로 추천을 만듭니다. 시간,장소,활동량,날씨까지 함께 판단해 지금 실행하기 좋은 Pack만 제안합니다.</p><p class="subhead" data-en="01 Two entry points">01 두가지 진입점</p><p class="subhead" data-en="NEWTON suggests, or you choose.">NEWTON이 먼저 제안하거나 내가 고르거나</p><p class="body" data-en="When idle, alerts suggest a Pack from your history; in the tab you browse and start one yourself.">앱을 탐색하지 않는 순간에는 관심 운동, 저장·시청 기록, 이전 세션을 바탕으로 개인화 알림이 적절한 Pack을 먼저 제안합니다. 콘텐츠 탭에서는 원하는 움직임을 직접 탐색해 Pack을 시작합니다.</p><p class="subhead" data-en="02 Daily touchpoints">02 생활 속 접점</p><p class="subhead" data-en="Prep at desk, act at door.">책상에서 준비하고, 현관에서 행동으로</p><p class="body" data-en="At the desk you pick a Pack and set up; at the door it suggests indoor/outdoor and starts with a wear + double-tap.">책상에서는 추천 Pack을 확인하고 운동 직전 설정을 마칩니다. 현관에서는 외출 및 귀가 상황에 맞춰 실내외 운동을 제안하며, 웨어러블 착용과 발 두 번 탭까지 이어 실제 시작으로 전환합니다.</p><figure class="figure"><img class="media" src="assets/img_28.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_29.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_30.png" alt="" loading="lazy"></figure></div></div></div></details></div><figure class="figure"><img class="media" src="assets/img_27.png" alt="" loading="lazy"></figure><div class="head-block step"><p class="kicker">(2) Step by Step, Into Play</p><div class="head-row"><h2 class="head-title" data-en="First step, right at home">처음의 한 걸음은, 집에서도 충분하니까</h2><p class="head-body" data-en="Pick a Pack and your wall becomes a quiet ring. Stretch, turn Quiet On, and a pro&#x27;s rhythm and a virtual foe appear; you slip and re-enter for a short spar. That quiet first move sparks the next.">Pack을 고르면, 방 안의 벽면이 조용한 링으로 바뀝니다. 굳은 몸을 스트레칭으로 열고, Quiet On으로 발소리와 충격을 낮춥니다. 벽에는 복싱 고수의 리듬과 가상 상대의 공격 범위가 펼쳐지고, 한 발 피하고 다시 들어가며 짧은 스파링을 시작합니다. 소음 부담 없이 완성한 첫 움직임은, 또 다른 도전을 해보고 싶은 재미로 이어집니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_31.png" alt="" loading="lazy"></figure><div class="head-block step"><div class="head-row"><h2 class="head-title" data-en="One move carries outside.">한번 움직인 마음은,<br>바깥으로 이어진다</h2><p class="head-body" data-en="One move at home makes you stop scrolling past runs. Today&#x27;s Pack runs with Sean; NEWTON paces you underfoot and Boost On pushes the next step. The feed&#x27;s run becomes your street — outdoor play, not routine.">집에서 한 번 움직여본 감각은, 피드 속 러닝을 그냥 넘기지 못하게 만듭니다. 오늘의 Pack은 션과 함께 달리는 러닝메이트. NEWTON은 발밑에 페이스와 박자를 안내하고, 리듬이 꺼질 때는 Boost On으로 다음 한 발을 밀어줍니다. 피드에서 보던 러닝이 오늘 내 거리로 넘어오는 순간, 운동은 루틴이 아니라 따라가고 싶은 바깥 플레이가 됩니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_32.png" alt="" loading="lazy"></figure><div class="head-block step"><div class="head-row"><h2 class="head-title" data-en="Solo rhythm, shared confidence.">혼자 익힌 리듬이,<br>함께 움직일 자신감으로</h2><p class="head-body" data-en="A body that ran alone now craves company. Today&#x27;s Pack is Curry&#x27;s step-back; NEWTON floors the first step, back-step and return, and Press On adds resistance to wake your quickness. Solo reps make watched plays feel doable — then shareable.">혼자 달리던 몸은 이제 함께 움직이는 재미를 궁금해합니다. 오늘의 Pack은 스테판 커리의 스텝백. NEWTON은 첫 발, 백스텝, 복귀 리듬을 지면 위에 띄우고, Press On은 발을 빼고 돌아오는 순간에 묵직한 저항을 더해 순발력을 깨웁니다. 혼자 익힌 리듬이 쌓이면, 보기만 하던 플레이는 해볼 수 있는 감각이 됩니다. 그 감각은 친구들과 함께 움직여볼 자신감으로 이어집니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_33.png" alt="" loading="lazy"></figure><div class="head-block step"><div class="head-row"><h2 class="head-title" data-en="Solo thrill, shared fun.">혼자 익힌 설렘이,<br>함께 하는 재미가 되어</h2><p class="head-body" data-en="Solo rhythm is more fun shared. Place two projectors and the living room becomes a stage; moves interlock, play turns game-like, and practice becomes shared fun.">혼자 익힌 리듬은, 함께할 때 더 재밌어집니다. NEWTON의 빔프로젝터를 나란히 두는 순간, 거실은 둘만의 플레이 스테이지로 넓어집니다. 커진 투사면 안에서 서로의 움직임이 맞물리고, 운동은 게임처럼 가볍게 이어집니다. 혼자 쌓은 자신감은 친구와 주고받는 리듬이 되고, 연습은 함께 즐기는 플레이가 됩니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_34.png" alt="" loading="lazy"></figure><div class="head-block step"><p class="kicker">(3) From Movement to Momentum</p><div class="head-row"><h2 class="head-title" data-en="Today&#x27;s spark, next challenge">오늘의 두근거림을, 다음 도전으로</h2><p class="head-body" data-en="Even after you finish, NEWTON preps what&#x27;s next. Today&#x27;s rhythm and wobbles become a report and a clue for the next challenge. The wearable recharges, fabric parts stay fresh, and today&#x27;s play carries into the next move.">움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 오늘의 리듬과 흔들렸던 순간은 리포트로 남아 다음 도전의 단서가 됩니다. 하체 웨어러블은 다시 충전되고, 패브릭 파츠는 산뜻하게 관리됩니다. 오늘의 플레이는 그렇게 다음 움직임으로 이어집니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_35.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_36.png" alt="" loading="lazy"></figure></div>
+    <div class="head-block"><p class="kicker">(1) A Spark to Move</p><div class="head-row"><h2 class="head-title" data-en="When your heart moves first">마음이 먼저<br>움직이는 순간</h2><p class="head-body" data-en="To a body stiff from sitting, the portable station flashes a tempting Pack. Boxing slips you once learned unfold at home, and a projected start button pulls you in. Press it, and exercise becomes a challenge you want right now.">책상 앞에 오래 앉아 굳어 있던 몸 앞에, 포터블 스테이션은 지금 끌릴 만한 Challenge Pack을 짧게 띄웁니다. 어릴 때 배워봤던 복싱의 회피 스텝과 짧은 풋워크 하이라이트가 집 안에 펼쳐지고, 투사된 시작 버튼은 다시 움직여보고 싶은 마음을 당깁니다. 누르는 순간, 운동은 해야 할 일이 아니라 지금 바로 시작해보고 싶은 도전이 됩니다</p></div></div>
+    <div class="page-content"><div class="group"><details class="toggle"><summary data-en="How NEWTON nudges you">운동을 마음먹게 시작하는 뉴턴의 넛지 설계</summary><div class="toggle-body"><div class="finding"><div class="finding-icon"></div><div class="finding-body"><p class="finding-title" data-en="Nudge design">NEWTON 넛지 설계</p><p class="body" data-en="NEWTON recommends from your habits, and weighs time, place, activity and weather to suggest only what fits now.">NEWTON은 관심 운동, 저장한 Pack, 최근 본 콘텐츠, 중단한 세션과 생활 패턴을 바탕으로 추천을 만듭니다. 시간,장소,활동량,날씨까지 함께 판단해 지금 실행하기 좋은 Pack만 제안합니다.</p><p class="subhead" data-en="01 Two entry points">01 두가지 진입점</p><p class="subhead" data-en="NEWTON suggests, or you choose.">NEWTON이 먼저 제안하거나 내가 고르거나</p><p class="body" data-en="When idle, alerts suggest a Pack from your history; in the tab you browse and start one yourself.">앱을 탐색하지 않는 순간에는 관심 운동, 저장·시청 기록, 이전 세션을 바탕으로 개인화 알림이 적절한 Pack을 먼저 제안합니다. 콘텐츠 탭에서는 원하는 움직임을 직접 탐색해 Pack을 시작합니다.</p><p class="subhead" data-en="02 Daily touchpoints">02 생활 속 접점</p><p class="subhead" data-en="Prep at desk, act at door.">책상에서 준비하고, 현관에서 행동으로</p><p class="body" data-en="At the desk you pick a Pack and set up; at the door it suggests indoor/outdoor and starts with a wear + double-tap.">책상에서는 추천 Pack을 확인하고 운동 직전 설정을 마칩니다. 현관에서는 외출 및 귀가 상황에 맞춰 실내외 운동을 제안하며, 웨어러블 착용과 발 두 번 탭까지 이어 실제 시작으로 전환합니다.</p><figure class="figure"><img class="media" src="assets/img_28.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_29.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_30.png" alt="" loading="lazy"></figure></div></div></div></details></div><figure class="figure"><img class="media" src="assets/img_27.png" alt="" loading="lazy"></figure><div class="head-block step"><p class="kicker">{1} Home First Trial</p><div class="head-row"><h2 class="head-title" data-en="First step, right at home">처음의 한 걸음은,<br>집에서도 충분하니까</h2><p class="head-body" data-en="Pick a Pack and your wall becomes a quiet ring. Stretch, turn Quiet On, and a pro&#x27;s rhythm and a virtual foe appear; you slip and re-enter for a short spar. That quiet first move sparks the next.">Pack을 고르면, 방 안의 벽면이 조용한 링으로 바뀝니다. 굳은 몸을 스트레칭으로 열고, Quiet On으로 발소리와 충격을 낮춥니다. 벽에는 복싱 고수의 리듬과 가상 상대의 공격 범위가 펼쳐지고, 한 발 피하고 다시 들어가며 짧은 스파링을 시작합니다. 소음 부담 없이 완성한 첫 움직임은, 또 다른 도전을 해보고 싶은 재미로 이어집니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_31.png" alt="" loading="lazy"></figure><div class="head-block step"><div class="head-row"><h2 class="head-title" data-en="One move carries outside.">한번 움직인 마음은,<br>바깥으로 이어진다</h2><p class="head-body" data-en="One move at home makes you stop scrolling past runs. Today&#x27;s Pack runs with Sean; NEWTON paces you underfoot and Boost On pushes the next step. The feed&#x27;s run becomes your street — outdoor play, not routine.">집에서 한 번 움직여본 감각은, 피드 속 러닝을 그냥 넘기지 못하게 만듭니다. 오늘의 Pack은 션과 함께 달리는 러닝메이트. NEWTON은 발밑에 페이스와 박자를 안내하고, 리듬이 꺼질 때는 Boost On으로 다음 한 발을 밀어줍니다. 피드에서 보던 러닝이 오늘 내 거리로 넘어오는 순간, 운동은 루틴이 아니라 따라가고 싶은 바깥 플레이가 됩니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_32.png" alt="" loading="lazy"></figure><div class="head-block step"><div class="head-row"><h2 class="head-title" data-en="Solo rhythm, shared confidence.">혼자 익힌 리듬이,<br>함께 움직일 자신감으로</h2><p class="head-body" data-en="A body that ran alone now craves company. Today&#x27;s Pack is Curry&#x27;s step-back; NEWTON floors the first step, back-step and return, and Press On adds resistance to wake your quickness. Solo reps make watched plays feel doable — then shareable.">혼자 달리던 몸은 이제 함께 움직이는 재미를 궁금해합니다. 오늘의 Pack은 스테판 커리의 스텝백. NEWTON은 첫 발, 백스텝, 복귀 리듬을 지면 위에 띄우고, Press On은 발을 빼고 돌아오는 순간에 묵직한 저항을 더해 순발력을 깨웁니다. 혼자 익힌 리듬이 쌓이면, 보기만 하던 플레이는 해볼 수 있는 감각이 됩니다. 그 감각은 친구들과 함께 움직여볼 자신감으로 이어집니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_33.png" alt="" loading="lazy"></figure><div class="head-block step"><div class="head-row"><h2 class="head-title" data-en="Solo thrill, shared fun.">혼자 익힌 설렘이,<br>함께 하는 재미가 되어</h2><p class="head-body" data-en="Solo rhythm is more fun shared. Place two projectors and the living room becomes a stage; moves interlock, play turns game-like, and practice becomes shared fun.">혼자 익힌 리듬은, 함께할 때 더 재밌어집니다. NEWTON의 빔프로젝터를 나란히 두는 순간, 거실은 둘만의 플레이 스테이지로 넓어집니다. 커진 투사면 안에서 서로의 움직임이 맞물리고, 운동은 게임처럼 가볍게 이어집니다. 혼자 쌓은 자신감은 친구와 주고받는 리듬이 되고, 연습은 함께 즐기는 플레이가 됩니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_34.png" alt="" loading="lazy"></figure><div class="head-block step"><p class="kicker">{5} Dock and Remember</p><div class="head-row"><h2 class="head-title" data-en="Today&#x27;s spark, next challenge">오늘의 두근거림을,<br>다음 도전으로</h2><p class="head-body" data-en="Even after you finish, NEWTON preps what&#x27;s next. Today&#x27;s rhythm and wobbles become a report and a clue for the next challenge. The wearable recharges, fabric parts stay fresh, and today&#x27;s play carries into the next move.">움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 오늘의 리듬과 흔들렸던 순간은 리포트로 남아 다음 도전의 단서가 됩니다. 하체 웨어러블은 다시 충전되고, 패브릭 파츠는 산뜻하게 관리됩니다. 오늘의 플레이는 그렇게 다음 움직임으로 이어집니다.</p></div></div><figure class="figure"><img class="media" src="assets/img_35.png" alt="" loading="lazy"></figure><figure class="figure"><img class="media" src="assets/img_36.png" alt="" loading="lazy"></figure></div>
     
   </div>
   <div class="scroll-hint" aria-hidden="true"><span class="scroll-mouse"></span><span class="chevs"><i class="chev"></i><i class="chev"></i><i class="chev"></i></span></div>
@@ -793,7 +828,35 @@
     document.getElementById('langLabel').textContent = lang === 'ko' ? 'EN' : 'KO';
     document.documentElement.setAttribute('data-lang', lang);
     setLang(lang);
+    retypePage(document.querySelector('.page.active'));
   });
+  // On language switch: a very faint ShinyText sweep across the visible page (reactbits
+  // ShinyText). Driven by the Web Animations API on background-position — no CSS `animation`
+  // property is touched, so the page's .stagger entrance never replays (no rise), and no DOM
+  // is rewritten (text can't break). A thin white glint keeps it subtle.
+  function retypePage(page){
+    if (!page) return;
+    page.querySelectorAll('h1,h2,h3,h4,h5,p,li,summary,.pill,.kicker,.tab').forEach(el => {
+      if (!el.textContent.trim() || el.offsetParent === null) return;
+      // drop the old sweep's handlers BEFORE cancelling — cancel() fires oncancel async,
+      // which would otherwise wipe the fresh styles we set below (that was the "no replay" bug).
+      if (el._shine) { el._shine.onfinish = el._shine.oncancel = null; el._shine.cancel(); }
+      const clear = () => {
+        el.style.backgroundImage = el.style.backgroundSize = '';
+        el.style.webkitBackgroundClip = el.style.backgroundClip = '';
+        el.style.webkitTextFillColor = '';
+        el._shine = null;
+      };
+      el.style.backgroundImage = 'linear-gradient(110deg,currentColor 44%,#fff 50%,currentColor 56%)';
+      el.style.backgroundSize = '200% 100%';
+      el.style.webkitBackgroundClip = 'text'; el.style.backgroundClip = 'text';
+      el.style.webkitTextFillColor = 'transparent';
+      // start with the glint already at the right edge → visible the instant you press; quick sweep out left
+      const a = el.animate([{ backgroundPosition: '0% 0' }, { backgroundPosition: '160% 0' }],
+                           { duration: 650, easing: 'linear' });
+      el._shine = a; a.onfinish = a.oncancel = clear;
+    });
+  }
 
   // logo glitch: fires automatically once every 5s
   const wm = document.querySelector('.cover-slide .wordmark');
@@ -1006,6 +1069,148 @@
       if (hint) hint.classList.toggle('hide', sc.scrollTop > 20);
     });
   });
+
+  // ---- cover grainient (reactbits motion port): noise-driven gradient rotation ----
+  // colors 100% from --cover-grad chips per theme; warp=0, grain=0; params from the
+  // reference URL (timeSpeed 2.8, colorBalance -0.11, rotation 170). contrast/gamma/sat
+  // left at 1.0 so the chips are reproduced unaltered.
+  (function coverGrainient(){
+    const cv = document.querySelector('.cover-canvas');
+    const gl = cv && cv.getContext('webgl2', {antialias:false, alpha:false});
+    if (!gl) return;                                  // CSS --cover-grad fallback shows
+    const VS = `#version 300 es
+in vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
+    const FS = `#version 300 es
+precision highp float;
+uniform vec2 iResolution; uniform float iTime;
+uniform float uTimeSpeed,uColorBalance,uWarpStrength,uWarpFrequency,uWarpSpeed,uWarpAmplitude,uBlendAngle,uRotationAmount,uNoiseScale,uZoom;
+uniform vec3 uC0,uC1,uC2,uC3; uniform vec4 uStops;
+out vec4 fragColor;
+#define S(a,b,t) smoothstep(a,b,t)
+mat2 Rot(float a){float s=sin(a),c=cos(a);return mat2(c,-s,s,c);}
+vec2 hash(vec2 p){p=vec2(dot(p,vec2(2127.1,81.17)),dot(p,vec2(1269.5,283.37)));return fract(sin(p)*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.0-2.0*f);float n=mix(mix(dot(-1.0+2.0*hash(i+vec2(0.,0.)),f-vec2(0.,0.)),dot(-1.0+2.0*hash(i+vec2(1.,0.)),f-vec2(1.,0.)),u.x),mix(dot(-1.0+2.0*hash(i+vec2(0.,1.)),f-vec2(0.,1.)),dot(-1.0+2.0*hash(i+vec2(1.,1.)),f-vec2(1.,1.)),u.x),u.y);return 0.5+0.5*n;}
+vec3 grad4(float t){
+  if(t<=uStops.x) return uC0;
+  if(t<=uStops.y) return mix(uC0,uC1,(t-uStops.x)/(uStops.y-uStops.x));
+  if(t<=uStops.z) return mix(uC1,uC2,(t-uStops.y)/(uStops.z-uStops.y));
+  if(t<=uStops.w) return mix(uC2,uC3,(t-uStops.z)/(uStops.w-uStops.z));
+  return uC3;
+}
+void main(){
+  float t=iTime*uTimeSpeed;
+  vec2 uv=gl_FragCoord.xy/iResolution.xy;
+  float ratio=iResolution.x/iResolution.y;
+  vec2 tuv=uv-0.5; tuv/=max(uZoom,0.001);
+  float degree=noise(vec2(t*0.1,tuv.x*tuv.y)*uNoiseScale);
+  tuv.y*=1.0/ratio;
+  tuv*=Rot(radians((degree-0.5)*uRotationAmount+0.0));   // base 0° = red top, bright bottom
+  tuv.y*=ratio;
+  float ws=max(uWarpStrength,0.001);
+  float amplitude=uWarpAmplitude/ws;   // warp≈0 when uWarpStrength=0
+  float warpTime=t*uWarpSpeed;
+  tuv.x+=sin(tuv.y*uWarpFrequency+warpTime)/amplitude;
+  tuv.y+=sin(tuv.x*(uWarpFrequency*1.5)+warpTime)/(amplitude*0.5);
+  float ax=(tuv*Rot(radians(uBlendAngle))).x;
+  float pos=clamp(0.5 - tuv.y + uColorBalance + ax*0.18, 0.0, 1.0);
+  fragColor=vec4(grad4(pos),1.0);
+}`;
+    const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
+      if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.warn(gl.getShaderInfoLog(o));return o;};
+    const prog=gl.createProgram();
+    gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
+    gl.linkProgram(prog);gl.useProgram(prog);
+    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    const U=n=>gl.getUniformLocation(prog,n);
+    // static params from the reference URL; contrast/gamma/sat kept at 1 (chips unaltered)
+    gl.uniform1f(U('uTimeSpeed'),2.0);      // a touch stronger
+    gl.uniform1f(U('uColorBalance'),-0.11);
+    gl.uniform1f(U('uWarpStrength'),1.0);   // warp ON = whole-surface undulation ("일렁임")
+    gl.uniform1f(U('uWarpFrequency'),3.2);  // finer, more detailed waves ("미세하게")
+    gl.uniform1f(U('uWarpSpeed'),1.2);
+    gl.uniform1f(U('uWarpAmplitude'),16.0); // stronger offset ("강하게")
+    gl.uniform1f(U('uBlendAngle'),0.0);
+    gl.uniform1f(U('uRotationAmount'),38.0); // modest sway (big rotation = the slosh she disliked)
+    gl.uniform1f(U('uNoiseScale'),1.2);
+    gl.uniform1f(U('uZoom'),0.9);
+    const cs=getComputedStyle(document.documentElement);
+    const hex=v=>{const h=cs.getPropertyValue(v).trim().replace('#','');
+      return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];};
+    function applyColors(){
+      const dark=document.documentElement.getAttribute('data-theme')==='dark';
+      const vars=dark?['--void','--oxblood','--crimson','--red']:['--red','--coral','--sand','--prism'];
+      gl.uniform3fv(U('uC0'),hex(vars[0]));gl.uniform3fv(U('uC1'),hex(vars[1]));
+      gl.uniform3fv(U('uC2'),hex(vars[2]));gl.uniform3fv(U('uC3'),hex(vars[3]));
+      // stops spread across the whole face so the gradient (and its motion) shows everywhere
+      gl.uniform4f(U('uStops'),...(dark?[0.12,0.45,0.75,1.0]:[0.12,0.45,0.75,1.0]));
+    }
+    function resize(){
+      const dpr=Math.min(devicePixelRatio||1,2);
+      const w=Math.max(1,cv.clientWidth*dpr|0),h=Math.max(1,cv.clientHeight*dpr|0);
+      if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);
+        gl.uniform2f(U('iResolution'),w,h);}
+    }
+    applyColors();resize();
+    new MutationObserver(applyColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    addEventListener('resize',resize);
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const t0=performance.now();
+    function frame(now){resize();
+      gl.uniform1f(U('iTime'),(now-t0)*0.001);
+      gl.drawArrays(gl.TRIANGLES,0,3);
+      if(!reduce)requestAnimationFrame(frame);
+    }
+    if(reduce){gl.uniform1f(U('iTime'),8.0);frame(t0);}else requestAnimationFrame(frame);
+  })();
+
+  // ---- click / touch spark + mouse footprint trail (reactbits ClickSpark + TextCursor) ----
+  (function pointerFx(){
+    const noMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if (noMotion) return;
+    // ClickSpark: 9 FA3030 rays burst from the pointer on every press
+    addEventListener('pointerdown', e => {
+      const b = document.createElement('div');
+      b.className = 'spark-burst';
+      b.style.left = e.clientX + 'px'; b.style.top = e.clientY + 'px';
+      for (let i = 0; i < 9; i++) {
+        const s = document.createElement('i');
+        s.style.setProperty('--a', (i * 40) + 'deg');
+        b.appendChild(s);
+      }
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 560);
+    }, {passive:true});
+    // TextCursor: shoe silhouettes drop along the mouse path (left foot first),
+    // rotated toward motion, offset to alternate sides — FA3030, exclusion blend.
+    if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      let lx = null, ly = null, foot = 0;
+      const STEP = 28, SIDE = 7, MAX = 5;   // closer spacing, gentle side offset, short trail
+      const pool = [];
+      addEventListener('pointermove', e => {
+        if (e.pointerType === 'touch') return;
+        if (lx === null) { lx = e.clientX; ly = e.clientY; return; }
+        const dx = e.clientX - lx, dy = e.clientY - ly;
+        if (Math.hypot(dx, dy) < STEP) return;
+        const ang = Math.atan2(dy, dx);
+        const px = -Math.sin(ang), py = Math.cos(ang);        // perpendicular unit
+        const left = (foot % 2 === 0);                        // left foot first
+        const side = left ? -SIDE : SIDE;
+        const w = document.createElement('div');
+        w.className = 'footstep' + (left ? '' : ' right');
+        w.style.left = (e.clientX + px * side) + 'px';
+        w.style.top  = (e.clientY + py * side) + 'px';
+        w.style.setProperty('--r', (ang * 180 / Math.PI + 90) + 'deg');  // toe → motion dir
+        document.body.appendChild(w);
+        pool.push(w);
+        while (pool.length > MAX) pool.shift().remove();      // cap the trail length
+        setTimeout(() => { const k = pool.indexOf(w); if (k >= 0) pool.splice(k, 1); w.remove(); }, 1150);
+        foot++; lx = e.clientX; ly = e.clientY;
+      }, {passive:true});
+    }
+  })();
 
   // init: first page visible without a page-turn
   pages[0].classList.add('active');
