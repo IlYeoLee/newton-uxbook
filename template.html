@@ -171,6 +171,9 @@
   .stage{position:relative;height:56.93cqw;overflow:hidden}
   .book.is-cover .stage{height:62.49cqw}
   .book.is-cover .book-nav{display:none}
+  /* cover: paint the book (outermost surface) with the gradient so any high-DPR subpixel
+     seam at the screen edge shows the gradient, never the white --bg. */
+  .book.is-cover{background:var(--cover-grad)}
 
   /* pages stacked; simple cross-fade between them */
   .page{
@@ -380,8 +383,10 @@
        --cover-grad stays as a static fallback shown when WebGL is unavailable. */
     background:var(--cover-grad);
   }
-  /* grainient motion (reactbits): noise-driven gradient rotation, warp & grain off */
-  .cover-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+  /* grainient motion (reactbits): noise-driven gradient rotation, warp & grain off.
+     Overscan 1px on every edge so a high-DPR subpixel seam can't reveal the white bg at the
+     top edge; the parent's overflow:hidden clips the bleed. */
+  .cover-canvas{position:absolute;inset:-2px;width:auto;height:auto;display:block;z-index:0}
   .cover-slide .wordmark,.cover-slide p{position:relative;z-index:1}
   .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
     background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
