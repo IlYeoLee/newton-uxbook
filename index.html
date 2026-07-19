@@ -188,7 +188,7 @@
      (NOT the CSS `animation` property) so it can't disturb the page's .stagger
      entrance animation — that swap is what made text re-rise before. */
 
-  /* click / touch spark (reactbits ClickSpark, FA3030) */
+  /* click / touch spark (reactbits ClickSpark, FA3030) — follows the pointer anywhere */
   .spark-burst{position:fixed;z-index:10000;pointer-events:none;left:0;top:0;transform:scale(.9)}
   .spark-burst i{position:absolute;left:0;top:0;width:12px;height:2px;margin-top:-1px;border-radius:2px;
     background:#FA3030;transform-origin:0 50%;animation:sparkFly .5s cubic-bezier(.25,1,.5,1) forwards}
@@ -209,6 +209,15 @@
     0%{opacity:.9;transform:rotate(var(--r)) scale(1)}
     100%{opacity:0;transform:rotate(var(--r)) scale(.9)}
   }
+
+  /* cover → intro onboarding: big "Now, Your Turn!" on a clean sheet morphs down into the kicker */
+  .onboard{position:absolute;inset:0;z-index:9990;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .onboard-bg{position:absolute;inset:0;background:var(--bg)}   /* "펼침전" clean sheet; fades as text shrinks in */
+  .onboard-goo{position:relative;filter:url(#goo)}             /* clamps alpha → child blur becomes liquid (TextMorph) */
+  .onboard-text{
+    font-family:'Supreme','Freesentation',sans-serif;font-weight:700;color:var(--red);
+    font-size:clamp(32px,6.5cqw,86px);letter-spacing:-.02em;white-space:nowrap;line-height:1;
+    transform-origin:center center;will-change:transform,filter,opacity}
 
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
@@ -253,6 +262,14 @@
   .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
   /* content images near full-bleed (~10px sides) against the 80px content padding */
   .page-content figure.figure{margin-left:calc(0.830cqw - 6.639cqw);margin-right:calc(0.830cqw - 6.639cqw)}
+
+  /* Scenario (sec-08): every text/toggle block shares ONE inset column (= the step
+     head-blocks' deeper inset). Main head-block was 1× padded (70px) while steps were
+     double-padded (page-content + own = 140px); unify them all to the deeper column. */
+  .page[data-page="sec-08"] .head-block{padding-left:13.278cqw;padding-right:13.278cqw}   /* main head → deep column */
+  .page[data-page="sec-08"] .page-content{padding-left:13.278cqw;padding-right:13.278cqw} /* toggles/steps base inset */
+  .page[data-page="sec-08"] .head-block.step{padding-left:0;padding-right:0}               /* steps: inset already from page-content */
+  .page[data-page="sec-08"] .page-content figure.figure{margin-left:calc(0.830cqw - 13.278cqw);margin-right:calc(0.830cqw - 13.278cqw)}  /* keep symmetric full-bleed */
   /* scroll hint: white mouse (wheel) + cascading chevrons */
   .scroll-hint{
     position:absolute;left:50%;bottom:1.4cqw;transform:translateX(-50%);
@@ -502,6 +519,12 @@
     .page-content{padding:0 5vw}
     .page-content figure.figure{margin-left:0;margin-right:0}   /* inset rounded cards, web-like */
     .page-content figure.figure img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
+    /* sec-08 desktop deep-column override is cqw-based (over-indents on mobile) → reset to the
+       standard 5vw mobile inset so Scenario matches every other page when stacked */
+    .page[data-page="sec-08"] .head-block{padding-left:5vw;padding-right:5vw}
+    .page[data-page="sec-08"] .page-content{padding-left:5vw;padding-right:5vw}
+    .page[data-page="sec-08"] .head-block.step{padding-left:0;padding-right:0}
+    .page[data-page="sec-08"] .page-content figure.figure{margin-left:0;margin-right:0}
     .page-hero{margin:5vw 5vw 0}
     .page-hero img{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
     .page[data-page="intro"] .page-hero img{border-radius:32px}   /* sits inside typical device corner radius (~30-44px) so it never fights the screen edge */
@@ -570,6 +593,12 @@
 </style>
 </head>
 <body>
+
+<!-- gooey threshold for the onboarding TextMorph (parent clamps alpha; child blur → liquid) -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+  <filter id="goo"><feColorMatrix in="SourceGraphic" type="matrix"
+    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11"/></filter>
+</defs></svg>
 
 <div class="cursor" id="cursor" aria-hidden="true"></div>
 
@@ -773,15 +802,105 @@
     p.querySelector('.page-text')?.scrollTo(0, 0);
     p.querySelector('.page-scroll')?.scrollTo(0, 0);
   }
+  let onboardCancel = null;
   function show(i){
     i = Math.max(0, Math.min(pages.length - 1, i));
     if (i === idx) return;
+    if (onboardCancel) onboardCancel();   // navigating away mid-onboarding → tear it down
+    const prev = idx;
     idx = i;
     resetPage(pages[i]);
+    // ONLY cover transitions toggle is-cover (hides nav, resizes stage), which shifts the stage
+    // and reflows the still-visible fading page — its title/margins jump ~140px for 0.3s. Freeze
+    // the outgoing page as position:fixed (book's container-type makes that book-relative, and
+    // the book doesn't move) so it's detached from that reflow. Restricted to cover transitions
+    // because on normal content↔content moves there's no reflow, and position:fixed there would
+    // instead break the stage's overflow clip → clipped images spill outside the frame.
+    const coverTransition = (prev === 0 || i === 0);
+    const out = pages[prev];
+    if (coverTransition && out) {
+      clearTimeout(out._unfreeze);
+      const br = book.getBoundingClientRect(), pr = out.getBoundingClientRect();
+      out.style.position = 'fixed'; out.style.inset = 'auto';
+      out.style.top = (pr.top - br.top) + 'px'; out.style.left = (pr.left - br.left) + 'px';
+      out.style.width = pr.width + 'px'; out.style.height = pr.height + 'px';
+      out._unfreeze = setTimeout(() => {   // well after the .3s opacity fade → unpin while invisible
+        out.style.position = out.style.inset = out.style.top = out.style.left = out.style.width = out.style.height = '';
+      }, 460);
+    }
     pages.forEach((p, n) => p.classList.toggle('active', n === i));
     updateChrome();
     staggerIn(pages[i]);   // slide-in plays going forward AND backward
     if (i === 0) glitch();  // entering cover by any path → glitch immediately
+    if (prev === 0 && i === 1) onboard(pages[i]);   // cover → intro: big-title morph-in
+  }
+
+  // Onboarding (reverse-FLIP, per her idea): clone the REAL kicker text — same font/size/
+  // position — start it BIG & centered, then play back to its natural state (transform:none).
+  // Because the end state IS the kicker's exact slot, it lands pixel-perfect (no jolt), and
+  // the kicker is a full-width block, so we measure the visible TEXT via Range, not the box.
+  function onboard(introPage){
+    const kicker = introPage.querySelector('.kicker');
+    const frame = document.getElementById('book');
+    if (!kicker || !frame || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    if (document.querySelector('.onboard')) return;         // guard against re-entry
+    // The kicker's .head-block is mid-entrance (stagger translateY 18px→0) right now; measuring
+    // during it gave a position ~17px off its resting spot → the landing snap. Force the stagger
+    // to finish first so we measure the TRUE final slot (covered by the white sheet anyway).
+    const hb = kicker.closest('.head-block');
+    if (hb) hb.getAnimations().forEach(a => a.finish());
+    const range = document.createRange(); range.selectNodeContents(kicker);
+    const tr = range.getBoundingClientRect();               // the visible "Now, Your Turn!" text
+    const fr = frame.getBoundingClientRect();
+    if (!tr.height) return;
+    const cs = getComputedStyle(kicker);
+    kicker.style.visibility = 'hidden';
+    const ov = document.createElement('div'); ov.className = 'onboard';
+    const bg = document.createElement('div'); bg.className = 'onboard-bg';   // clean "펼침전" sheet
+    const t = document.createElement('div'); t.textContent = kicker.textContent;
+    Object.assign(t.style, {                                 // exact clone of the kicker
+      position: 'absolute', margin: '0', whiteSpace: 'nowrap', lineHeight: '1',
+      left: (tr.left - fr.left) + 'px', top: (tr.top - fr.top) + 'px',
+      fontFamily: cs.fontFamily, fontSize: cs.fontSize, fontWeight: cs.fontWeight,
+      letterSpacing: cs.letterSpacing, color: cs.color,
+      transformOrigin: 'center center', willChange: 'transform, filter'
+    });
+    ov.appendChild(bg); ov.appendChild(t); frame.appendChild(ov);
+    // Self-correct: nudge the clone so its TEXT exactly overlaps the real kicker's text
+    // (line-height boxes differ). End state = transform:none = pixel-identical to the kicker,
+    // so the swap at the end has ZERO jump — that residual 17px snap was the "덜컹".
+    const crng = document.createRange(); crng.selectNodeContents(t);
+    const c0 = crng.getBoundingClientRect();
+    t.style.left = (parseFloat(t.style.left) + (tr.left - c0.left)) + 'px';
+    t.style.top  = (parseFloat(t.style.top)  + (tr.top  - c0.top )) + 'px';
+    // BIG = fully CENTERED in the frame (both axes) + scaled up. Motion is one continuous
+    // shrink from centre into the corner kicker — no hold-then-jerk.
+    const c1 = t.getBoundingClientRect();
+    // cap the big size by BOTH height and width so it never overflows a narrow (mobile) frame
+    const S = Math.min((Math.min(fr.height * 0.2, 96)) / c1.height,   // height cap
+                       (fr.width * 0.86) / c1.width);                  // width cap → fits mobile
+    const bcx = c1.left + c1.width / 2, bcy = c1.top + c1.height / 2;
+    const big = `translate(${(fr.left + fr.width / 2) - bcx}px, ${(fr.top + fr.height / 2) - bcy}px) scale(${S})`;
+    let timer = null;
+    const done = () => {
+      if (ov._done) return; ov._done = true;
+      clearTimeout(timer); kicker.style.visibility = ''; ov.remove();
+      if (onboardCancel === done) onboardCancel = null;
+    };
+    onboardCancel = done;
+    t.style.transform = big;
+    t.animate([{ opacity: 0, filter: 'blur(12px)' }, { opacity: 1, filter: 'blur(0px)' }],
+      { duration: 360, easing: 'ease-out', fill: 'both' });   // appear big, centered
+    timer = setTimeout(() => {                                 // brief read, then one smooth shrink to its slot
+      if (ov._done) return;
+      const morph = t.animate(
+        [{ transform: big, filter: 'blur(0px)' },
+         { filter: 'blur(2px)', offset: .5 },
+         { transform: 'none', filter: 'blur(0px)' }],
+        { duration: 900, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' });  // gentle accel→decel, no overshoot
+      bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 720, easing: 'ease-out', fill: 'forwards' });
+      morph.onfinish = done;
+    }, 560);   // total ≈ 360 + 560 + 900 ≈ 1.82s (within 3s)
   }
 
   // ripple on the round chevron buttons
@@ -1178,6 +1297,7 @@ void main(){
   (function pointerFx(){
     const noMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
     if (noMotion) return;
+    // These follow the mouse anywhere (the "mouse area"), like the cursor — NOT frame-bound.
     // ClickSpark: 9 FA3030 rays burst from the pointer on every press
     addEventListener('pointerdown', e => {
       const b = document.createElement('div');
