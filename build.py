@@ -456,7 +456,7 @@ sections_html = "".join(pages_out)
 intro_hero, intro_rest = extract_hero(hero_items)
 intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
 intro_body.append({"t": "P", "x": "송시헌, 이일여, 김소진, 박주원, 전다빈", "credit": True})
-intro_page_html = render_vertical("intro", "Now, your turn!",
+intro_page_html = render_vertical("intro", "Now, Your Turn!",
                                   "NEWTON", intro_body, intro_hero)
 
 # label, first page, member pages

@@ -245,6 +245,8 @@
   .head-block .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em;margin:0}
   .head-row{display:flex;gap:1.660cqw;align-items:flex-start}
   .head-title{font-size:2.656cqw;font-weight:700;color:var(--text);width:21.90cqw;flex:none;line-height:1.4;letter-spacing:-.03em;margin:0}
+  /* English titles render in Supreme (wider than the KO face) → tighten a touch, EN only */
+  :root[data-lang="en"] .head-title,:root[data-lang="en"] .chapter-title,:root[data-lang="en"] .step-title{letter-spacing:-.045em}
   .head-body{flex:1;min-width:0;font-size:1.494cqw;color:var(--text-body);line-height:1.5;margin:0}
   .page-content{width:100%;padding:0 6.639cqw}
   .page-hero{margin:2.656cqw 0.830cqw 0;line-height:0}
@@ -599,7 +601,7 @@
     
 <div class="page" data-page="intro">
   <div class="page-scroll">
-    <div class="head-block"><p class="kicker">Now, your turn!</p><div class="head-row"><h2 class="head-title">NEWTON</h2><p class="head-body" data-en="NEWTON turns dream sports into challenges right where you are. Follow the cues on floor and wall and try moves you only watched; wearables tune your sense so new moves become your play. Now, your turn!">NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!</p></div></div>
+    <div class="head-block"><p class="kicker">Now, Your Turn!</p><div class="head-row"><h2 class="head-title">NEWTON</h2><p class="head-body" data-en="NEWTON turns dream sports into challenges right where you are. Follow the cues on floor and wall and try moves you only watched; wearables tune your sense so new moves become your play. Now, your turn!">NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!</p></div></div>
     <div class="page-content"><p class="credit">송시헌, 이일여, 김소진, 박주원, 전다빈</p></div>
     <figure class="page-hero"><img class="media" src="assets/img_03.png" alt="" loading="lazy"></figure>
   </div>
@@ -836,6 +838,12 @@
   // is rewritten (text can't break). A thin white glint keeps it subtle.
   function retypePage(page){
     if (!page) return;
+    // Light mode = dark text, so a pure-white glint reads as a harsh flash. Soften it there:
+    // a translucent, narrower highlight. Dark mode (white text) keeps the crisp white glint.
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const grad = dark
+      ? 'linear-gradient(110deg,currentColor 44%,#fff 50%,currentColor 56%)'
+      : 'linear-gradient(110deg,currentColor 47%,rgba(255,255,255,.5) 50%,currentColor 53%)';
     page.querySelectorAll('h1,h2,h3,h4,h5,p,li,summary,.pill,.kicker,.tab').forEach(el => {
       if (!el.textContent.trim() || el.offsetParent === null) return;
       // drop the old sweep's handlers BEFORE cancelling — cancel() fires oncancel async,
@@ -847,7 +855,7 @@
         el.style.webkitTextFillColor = '';
         el._shine = null;
       };
-      el.style.backgroundImage = 'linear-gradient(110deg,currentColor 44%,#fff 50%,currentColor 56%)';
+      el.style.backgroundImage = grad;
       el.style.backgroundSize = '200% 100%';
       el.style.webkitBackgroundClip = 'text'; el.style.backgroundClip = 'text';
       el.style.webkitTextFillColor = 'transparent';

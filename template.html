@@ -245,6 +245,8 @@
   .head-block .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em;margin:0}
   .head-row{display:flex;gap:1.660cqw;align-items:flex-start}
   .head-title{font-size:2.656cqw;font-weight:700;color:var(--text);width:21.90cqw;flex:none;line-height:1.4;letter-spacing:-.03em;margin:0}
+  /* English titles render in Supreme (wider than the KO face) → tighten a touch, EN only */
+  :root[data-lang="en"] .head-title,:root[data-lang="en"] .chapter-title,:root[data-lang="en"] .step-title{letter-spacing:-.045em}
   .head-body{flex:1;min-width:0;font-size:1.494cqw;color:var(--text-body);line-height:1.5;margin:0}
   .page-content{width:100%;padding:0 6.639cqw}
   .page-hero{margin:2.656cqw 0.830cqw 0;line-height:0}
@@ -748,6 +750,12 @@
   // is rewritten (text can't break). A thin white glint keeps it subtle.
   function retypePage(page){
     if (!page) return;
+    // Light mode = dark text, so a pure-white glint reads as a harsh flash. Soften it there:
+    // a translucent, narrower highlight. Dark mode (white text) keeps the crisp white glint.
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const grad = dark
+      ? 'linear-gradient(110deg,currentColor 44%,#fff 50%,currentColor 56%)'
+      : 'linear-gradient(110deg,currentColor 47%,rgba(255,255,255,.5) 50%,currentColor 53%)';
     page.querySelectorAll('h1,h2,h3,h4,h5,p,li,summary,.pill,.kicker,.tab').forEach(el => {
       if (!el.textContent.trim() || el.offsetParent === null) return;
       // drop the old sweep's handlers BEFORE cancelling — cancel() fires oncancel async,
@@ -759,7 +767,7 @@
         el.style.webkitTextFillColor = '';
         el._shine = null;
       };
-      el.style.backgroundImage = 'linear-gradient(110deg,currentColor 44%,#fff 50%,currentColor 56%)';
+      el.style.backgroundImage = grad;
       el.style.backgroundSize = '200% 100%';
       el.style.webkitBackgroundClip = 'text'; el.style.backgroundClip = 'text';
       el.style.webkitTextFillColor = 'transparent';
