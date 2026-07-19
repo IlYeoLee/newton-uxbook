@@ -52,6 +52,7 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
+  html{background:#000}   /* behind body's safe-area edges → never a white strip on viewport-fit=cover tablets */
 
   /* custom cursor = the vector logo, FA3030 with Figma "exclusion" blend, on desktop only */
   .cursor{
@@ -386,7 +387,7 @@
   /* grainient motion (reactbits): noise-driven gradient rotation, warp & grain off.
      Overscan 1px on every edge so a high-DPR subpixel seam can't reveal the white bg at the
      top edge; the parent's overflow:hidden clips the bleed. */
-  .cover-canvas{position:absolute;inset:-2px;width:auto;height:auto;display:block;z-index:0}
+  .cover-canvas{position:absolute;top:-2px;left:-2px;width:calc(100% + 4px);height:calc(100% + 4px);display:block;z-index:0}
   .cover-slide .wordmark,.cover-slide p{position:relative;z-index:1}
   .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
     background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
