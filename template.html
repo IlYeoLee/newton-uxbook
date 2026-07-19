@@ -68,6 +68,7 @@
     -webkit-mask-image:url(assets/cursor-click.svg);
     mask-image:url(assets/cursor-click.svg);
   }
+  .cursor.touch-on{display:block}   /* touch devices: show the symbol while a finger presses & drags */
   @media (hover:hover) and (pointer:fine){
     .cursor{display:block}
     *{cursor:none !important}
@@ -1085,13 +1086,26 @@
   }, { passive: false });
   lbImg.addEventListener('touchend', e => { if (e.touches.length < 2) pinchDist = 0; });
 
-  // smooth (lerped) custom cursor — desktop only
+  // smooth (lerped) custom cursor — mouse anywhere; on touch it appears while a finger drags
   const cursor = document.getElementById('cursor');
   let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my;
   addEventListener('pointermove', e => {
     if (e.pointerType === 'touch') return;
     mx = e.clientX; my = e.clientY;
   });
+  // touch: same symbol follows the finger while pressed (rub-drag), driven by the same follow loop
+  let touchOn = false;
+  addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    touchOn = true; mx = cx = e.clientX; my = cy = e.clientY;   // snap to finger
+    cursor.classList.add('touch-on');
+  }, { passive: true });
+  addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch' && touchOn) { mx = e.clientX; my = e.clientY; }
+  }, { passive: true });
+  const cursorTouchEnd = e => { if (e.pointerType === 'touch') { touchOn = false; cursor.classList.remove('touch-on'); } };
+  addEventListener('pointerup', cursorTouchEnd, { passive: true });
+  addEventListener('pointercancel', cursorTouchEnd, { passive: true });
   // hovering an interactive element swaps to the click-cursor icon
   addEventListener('pointerover', e => {
     if (e.pointerType === 'touch') return;
@@ -1245,33 +1259,41 @@ void main(){
       document.body.appendChild(b);
       setTimeout(() => b.remove(), 560);
     }, {passive:true});
-    // TextCursor: shoe silhouettes drop along the mouse path (left foot first),
-    // rotated toward motion, offset to alternate sides — FA3030, exclusion blend.
-    if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
-      let lx = null, ly = null, foot = 0;
-      const STEP = 28, SIDE = 7, MAX = 5;   // closer spacing, gentle side offset, short trail
-      const pool = [];
-      addEventListener('pointermove', e => {
-        if (e.pointerType === 'touch') return;
-        if (lx === null) { lx = e.clientX; ly = e.clientY; return; }
-        const dx = e.clientX - lx, dy = e.clientY - ly;
-        if (Math.hypot(dx, dy) < STEP) return;
-        const ang = Math.atan2(dy, dx);
-        const px = -Math.sin(ang), py = Math.cos(ang);        // perpendicular unit
-        const left = (foot % 2 === 0);                        // left foot first
-        const side = left ? -SIDE : SIDE;
-        const w = document.createElement('div');
-        w.className = 'footstep' + (left ? '' : ' right');
-        w.style.left = (e.clientX + px * side) + 'px';
-        w.style.top  = (e.clientY + py * side) + 'px';
-        w.style.setProperty('--r', (ang * 180 / Math.PI + 90) + 'deg');  // toe → motion dir
-        document.body.appendChild(w);
-        pool.push(w);
-        while (pool.length > MAX) pool.shift().remove();      // cap the trail length
-        setTimeout(() => { const k = pool.indexOf(w); if (k >= 0) pool.splice(k, 1); w.remove(); }, 1150);
-        foot++; lx = e.clientX; ly = e.clientY;
-      }, {passive:true});
+    // TextCursor: shoe silhouettes drop along the path (left foot first), rotated toward motion,
+    // offset to alternate sides — FA3030, exclusion blend. Desktop = mouse move; touch = while a
+    // finger is pressed & dragging ("rub-drag"), matching the symbol cursor.
+    let lx = null, ly = null, foot = 0;
+    const STEP = 28, SIDE = 7, MAX = 5;   // closer spacing, gentle side offset, short trail
+    const pool = [];
+    function dropStep(cxp, cyp) {
+      if (lx === null) { lx = cxp; ly = cyp; return; }
+      const dx = cxp - lx, dy = cyp - ly;
+      if (Math.hypot(dx, dy) < STEP) return;
+      const ang = Math.atan2(dy, dx);
+      const px = -Math.sin(ang), py = Math.cos(ang);          // perpendicular unit
+      const left = (foot % 2 === 0);                          // left foot first
+      const side = left ? -SIDE : SIDE;
+      const w = document.createElement('div');
+      w.className = 'footstep' + (left ? '' : ' right');
+      w.style.left = (cxp + px * side) + 'px';
+      w.style.top  = (cyp + py * side) + 'px';
+      w.style.setProperty('--r', (ang * 180 / Math.PI + 90) + 'deg');   // toe → motion dir
+      document.body.appendChild(w);
+      pool.push(w);
+      while (pool.length > MAX) pool.shift().remove();        // cap the trail length
+      setTimeout(() => { const k = pool.indexOf(w); if (k >= 0) pool.splice(k, 1); w.remove(); }, 1150);
+      foot++; lx = cxp; ly = cyp;
     }
+    const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+    let tDown = false;
+    addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { tDown = true; lx = e.clientX; ly = e.clientY; } }, {passive:true});
+    const stepEnd = e => { if (e.pointerType === 'touch') { tDown = false; lx = ly = null; } };
+    addEventListener('pointerup', stepEnd, {passive:true});
+    addEventListener('pointercancel', stepEnd, {passive:true});
+    addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') { if (tDown) dropStep(e.clientX, e.clientY); }
+      else if (fine) dropStep(e.clientX, e.clientY);
+    }, {passive:true});
   })();
 
   // init: first page visible without a page-turn
