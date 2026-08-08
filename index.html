@@ -435,7 +435,7 @@
      이름·역할 정보를 여기서 읽어 텍스처로 굽기 때문이다. */
   .lany-stage .lany{display:none}
   .lany-stage.no3d .lany{display:block}
-  .lany3d-host{position:absolute;inset:0;z-index:5}
+  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
   .lany3d-host .lanyard-wrapper{height:100%}
   .lany3d-host canvas{display:block;touch-action:none}
@@ -444,9 +444,9 @@
   /* drei 가 Html 바깥에 만드는 래퍼들까지 포인터를 끊어야, 카드를 눌렀을 때
      옆 카드가 대신 잡히지 않는다. 클릭은 캔버스(메시)가 받아야 한다. */
   .lany3d-host > div:not(canvas){pointer-events:none}
-  .lany3d-host .cc3d-slot{pointer-events:auto}
+  .lany3d-host .cc3d-slot{pointer-events:none}
   .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;
-    pointer-events:auto;cursor:grab}
+    pointer-events:none}
   .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
     /* drei 의 CSS3D 행렬이 이 배치에서 X 를 뒤집는다. 여기서 되돌린다. */
     transform:scaleX(-1);transition:none;cursor:default;pointer-events:none;
@@ -2656,9 +2656,23 @@ void main(){
       };
       const band = slot => slot && slot.__band;
 
+      // 판의 히트박스가 보이는 카드와 어긋나 모서리만 먹었다. 호스트가 전부 받고
+      // 화면상 사각형으로 어느 카드인지 직접 고른다. 겹치면 앞쪽(뒤에 그린 것)을
+      // 고른다 — 그게 눈에 보이는 카드다.
+      const pick = e => {
+        const slots = [...host.querySelectorAll('.cc3d-slot')];
+        for (let i = slots.length - 1; i >= 0; i--) {
+          const r = slots[i].getBoundingClientRect();
+          if (!r.width) continue;
+          if (e.clientX >= r.left && e.clientX <= r.right &&
+              e.clientY >= r.top && e.clientY <= r.bottom) return slots[i];
+        }
+        return null;
+      };
+
       host.addEventListener('pointerdown', e => {
         if (page.classList.contains('zoomed')) return;
-        downSlot = e.target.closest && e.target.closest('.cc3d-slot');
+        downSlot = pick(e);
         moved = 0; sx = e.clientX; sy = e.clientY;
         if (!downSlot) return;
         host.setPointerCapture && host.setPointerCapture(e.pointerId);
