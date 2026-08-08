@@ -444,8 +444,10 @@
   /* drei 가 Html 바깥에 만드는 래퍼들까지 포인터를 끊어야, 카드를 눌렀을 때
      옆 카드가 대신 잡히지 않는다. 클릭은 캔버스(메시)가 받아야 한다. */
   .lany3d-host > div:not(canvas){pointer-events:none}
-  .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;pointer-events:none}
-  .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;
+  .lany3d-host .cc3d-slot,.lany3d-host .cc3d-slot *{pointer-events:auto}
+  .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;
+    pointer-events:auto;cursor:pointer}
+  .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;
     /* drei 의 CSS3D 행렬이 이 배치에서 X 를 뒤집는다. 여기서 되돌린다. */
     transform:scaleX(-1);transition:none;cursor:default;pointer-events:none;
     filter:drop-shadow(0 18px 26px rgba(0,0,0,.55))}
@@ -593,7 +595,8 @@
     transform:none;transition:none;pointer-events:auto;
     filter:drop-shadow(0 2.5cqw 5cqw rgba(0,0,0,.6))}
   .cc-zoom .cc-inner{transform:none;transform-style:flat;transition:none}
-  .cc-zoom .cc-face{transform:none;backface-visibility:visible;transition:opacity .38s ease}
+  .cc-zoom .cc,.cc-zoom .cc-inner,.cc-zoom .cc-face{transform:none !important}
+  .cc-zoom .cc-face{backface-visibility:visible;transition:opacity .38s ease}
   .cc-zoom .cc-back{opacity:0}
   .cc-zoom .cc.flipped .cc-front{opacity:0}
   .cc-zoom .cc.flipped .cc-back{opacity:1}
@@ -2601,6 +2604,20 @@ void main(){
         page.appendChild(zoomEl);
         page.classList.add('zoomed');
       }
+
+      // 보이는 카드는 DOM 판이고 클릭 판정은 그 뒤 3D 메시라 서로 어긋났다.
+      // 판을 직접 누를 수 있게 해서 눌린 카드를 사진 경로로 되찾는다.
+      host.addEventListener('click', e => {
+        const slot = e.target.closest && e.target.closest('.cc3d-slot');
+        if (!slot || page.classList.contains('zoomed')) return;
+        const photo = slot.querySelector('.cc-photo');
+        if (!photo) return;
+        const i = list.findIndex(p => {
+          const q = p.el && p.el.querySelector('.cc-photo');
+          return q && q.src === photo.src;
+        });
+        if (i >= 0) openZoom(i);
+      });
 
       handle = window.NewtonLanyard.mount(host, {
         people: list,
