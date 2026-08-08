@@ -483,10 +483,21 @@ playwith_page = f'''
   </div>
 </div>'''
 
+# 내용상 프로젝션 유닛이 스테이션보다 먼저 온다. structure_full 의 문서 순서는 건드리지
+# 않는다 — 위쪽 구간 슬라이싱이 마커의 문서 위치에 의존하므로, 출력 순서만 바꾼다.
+PAGE_ORDER = [
+    "01 From Routine to Challenge", "02 Challenge Spark", "03 Target", "04 Solution",
+    "05 Wearable Robotics", "07 Projection Unit", "06 Station",
+    "08 Scenario", "09 Extensibility",
+]
+assert sorted(PAGE_ORDER) == sorted(MARKERS), "PAGE_ORDER 가 MARKERS 를 그대로 담고 있지 않다"
+LAST_PRODUCT = "06 Station"   # "Play with Newton!" 은 Products 마지막 페이지 뒤에 들어간다
+
+seg_of = dict(sections)
 pages_out = []
-for m, seg in sections:
-    pages_out.append(render_page(m, seg))
-    if m.startswith("07"):
+for m in PAGE_ORDER:
+    pages_out.append(render_page(m, seg_of[m]))
+    if m == LAST_PRODUCT:
         pages_out.append(playwith_page)
 sections_html = "".join(pages_out)
 
