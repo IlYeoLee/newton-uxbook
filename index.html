@@ -391,8 +391,8 @@
      납작한 끈이 아니라 물리적인 띠로 읽힌다. SVG 는 스트로크 폭을 따라 그라디언트를
      못 넣어서 이렇게 겹치는 편이 확실하다. */
   .rp-band {fill:none;stroke:#05070A;stroke-width:1.95cqw;stroke-linecap:butt;stroke-linejoin:round}
-  .rp-mid  {fill:none;stroke:#1C2127;stroke-width:1.52cqw;stroke-linecap:butt;stroke-linejoin:round}
-  .rp-sheen{fill:none;stroke:rgba(255,255,255,.09);stroke-width:.5cqw;stroke-linecap:butt}
+  .rp-mid  {fill:none;stroke:#0E1114;stroke-width:1.52cqw;stroke-linecap:butt;stroke-linejoin:round}
+  .rp-sheen{fill:none;stroke:rgba(255,255,255,.045);stroke-width:.5cqw;stroke-linecap:butt}
   .rp-logos image{opacity:.92}
   /* 스트랩 끝: 검은 커넥터 탭 + 금속 링(카드 구멍에 걸리는 부분) */
   .lany-clip{position:absolute;left:0;top:0;width:1.72cqw;height:2.1cqw;border-radius:.3cqw;
@@ -1453,7 +1453,7 @@
 
         // 워드마크를 줄 위에 일정 간격으로 얹는다. 접선 각도로 돌려 곡선을 따라간다.
         const strapW = r.card.offsetWidth * 0.0934;      // .rp-band stroke-width 와 같은 비율
-        const LW = strapW * 0.80, LH = LW / 6.98;        // wordmark.svg 는 872x125
+        const LW = strapW * 2.6, LH = LW / 6.98;        // wordmark.svg 는 872x125
         r.logos.forEach((im, k) => {
           const idx = 2 + k * 2;                          // SEG=14 구간에 6개
           const p0 = pts[Math.max(0, idx - 1)], p1 = pts[Math.min(SEG, idx + 1)];
