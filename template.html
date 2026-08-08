@@ -231,10 +231,12 @@
      텍스트 블록 219(18.17cqw) · 이미지 영역 469 · 좌우 여백 80(6.639cqw),
      kicker 는 블록 상단에서 50(4.15cqw), 타이틀/본문 행은 97(8.05cqw). */
   .wide-text{flex:none;height:18.17cqw;padding:4.15cqw 6.639cqw 0;overflow:hidden}
-  /* BX 타이틀은 세로 페이지보다 길다. 264px 고정폭이면 두 줄이 부서진다. */
-  .wide-text .head-title{width:31cqw;font-size:2.24cqw;line-height:1.28}
-  .wide-text .head-body{font-size:1.16cqw;line-height:1.62}
+  /* 피그마 27:302 실측 그대로. 타이틀 32px lh45 폭 264, 본문 18px lh27 폭 761,
+     둘 사이 간격 20. 이 값들은 이미 .head-title/.head-row 가 갖고 있으므로
+     폭이나 크기를 덮어쓰지 않는다 — 덮어쓰면 두 줄 제목이 부서진다. */
   .wide-text .head-block{margin:0}
+  .wide-text .head-title{font-size:2.656cqw;line-height:1.406}
+  .wide-text .head-body{font-size:1.494cqw;line-height:1.5;max-width:63.15cqw}
   /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
      object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
   .wide-media{flex:none;aspect-ratio:1185/449;margin:0 0.830cqw 0.830cqw;

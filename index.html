@@ -231,10 +231,12 @@
      텍스트 블록 219(18.17cqw) · 이미지 영역 469 · 좌우 여백 80(6.639cqw),
      kicker 는 블록 상단에서 50(4.15cqw), 타이틀/본문 행은 97(8.05cqw). */
   .wide-text{flex:none;height:18.17cqw;padding:4.15cqw 6.639cqw 0;overflow:hidden}
-  /* BX 타이틀은 세로 페이지보다 길다. 264px 고정폭이면 두 줄이 부서진다. */
-  .wide-text .head-title{width:31cqw;font-size:2.24cqw;line-height:1.28}
-  .wide-text .head-body{font-size:1.16cqw;line-height:1.62}
+  /* 피그마 27:302 실측 그대로. 타이틀 32px lh45 폭 264, 본문 18px lh27 폭 761,
+     둘 사이 간격 20. 이 값들은 이미 .head-title/.head-row 가 갖고 있으므로
+     폭이나 크기를 덮어쓰지 않는다 — 덮어쓰면 두 줄 제목이 부서진다. */
   .wide-text .head-block{margin:0}
+  .wide-text .head-title{font-size:2.656cqw;line-height:1.406}
+  .wide-text .head-body{font-size:1.494cqw;line-height:1.5;max-width:63.15cqw}
   /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
      object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
   .wide-media{flex:none;aspect-ratio:1185/449;margin:0 0.830cqw 0.830cqw;
@@ -971,15 +973,15 @@
   </div>
 </div>
 <div class="page wide-page" data-page="sec-10">
-  <div class="wide-text"><div class="head-block"><p class="kicker">Verbal Branding</p><div class="head-row"><h2 class="head-title" data-en="Now it&#x27;s your turn to feel it">이제, 당신이 경험할 차례</h2><p class="head-body" data-en="Every day we meet a new sports trend and picture ourselves inside it. But between that and moving sits more hesitation than we expect. Newton is lower-body wearable robotics that lets you try the movement on screen with your own body before the interest fades. It starts where the body pushes forward and reads impact and balance first, so unfamiliar movement can be followed at your own speed and range. As the scientist Newton found an order no one could see, Newton lets sport that felt far away be lived again on your body and the ground. If your heart has moved, it is your turn.">우리는 매일 새로운 스포츠 트렌드를 마주하고, 그것에 몰입한 나를 상상해보곤 합니다. 하지만, 실제로 행동하기까지는 생각보다 많은 망설임이 존재합니다. Newton은 그 관심이 사라지기 전, 화면 속 움직임을 내 몸으로 시도할 수 있게 만드는 하체 웨어러블 로보틱스입니다. 몸을 앞으로 밀어내고 지면의 충격과 균형을 가장 먼저 읽는 하체에서 출발해, 낯선 움직임도 내 속도와 범위 안에서 자연스럽게 따라갈 수 있도록 돕습니다. 과학자 뉴턴이 보이지 않던 움직임의 질서를 발견했듯, Newton은 어렵고 멀게 느껴졌던 스포츠를 몸과 지면 위에서 다시 경험하게 합니다. 마음이 움직였다면, 이제 당신의 차례입니다.</p></div></div></div>
+  <div class="wide-text"><div class="head-block"><p class="kicker">Verbal Branding</p><div class="head-row"><h2 class="head-title" data-en="Now it&#x27;s your turn to feel it">이제, 당신이<br>경험할 차례</h2><p class="head-body" data-en="We meet a new sports trend daily and picture ourselves in it, but hesitation sits between that and moving. Newton is lower-body wearable robotics that lets you try what is on screen before the interest fades. If your heart moved, it is your turn.">우리는 매일 새로운 스포츠 트렌드를 마주하고, 그것에 몰입한 나를 상상해보곤 합니다. 하지만 행동하기까지는 많은 망설임이 있습니다. Newton은 그 관심이 사라지기 전, 화면 속 움직임을 내 몸으로 시도하게 만드는 하체 웨어러블 로보틱스입니다. 마음이 움직였다면, 이제 당신의 차례입니다.</p></div></div></div>
   <div class="wide-media"><img class="media" src="assets/bx_value.png" alt="" loading="lazy"></div>
 </div>
 <div class="page wide-page" data-page="sec-11">
-  <div class="wide-text"><div class="head-block"><p class="kicker">Logo</p><div class="head-row"><h2 class="head-title" data-en="A logo that holds the first move">움직임의 시작을<br>담은 Logo</h2><p class="head-body" data-en="The logo looks like a light user who wants to follow a great move, however clumsily. The lower body running forward became the wearable&#x27;s symbol — the moment a play watched through a screen is tried with your own body. What matters more than perfect form is wanting to move now. Newton starts that first turn with you.">Newton의 로고는 비록 서툴더라도 멋진 움직임을 따라가고 싶은 라이트 유저의 모습과 닮아 있습니다. 앞으로 달려가는 하체 그래픽은 하체 웨어러블 Newton의 심볼이 되어, 화면 너머로 바라보던 플레이를 내 몸으로 시도하는 순간을 표현합니다. 완벽한 자세보다 중요한 것은 지금 움직이고 싶다는 마음입니다. Newton은 그 작은 마음이 실제 움직임으로 이어질 수 있도록, 사용자의 첫 번째 턴을 함께 시작합니다.</p></div></div></div>
+  <div class="wide-text"><div class="head-block"><p class="kicker">Logo</p><div class="head-row"><h2 class="head-title" data-en="A logo that holds the first move">움직임의 시작을<br>담은 Logo</h2><p class="head-body" data-en="The logo resembles a light user chasing a great move, however clumsily. The lower body running forward holds the moment a play once watched is tried with your own body. Wanting to move now matters more than perfect form.">Newton의 로고는 서툴더라도 멋진 움직임을 따라가고 싶은 라이트 유저를 닮았습니다. 앞으로 달려가는 하체 그래픽은 화면 너머로 바라보던 플레이를 내 몸으로 시도하는 순간을 표현합니다. 완벽한 자세보다 중요한 건 지금 움직이고 싶다는 마음입니다.</p></div></div></div>
   <div class="wide-media"><img class="media" src="assets/bx_logo.png" alt="" loading="lazy"></div>
 </div>
 <div class="page wide-page" data-page="sec-12">
-  <div class="wide-text"><div class="head-block"><p class="kicker">Color</p><div class="head-row"><h2 class="head-title" data-en="The gradient that wakes a new movement">새로운 움직임을 깨우는<br>그라디언트</h2><p class="head-body" data-en="Newton uses a gradient where light and heat carry into each other. Rising dawn is the moment a movement begins; heat still unspent at night is the will to keep going. Red bleeding into soft light traces how a movement once watched becomes play.">Newton은 빛과 열이 이어지는 그라디언트 컬러 시스템을 사용합니다. 떠오르는 새벽빛은 새로운 움직임이 시작되는 순간을, 늦은 밤에도 식지 않은 열기는 계속 도전하고 싶은 마음을 나타냅니다. 붉은 에너지에서 부드러운 빛으로 번지는 컬러의 흐름은 화면 너머로 바라보던 움직임이 실제 플레이로 이어지는 과정을 보여줍니다.</p></div></div></div>
+  <div class="wide-text"><div class="head-block"><p class="kicker">Color</p><div class="head-row"><h2 class="head-title" data-en="The gradient that wakes a new movement">새로운 움직임을 깨우는<br>그라디언트</h2><p class="head-body" data-en="A gradient where light and heat carry into each other. Rising dawn is a movement beginning; heat unspent at night is the will to keep going. Red bleeding into soft light traces that passage.">Newton은 빛과 열이 이어지는 그라디언트 컬러 시스템을 씁니다. 떠오르는 새벽빛은 움직임이 시작되는 순간을, 식지 않은 밤의 열기는 계속 도전하고 싶은 마음을 나타냅니다. 붉은 에너지에서 부드러운 빛으로 번지는 흐름이 그 과정을 보여줍니다.</p></div></div></div>
   <div class="wide-media"><div class="fade-stack"><div class="fade-track" data-n="3"><img src="assets/bx_color.png" alt="" loading="lazy"><img src="assets/bx_color_dark.png" alt="" loading="lazy"><img src="assets/bx_color.png" alt="" loading="lazy"></div></div></div>
 </div>
 <div class="page wide-page" data-page="sec-13">
