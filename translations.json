@@ -277,10 +277,10 @@
  "디자인 시스템": "Design System",
  "둥근 느낌의 카드 R값": "Rounded card radius",
  "Newton 전용 파우치": "The Newton pouch",
- "이제, 당신이 경험할 차례": "Gradient and silhouette graphics",
- "그라디언트와 실루엣 그래픽": "Now it's your turn to feel it",
- "움직임의 시작을\n담은 Logo": "A GUI that echoes the product's form",
- "제품의 조형과 연결되는 GUI": "A logo that holds\nthe first move",
+ "이제, 당신이 경험할 차례": "Now it's your turn to feel it",
+ "그라디언트와 실루엣 그래픽": "Gradient and silhouette graphics",
+ "움직임의 시작을\n담은 Logo": "A logo that holds\nthe first move",
+ "제품의 조형과 연결되는 GUI": "A GUI that echoes the product's form",
  "움직임을 읽게 하는\n타입 시스템": "A type system\nbuilt to be read in motion",
  "새로운 움직임을 깨우는\n그라디언트": "The gradient that wakes\na new movement",
  "나의 취향을 담은\nNewton 키링": "A Newton keyring\nmade to your taste",
@@ -296,5 +296,10 @@
  "서브 타입으로 사용되는 OffBit Trial Dot Bold는 움직임을 이루는 작은 신호를 도트 형태로 표현합니다. 하나의 도트가 기록되고 연결되며 더 큰 흐름으로 확장되듯, Newton의 타입 시스템은 움직임이 데이터로 쌓이고 다시 새로운 플레이로 이어지는 구조를 보여줍니다.": "The sub type, OffBit Trial Dot Bold, renders the small signals of movement as dots. As one dot is recorded, joined, and grows into a larger flow, the type system shows movement stacking into data and returning as play.",
  "Newton은 빛과 열이 이어지는 그라디언트 컬러 시스템을 사용합니다. 떠오르는 새벽빛은 새로운 움직임이 시작되는 순간을, 늦은 밤에도 식지 않은 열기는 계속 도전하고 싶은 마음을 나타냅니다. 붉은 에너지에서 부드러운 빛으로 번지는 컬러의 흐름은 화면 너머로 바라보던 움직임이 실제 플레이로 이어지는 과정을 보여줍니다.": "Newton uses a gradient where light and heat carry into each other. Rising dawn is the moment a movement begins; heat still unspent at night is the will to keep going. Red bleeding into soft light traces how a movement once watched becomes play.",
  "Newton의 로고는 비록 서툴더라도 멋진 움직임을 따라가고 싶은 라이트 유저의 모습과 닮아 있습니다. 앞으로 달려가는 하체 그래픽은 하체 웨어러블 Newton의 심볼이 되어, 화면 너머로 바라보던 플레이를 내 몸으로 시도하는 순간을 표현합니다. 완벽한 자세보다 중요한 것은 지금 움직이고 싶다는 마음입니다. Newton은 그 작은 마음이 실제 움직임으로 이어질 수 있도록, 사용자의 첫 번째 턴을 함께 시작합니다.": "The logo looks like a light user who wants to follow a great move, however clumsily. The lower body running forward became the wearable's symbol — the moment a play watched through a screen is tried with your own body. What matters more than perfect form is wanting to move now. Newton starts that first turn with you.",
- "우리는 매일 새로운 스포츠 트렌드를 마주하고, 그것에 몰입한 나를 상상해보곤 합니다. 하지만, 실제로 행동하기까지는 생각보다 많은 망설임이 존재합니다. Newton은 그 관심이 사라지기 전, 화면 속 움직임을 내 몸으로 시도할 수 있게 만드는 하체 웨어러블 로보틱스입니다. 몸을 앞으로 밀어내고 지면의 충격과 균형을 가장 먼저 읽는 하체에서 출발해, 낯선 움직임도 내 속도와 범위 안에서 자연스럽게 따라갈 수 있도록 돕습니다. 과학자 뉴턴이 보이지 않던 움직임의 질서를 발견했듯, Newton은 어렵고 멀게 느껴졌던 스포츠를 몸과 지면 위에서 다시 경험하게 합니다. 마음이 움직였다면, 이제 당신의 차례입니다.": "Every day we meet a new sports trend and picture ourselves inside it. But between that and moving sits more hesitation than we expect. Newton is lower-body wearable robotics that lets you try the movement on screen with your own body before the interest fades. It starts where the body pushes forward and reads impact and balance first, so unfamiliar movement can be followed at your own speed and range. As the scientist Newton found an order no one could see, Newton lets sport that felt far away be lived again on your body and the ground. If your heart has moved, it is your turn."
+ "우리는 매일 새로운 스포츠 트렌드를 마주하고, 그것에 몰입한 나를 상상해보곤 합니다. 하지만, 실제로 행동하기까지는 생각보다 많은 망설임이 존재합니다. Newton은 그 관심이 사라지기 전, 화면 속 움직임을 내 몸으로 시도할 수 있게 만드는 하체 웨어러블 로보틱스입니다. 몸을 앞으로 밀어내고 지면의 충격과 균형을 가장 먼저 읽는 하체에서 출발해, 낯선 움직임도 내 속도와 범위 안에서 자연스럽게 따라갈 수 있도록 돕습니다. 과학자 뉴턴이 보이지 않던 움직임의 질서를 발견했듯, Newton은 어렵고 멀게 느껴졌던 스포츠를 몸과 지면 위에서 다시 경험하게 합니다. 마음이 움직였다면, 이제 당신의 차례입니다.": "Every day we meet a new sports trend and picture ourselves inside it. But between that and moving sits more hesitation than we expect. Newton is lower-body wearable robotics that lets you try the movement on screen with your own body before the interest fades. It starts where the body pushes forward and reads impact and balance first, so unfamiliar movement can be followed at your own speed and range. As the scientist Newton found an order no one could see, Newton lets sport that felt far away be lived again on your body and the ground. If your heart has moved, it is your turn.",
+ "움직임의 시작을 담은 Logo": "A logo that holds\nthe first move",
+ "움직임을 읽게 하는 타입 시스템": "A type system\nbuilt to be read in motion",
+ "새로운 움직임을 깨우는 그라디언트": "The gradient that wakes\na new movement",
+ "나의 취향을 담은 Newton 키링": "A Newton keyring\nmade to your taste",
+ "플레이의 흐름을 연결하는 모바일 GUI": "A mobile GUI that\nconnects the flow of play"
 }

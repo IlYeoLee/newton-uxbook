@@ -536,13 +536,13 @@ def render_page(marker, seg):
             media = f'<div class="fade-stack"><div class="fade-track" data-n="{len(seq)}">{slides}</div></div>'
         else:
             media = img_tag(hero["src"]) if hero else ""
+        # 피그마 27:302 는 kicker 위, 타이틀 좌 / 본문 우다 — 기존 head_block 이 그 구조다
+        first_p, rest3 = first_paragraph(rest2)
+        body_text = first_p.get('x', '') if first_p else ''
+        head = head_block(kicker, h4['x'] if h4 else '', body_text)
         return f'''
 <div class="page wide-page" data-page="sec-{num}">
-  <div class="wide-text">
-    <p class="kicker">{esc(kicker)}</p>
-    {title_html}
-    {render_children(rest2)}
-  </div>
+  <div class="wide-text">{head}{render_children(rest3)}</div>
   <div class="wide-media">{media}</div>
 </div>'''
     # everything else keeps the left-image / right-text two-column layout
