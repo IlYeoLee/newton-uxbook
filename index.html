@@ -2643,14 +2643,18 @@ void main(){
       // 3D 레이캐스트는 보이는 판과 계속 어긋났다(어느 카드를 눌러도 첫 사람만
       // 열리고 첫 카드만 움직였다). 그래서 판정을 눈에 보이는 DOM 판으로 옮긴다.
       // 판이 곧 카드이므로 어긋날 수가 없다.
-      const canvas = host.querySelector('canvas');
+      // 캔버스는 React 가 마운트한 뒤에 생긴다. 여기서 미리 잡으면 null 이고,
+      // ndc() 가 그 자리에서 터져 드래그가 시작조차 못 했다. 쓸 때 찾는다.
+      const getCanvas = () => host.querySelector('canvas');
       let downSlot = null, moved = 0, sx = 0, sy = 0;
 
       // 끌기: 캔버스로 이벤트를 흘려보내면 결국 레이캐스트를 타서 첫 카드로
       // 몰린다. 판마다 자기 카드의 물리를 직접 미는 API(__band)를 들고 있으므로
       // 그걸 부른다. 좌표는 캔버스 기준 NDC(-1~1)로 바꿔 넘긴다.
       const ndc = e => {
-        const r = canvas.getBoundingClientRect();
+        const cv = getCanvas();
+        if (!cv) return [0, 0];
+        const r = cv.getBoundingClientRect();
         return [((e.clientX - r.left) / r.width) * 2 - 1,
                 -((e.clientY - r.top) / r.height) * 2 + 1];
       };
