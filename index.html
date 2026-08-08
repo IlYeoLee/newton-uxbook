@@ -2675,7 +2675,15 @@ void main(){
         return null;
       };
 
+      // 직전에 잡았던 카드를 반드시 놓고 시작한다. 확대 중이라고 그냥 빠져나가면
+      // downSlot 이 남아 있어서, 다음 마우스 움직임이 전부 그 카드로 가 마우스에
+      // 달라붙는다.
+      const release = () => {
+        if (downSlot) { const b = band(downSlot); if (b) b.end(); }
+        downSlot = null; moved = 0;
+      };
       host.addEventListener('pointerdown', e => {
+        release();
         if (page.classList.contains('zoomed')) return;
         downSlot = pick(e);
         moved = 0; sx = e.clientX; sy = e.clientY;
@@ -2686,6 +2694,8 @@ void main(){
       });
       host.addEventListener('pointermove', e => {
         if (!downSlot) return;
+        if (page.classList.contains('zoomed')) { release(); return; }
+        if (e.buttons === 0) { release(); return; }   // 버튼을 뗀 채 지나가면 놓는다
         moved += Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
         sx = e.clientX; sy = e.clientY;
         const b = band(downSlot);
