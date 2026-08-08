@@ -563,8 +563,9 @@ ROLE_NAME = {"PL": "Project Lead", "ID": "Industrial Design",
              "UX": "UX Design", "VD": "Video Direction"}
 PEOPLE = [
     # 링크의 추적 파라미터(igsh, utm_source)는 떼고 넣는다
-    {"ko": "송시헌", "en": "Siheon Song", "img": "person1",
-     "roles": ["PL", "ID"], "sns": {"instagram": "", "behance": ""}},   # 아직 못 받음
+    {"ko": "송시헌", "en": "Siheon Song", "img": "person1", "roles": ["PL", "ID"],
+     "sns": {"instagram": "https://www.instagram.com/halcy_heon",
+             "behance": "https://www.behance.net/halcyheon"}},
     {"ko": "이일여", "en": "Ilyeo Lee", "img": "person2", "roles": ["UX"],
      "desc": ["UX Research Strategy", "Mobile UX  Projection GUI",
               "Sports Simulator Development", "UX Process Book Development"],
