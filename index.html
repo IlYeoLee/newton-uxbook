@@ -441,7 +441,11 @@
   .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;pointer-events:none}
   .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;
     transform:none;transition:none;cursor:default;pointer-events:none;filter:none}
-  .cc3d-slot .cc-inner{transition:transform .55s cubic-bezier(.22,.7,.24,1)}
+  /* 슬롯 자체가 3D 에서 180° 돌아 있다(그래야 글자가 안 뒤집힌다). 그만큼 안쪽
+     앞뒷면 순서도 뒤집히므로 여기서 되돌린다. 기본이 앞면, flipped 가 뒷면. */
+  .cc3d-slot .cc-inner{transform:rotateY(180deg);
+    transition:transform .55s cubic-bezier(.22,.7,.24,1)}
+  .cc3d-slot .cc.flipped .cc-inner{transform:rotateY(0deg)}
   /* Extensibility 등에 쓰는 .kicker 와 같은 크기·색. 가운데 정렬에 하단 40px(1205 기준). */
   /* 하단 고정 묶음: DESIGNED BY 위, thanks to 블록 아래. 카드가 이 위로 매달린다. */
   .credits-foot{position:absolute;left:0;right:0;bottom:0;z-index:8;pointer-events:none;
