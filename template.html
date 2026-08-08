@@ -601,7 +601,7 @@
   .cc-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;
     -webkit-backdrop-filter:blur(0.9cqw);backdrop-filter:blur(0.9cqw);
     transition:opacity .24s ease;z-index:40;border-radius:inherit}
-  .credits-page.zoomed .cc-dim{opacity:1;pointer-events:auto}
+  .credits-page.zoomed .cc-dim{opacity:1;pointer-events:auto;z-index:70}
   /* 이미지 라이트박스의 .lb-close 를 그대로 쓴다(48x48 원형, 아이콘 20px, 같은 그림자).
      여기서는 위치만 잡는다 — 크기를 건드리면 토글 쪽 닫기 버튼과 달라진다.
      .lb-close 가 소스상 뒤에서 position:relative 를 걸므로 명시도만 한 단계 올린다. */
@@ -2214,7 +2214,8 @@ void main(){
         zoomEl.className = 'cc-zoom';
         const clone = src.cloneNode(true);
         clone.removeAttribute('style');
-        clone.classList.remove('grabbing', 'flipped');
+        clone.classList.remove('grabbing');
+        clone.classList.add('flipped');   // 확대하면 뒷면(역할·SNS)이 기본
         // 카드 아무 데나 누르면 앞뒤가 뒤집힌다. 단, SNS 버튼은 링크로 살린다.
         clone.addEventListener('click', e => {
           if (e.target.closest('.cc-sns')) return;
