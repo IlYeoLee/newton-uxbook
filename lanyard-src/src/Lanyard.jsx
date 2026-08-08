@@ -237,16 +237,16 @@ function Band({
     <>
       <group position={[anchorX, hangY, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={[0, -0.5, 0]} ref={j1} {...segmentProps}>
+        <RigidBody position={[0, -1.05, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0, -1, 0]} ref={j2} {...segmentProps}>
+        <RigidBody position={[0, -2.1, 0]} ref={j2} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0, -1.5, 0]} ref={j3} {...segmentProps}>
+        <RigidBody position={[0, -3.15, 0]} ref={j3} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0, -2, 0]} ref={card} {...segmentProps} type={cardType}>
+        <RigidBody position={[0, -5.15, 0]} ref={card} {...segmentProps} type={cardType}>
           <CuboidCollider args={[1.067, 1.500, 0.02]} />
           <group
             scale={3}

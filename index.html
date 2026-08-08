@@ -435,7 +435,9 @@
      이름·역할 정보를 여기서 읽어 텍스처로 굽기 때문이다. */
   .lany-stage .lany{display:none}
   .lany-stage.no3d .lany{display:block}
-  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto}
+  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto;
+    opacity:0;transition:opacity .45s ease}
+  .lany3d-host.ready{opacity:1}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
   .lany3d-host .lanyard-wrapper{height:100%}
   .lany3d-host canvas{display:block;touch-action:none;pointer-events:none}
@@ -2619,6 +2621,9 @@ void main(){
       if (!list.length) return;
       const host = document.createElement('div');
       host.className = 'lany3d-host';
+      // 줄이 중력으로 자리를 잡는 동안(약 0.9초)은 감춘다. 안 그러면 카드가
+      // 화면을 다 가릴 만큼 쭉 내려갔다 올라오는 게 그대로 보인다.
+      setTimeout(() => host.classList.add('ready'), 900);
       stage.appendChild(host);
       stage.classList.add('is3d');
       // 확대는 3D 가 아니라 DOM 으로 한다. 3D 안에서 카메라 쪽으로 끌어오면
@@ -2656,7 +2661,7 @@ void main(){
       // 캔버스는 React 가 마운트한 뒤에 생긴다. 여기서 미리 잡으면 null 이고,
       // ndc() 가 그 자리에서 터져 드래그가 시작조차 못 했다. 쓸 때 찾는다.
       const getCanvas = () => host.querySelector('canvas');
-      let downSlot = null, moved = 0, sx = 0, sy = 0;
+      let downSlot = null, moved = 0, sx = 0, sy = 0, downAt = 0, isTouch = false;
 
       // 끌기: 캔버스로 이벤트를 흘려보내면 결국 레이캐스트를 타서 첫 카드로
       // 몰린다. 판마다 자기 카드의 물리를 직접 미는 API(__band)를 들고 있으므로
@@ -2701,6 +2706,7 @@ void main(){
         if (page.classList.contains('zoomed')) return;
         downSlot = pick(e);
         moved = 0; sx = e.clientX; sy = e.clientY;
+        downAt = Date.now(); isTouch = e.pointerType !== 'mouse';
         if (!downSlot) return;
         host.setPointerCapture && host.setPointerCapture(e.pointerId);
         const b = band(downSlot);
@@ -2719,7 +2725,11 @@ void main(){
         if (!downSlot) return;
         const slot = downSlot, dist = moved;
         release();                     // 잡힌 카드는 전부 놓는다
-        if (dist > 8) return;                       // 끌었으면 확대하지 않는다
+        // 터치는 손가락이 흔들려 8px 를 쉽게 넘긴다. 마우스 8, 터치 22 로 두고
+        // 짧게(300ms 이내) 눌렀다 뗀 건 조금 움직였어도 탭으로 본다.
+        const slop = isTouch ? 22 : 8;
+        const quick = Date.now() - downAt < 300;
+        if (dist > slop && !(quick && dist < slop * 2)) return;
         // 눌린 판이 품고 있는 카드가 곧 그 사람이다. 인덱스를 거치지 않는다.
         const cc = slot.querySelector('.cc');
         if (cc) openZoom(-1, cc);
