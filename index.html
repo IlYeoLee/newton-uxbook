@@ -393,8 +393,7 @@
   .rp-band {fill:none;stroke:#05070A;stroke-width:1.95cqw;stroke-linecap:butt;stroke-linejoin:round}
   .rp-mid  {fill:none;stroke:#1C2127;stroke-width:1.52cqw;stroke-linecap:butt;stroke-linejoin:round}
   .rp-sheen{fill:none;stroke:rgba(255,255,255,.09);stroke-width:.5cqw;stroke-linecap:butt}
-  .rp-mark{fill:rgba(255,255,255,.92);font-size:.62cqw;font-weight:700;letter-spacing:.18em;
-    dominant-baseline:middle}
+  .rp-logos image{opacity:.92}
   /* 스트랩 끝: 검은 커넥터 탭 + 금속 링(카드 구멍에 걸리는 부분) */
   .lany-clip{position:absolute;left:0;top:0;width:1.72cqw;height:2.1cqw;border-radius:.3cqw;
     background:linear-gradient(90deg,#05070A 0%,#2A3038 45%,#12161A 100%);pointer-events:none;
@@ -427,7 +426,8 @@
   .cc-blob{position:absolute;border-radius:50%;pointer-events:none;
     background:radial-gradient(50.2% 57.3% at 50.6% 44.3%,
       #FA3030 2.1%,#FE6E3C 63.7%,#FEC389 83.3%,#D1FEFF 96.2%)}
-  .cc-front .cc-blob{width:225.4%;height:138.1%;left:-61.4%;top:29.2%;filter:blur(calc(var(--cw)*.246))}
+  /* 얼굴을 덜 가리도록 타원을 아래로 내린다(피그마 29.2% → 38%) */
+  .cc-front .cc-blob{width:225.4%;height:138.1%;left:-61.4%;top:38%;filter:blur(calc(var(--cw)*.246))}
   .cc-back  .cc-blob{width:176.6%;height:145.1%;left:-41.4%;top:3.2%;filter:blur(calc(var(--cw)*.0744))}
   .cc-photo{position:absolute;left:0;top:-2.1%;width:100.3%;height:85.7%;
     object-fit:cover;object-position:50% 8%}
@@ -930,7 +930,7 @@
           <path id="rp0" class="rp-band"/>
           <path class="rp-mid" d=""/>
           <path class="rp-sheen" d=""/>
-          <text class="rp-mark"><textPath href="#rp0" startOffset="6">NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;</textPath></text>
+          <g class="rp-logos"></g>
         </svg>
         <div class="lany-clip"><i class="lany-ring"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Siheon Song 카드">
@@ -956,7 +956,7 @@
           <path id="rp1" class="rp-band"/>
           <path class="rp-mid" d=""/>
           <path class="rp-sheen" d=""/>
-          <text class="rp-mark"><textPath href="#rp1" startOffset="6">NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;</textPath></text>
+          <g class="rp-logos"></g>
         </svg>
         <div class="lany-clip"><i class="lany-ring"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Ilyeo Lee 카드">
@@ -982,7 +982,7 @@
           <path id="rp2" class="rp-band"/>
           <path class="rp-mid" d=""/>
           <path class="rp-sheen" d=""/>
-          <text class="rp-mark"><textPath href="#rp2" startOffset="6">NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;</textPath></text>
+          <g class="rp-logos"></g>
         </svg>
         <div class="lany-clip"><i class="lany-ring"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="SoJin Kim 카드">
@@ -1008,7 +1008,7 @@
           <path id="rp3" class="rp-band"/>
           <path class="rp-mid" d=""/>
           <path class="rp-sheen" d=""/>
-          <text class="rp-mark"><textPath href="#rp3" startOffset="6">NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;</textPath></text>
+          <g class="rp-logos"></g>
         </svg>
         <div class="lany-clip"><i class="lany-ring"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Juwon Park 카드">
@@ -1034,7 +1034,7 @@
           <path id="rp4" class="rp-band"/>
           <path class="rp-mid" d=""/>
           <path class="rp-sheen" d=""/>
-          <text class="rp-mark"><textPath href="#rp4" startOffset="6">NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;NEWTON&#160;&#160;&#160;&#160;</textPath></text>
+          <g class="rp-logos"></g>
         </svg>
         <div class="lany-clip"><i class="lany-ring"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Dabin Jeon 카드">
@@ -1272,7 +1272,17 @@
       const paths = [...el.querySelectorAll('.rp-band')];
       const clip = el.querySelector('.lany-clip');
       // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
-      const r = { el, card, paths, clip, pts: [], len: 0, anchor: {x:0,y:0},
+      // 줄에 찍히는 워드마크 — 앱바와 같은 로고를 일정 간격으로 반복한다
+      const logoG = el.querySelector('.rp-logos');
+      const logos = [];
+      for (let k = 0; k < 6; k++) {
+        const im = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        im.setAttribute('href', 'assets/wordmark.svg');
+        im.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        logoG.appendChild(im);
+        logos.push(im);
+      }
+      const r = { el, card, paths, clip, logos, pts: [], len: 0, anchor: {x:0,y:0},
                   drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
@@ -1404,7 +1414,7 @@
             const p = pts[i];
             const vx = (p.x - p.px) * DAMP, vy = (p.y - p.py) * DAMP;
             p.px = p.x; p.py = p.y;
-            p.x += vx + gust * 0.5 * (i / SEG);
+            p.x += vx + gust * 0.16 * (i / SEG);
             p.y += vy + GRAV;
           }
           for (let k = 0; k < ITER; k++) {            // 거리 구속
@@ -1437,6 +1447,18 @@
         for (let i = 1; i <= SEG; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
         r.paths[0].setAttribute('d', d);
         r.el.querySelectorAll('.rp-mid,.rp-sheen').forEach(p => p.setAttribute('d', d));
+
+        // 워드마크를 줄 위에 일정 간격으로 얹는다. 접선 각도로 돌려 곡선을 따라간다.
+        const strapW = r.card.offsetWidth * 0.0934;      // .rp-band stroke-width 와 같은 비율
+        const LW = strapW * 0.80, LH = LW / 6.98;        // wordmark.svg 는 872x125
+        r.logos.forEach((im, k) => {
+          const idx = 2 + k * 2;                          // SEG=14 구간에 6개
+          const p0 = pts[Math.max(0, idx - 1)], p1 = pts[Math.min(SEG, idx + 1)];
+          const deg = Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180 / Math.PI;
+          im.setAttribute('x', -LW / 2); im.setAttribute('y', -LH / 2);
+          im.setAttribute('width', LW);  im.setAttribute('height', LH);
+          im.setAttribute('transform', `translate(${pts[idx].x},${pts[idx].y}) rotate(${deg})`);
+        });
         r.clip.style.transform = `translate(${end.x}px,${end.y}px) translate(-50%,-50%)`;
       }
       requestAnimationFrame(step);
