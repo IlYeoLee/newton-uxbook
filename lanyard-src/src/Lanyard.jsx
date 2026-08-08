@@ -58,7 +58,7 @@ export default function Lanyard({
       >
         <ambientLight intensity={Math.PI} />
         <Suspense fallback={null}>
-        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+        <Physics gravity={gravity} timeStep={1 / 60}>
           {people.map((p, i) => (
             <Band
               key={i}
@@ -92,7 +92,7 @@ export default function Lanyard({
 }
 
 function Band({
-  maxSpeed = 50,
+  maxSpeed = 22,
   minSpeed = 0,
   isMobile = false,
   index = 0,
@@ -214,7 +214,7 @@ function Band({
       curve.points[1].copy(j2.current.lerped);
       curve.points[2].copy(j1.current.lerped);
       curve.points[3].copy(fixed.current.translation());
-      band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+      band.current.geometry.setPoints(curve.getPoints(32));
       ang.copy(card.current.angvel());
       rot.copy(card.current.rotation());
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });

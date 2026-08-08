@@ -825,7 +825,7 @@
   .ar-track{position:absolute;left:0;right:0;top:8cqw;bottom:8cqw;transform-style:preserve-3d}
   .ar-item{position:absolute;left:50%;top:50%;margin:0;
     transform-style:preserve-3d;will-change:transform,opacity;
-    transition:transform .5s cubic-bezier(.22,.7,.24,1),opacity .5s ease}
+    transition:transform .34s cubic-bezier(.22,.7,.24,1),opacity .34s ease}
   /* 세로 사진이 스테이지를 넘지 않도록 가로·세로 둘 다 못 박는다. */
   .ar-item img{display:block;width:auto;height:auto;max-width:38cqw;max-height:40cqw;
     border-radius:1.245cqw;box-shadow:0 2cqw 4cqw rgba(0,0,0,.55)}
@@ -833,7 +833,7 @@
      이미지는 불투명하게 두고 위에 검정 레이어를 덮어 어둡게만 만든다. */
   .ar-item::after{content:"";position:absolute;inset:0;border-radius:1.245cqw;
     background:#000;opacity:var(--dim,0);pointer-events:none;
-    transition:opacity .5s ease}
+    transition:opacity .34s ease}
   .ar-item.is-center{cursor:zoom-in}
   .ar-head{position:absolute;left:0;right:0;top:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
@@ -2138,6 +2138,15 @@ void main(){
         if (d < -L / 2) d += L;
         const ad = Math.abs(d);
         // 5칸 밖은 아예 빼서 노드 수가 많아도 무겁지 않게 한다
+        // 고리를 한 바퀴 넘길 때 d 의 부호가 확 뒤집힌다. 그대로 두면 그 장이
+        // 화면 한가운데를 가로질러 미끄러져 오면서 밝게 스쳐 지나간다.
+        // 그런 프레임에서는 전환을 꺼서 제자리에 순간이동시킨다.
+        const prev = el._d;
+        el._d = d;
+        if (prev !== undefined && Math.abs(prev - d) > L / 2) {
+          el.style.transition = 'none';
+          requestAnimationFrame(() => { el.style.transition = ''; });
+        }
         if (ad > 3){ el.style.visibility = 'hidden'; return; }
         el.style.visibility = 'visible';
         const ang = d * STEP;
@@ -2181,7 +2190,12 @@ void main(){
     stage.addEventListener('pointermove', e => {
       if (sx === null) return;
       const d = e.clientX - sx;
-      if (Math.abs(d) > stage.clientWidth * 0.06){ go(cur - Math.sign(d)); sx = e.clientX; dragged = true; }
+      // 끈 만큼 여러 칸이 한 번에 넘어간다. 한 칸당 6% 는 태블릿에서 너무 둔했다.
+      const step = stage.clientWidth * 0.035;
+      if (Math.abs(d) > step){
+        const k = Math.trunc(d / step);
+        go(cur - k); sx += k * step; dragged = true;
+      }
     });
     stage.addEventListener('pointerup', e => {
       const wasDrag = dragged;
