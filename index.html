@@ -1425,7 +1425,9 @@
     function open(r){
       if (page.classList.contains('zoomed')) { r.card.classList.toggle('flipped'); return; }
       frozen = true;                       // 여기서 모든 움직임이 선다
-      ropes.forEach(o => { o.tilt.x = o.tilt.y = 0; o.drag = null; });
+      // 매 프레임 넣던 인라인 drop-shadow 를 비운다. 인라인이 남아 있으면
+      // 확대 시 흐리게 하는 CSS 규칙(filter:blur)을 덮어써서 딤/블러가 안 걸린다.
+      ropes.forEach(o => { o.tilt.x = o.tilt.y = 0; o.drag = null; o.card.style.filter = ''; });
       page.classList.add('zoomed');
       r.el.classList.add('on');
       r.zoom = true;
@@ -1568,7 +1570,9 @@
         });
         // 버클 + 후크: 로프 끝에서 카드 상단까지를 잇는다. 같은 SVG 좌표계라 안 어긋난다.
         const bang = Math.atan2(end.x - pts[SEG-1].x, -(end.y - pts[SEG-1].y)) * 180 / Math.PI;
-        const bw = W0 * 1.9, bh = W0 * 2.2;
+        // W0 는 반폭이라 줄의 전체 폭은 W0*2 다. 버클을 W0*1.9 로 두면 줄보다 좁아져
+        // 줄이 양옆으로 삐져나온다 — 실제 버클은 줄보다 넓게 물린다.
+        const bw = W0 * 2.7, bh = W0 * 2.1;
         const at = `translate(${end.x},${end.y}) rotate(${bang})`;
         r.buckle.setAttribute('x', -bw / 2);
         r.buckle.setAttribute('y', 0);
