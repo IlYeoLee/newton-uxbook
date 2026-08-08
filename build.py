@@ -566,6 +566,8 @@ PEOPLE = [
     {"ko": "송시헌", "en": "Siheon Song", "img": "person1",
      "roles": ["PL", "ID"], "sns": {"instagram": "", "behance": ""}},   # 아직 못 받음
     {"ko": "이일여", "en": "Ilyeo Lee", "img": "person2", "roles": ["UX"],
+     "desc": ["UX Research Strategy", "Mobile UX  Projection GUI",
+              "Sports Simulator Development", "UX Process Book Development"],
      "sns": {"instagram": "https://www.instagram.com/leeilyeoo",
              "behance": "https://www.behance.net/leeilyeoo"}},
     {"ko": "김소진", "en": "SoJin Kim", "img": "person3", "roles": ["ID"],
@@ -588,8 +590,11 @@ def credits_page():
     for i, p in enumerate(PEOPLE):
         chips = "".join(f'<span class="cc-chip">{esc(r)}</span>' for r in p["roles"])
         first, _, last = p["en"].partition(" ")
-        # 뒷면 설명은 역할 약어를 풀어 쓴 것이다(피그마엔 1번 카드 양식만 채워져 있다)
-        desc = ",<br>".join(esc(ROLE_NAME.get(r, r)) for r in p["roles"]) + "."
+        # 사람별 문구가 있으면 그대로, 없으면 역할 약어를 풀어 쓴다
+        if p.get("desc"):
+            desc = "".join(f'<span>{esc(l)}</span>' for l in p["desc"])
+        else:
+            desc = ",<br>".join(esc(ROLE_NAME.get(r, r)) for r in p["roles"]) + "."
         links = ""
         for kind, url in p["sns"].items():
             tag, attrs = ("a", f' href="{url}" target="_blank" rel="noopener"') if url else ("span", "")

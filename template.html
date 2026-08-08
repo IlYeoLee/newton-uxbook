@@ -473,9 +473,14 @@
     background:rgba(255,255,255,.2);color:#fff;font-family:'OffBit','Supreme',sans-serif;font-size:calc(var(--cw)*.068);font-weight:700;
     letter-spacing:-.04em;display:grid;place-items:center;padding:0 calc(var(--cw)*.036)}
   /* 설명도 이름과 같이 blend=OVERLAY 다(피그마 49:1771 실측) */
-  .cc-desc{position:absolute;left:21.32%;width:57.61%;top:32.25%;margin:0;text-align:center;
-    color:#fff;font-size:calc(var(--cw)*.066);line-height:1.5;font-weight:700;letter-spacing:-.038em;
-    mix-blend-mode:overlay}
+  /* 칩(18.15%)과 소셜 버튼(71%) 사이 밴드에 세로 가운데로 놓는다.
+     줄 수가 늘어도 아래 버튼과 이름 캡션은 제자리에 머문다. */
+  .cc-desc{position:absolute;left:8%;right:8%;top:27%;bottom:31%;margin:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:calc(var(--cw)*.028);text-align:center;
+    color:#fff;font-size:calc(var(--cw)*.062);line-height:1.25;font-weight:700;
+    letter-spacing:-.03em;mix-blend-mode:overlay}
+  .cc-desc span{display:block}
   .cc-links{position:absolute;left:0;right:0;top:71%;display:flex;justify-content:center;
     gap:calc(var(--cw)*.0102)}
   .cc-sns{width:calc(var(--cw)*.254);height:calc(var(--cw)*.254);border-radius:50%;
@@ -1239,7 +1244,7 @@
           const a = pts[Math.max(0, i - 1)], c = pts[Math.min(SEG, i + 1)];
           const tx = c.x - a.x, ty = c.y - a.y;
           const m = Math.hypot(tx, ty) || 1e-4;
-          const w = W0 * (0.94 + 0.06 * (i / SEG));     // 거의 일정한 폭 — 실물 끈은 테이퍼가 없다
+          const w = W0;                                 // 실물 끈은 폭이 일정하다 — 테이퍼 없음
           const nx = -ty / m * w, ny = tx / m * w;
           L.push([pts[i].x + nx, pts[i].y + ny]);
           R.push([pts[i].x - nx, pts[i].y - ny]);
@@ -1254,9 +1259,9 @@
 
         // 워드마크를 줄 위에 일정 간격으로 얹는다. 접선 각도로 돌려 곡선을 따라간다.
         const strapW = r.card.offsetWidth * 0.104;       // 리본 전체 폭(반폭 0.052 x2)
-        const LW = strapW * 2.2, LH = LW / 6.98;        // wordmark.svg 는 872x125
+        const LW = strapW * 1.45, LH = LW / 6.98;     // 띠 폭보다 짧게 → 서로 안 붙는다        // wordmark.svg 는 872x125
         r.logos.forEach((im, k) => {
-          const idx = 2 + k * 4;                          // SEG=14 구간에 3개 — 실물처럼 간격을 넓게
+          const idx = 3 + k * 4;                          // SEG=14 구간에 3개, 간격 넓게
           const p0 = pts[Math.max(0, idx - 1)], p1 = pts[Math.min(SEG, idx + 1)];
           const deg = Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180 / Math.PI;
           im.setAttribute('x', -LW / 2); im.setAttribute('y', -LH / 2);
