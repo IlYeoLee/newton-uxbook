@@ -146,7 +146,8 @@ def render_callout(node):
         if "/" in last and len(last) <= 30:
             body_children = body_children[:-1]
             caption_html = f'<p class="finding-caption"{en_attr(last)}>{esc(last)}</p>'
-    inner = render_children(body_children, group_toggles=False)
+    # 콜아웃 안이라고 예외를 두지 않는다 - 토글은 어느 깊이에서도 같은 컨테이너를 쓴다
+    inner = render_children(body_children)
     # icon = newton symbol logo (CSS mask); original emoji dropped
     return (f'<div class="finding"><div class="finding-icon"></div>'
             f'<div class="finding-body">{head_html}{inner}{caption_html}</div></div>')
@@ -492,6 +493,10 @@ def render_vertical(page_id, kicker, title_text, body_items, hero, scroll_hint=F
   {hint_html}
 </div>'''
 
+# 피그마 "텍스트+이미지 크게쓰고싶을 때"(27:302) 레이아웃을 쓰는 페이지.
+# 이미지가 2.6:1 가로형이라 좌우 2단이 아니라 텍스트 위 / 이미지 아래로 간다.
+WIDE_PAGES = {"10", "11", "12", "13"}
+
 KICKER_OVERRIDE = {"03": "For Those Who Turn Trends Into Play", "08": "(1) A Spark to Move"}
 
 # 다중 이미지 페이지 → 데스크톱은 슬라이딩 캐러셀, 모바일은 16:9 합성 한 장.
@@ -520,6 +525,26 @@ def render_page(marker, seg):
             rest2.insert(ci + 1 if ci is not None else 0, hero)
         rest2 = apply_scenario_media(rest2, SCENARIO_MEDIA)
         return render_vertical(f"sec-{num}", kicker, h4["x"] if h4 else "", rest2, None, scroll_hint=True)
+    # 가로형 이미지 페이지: 텍스트가 위, 이미지가 아래 전폭 (피그마 27:302)
+    if num in WIDE_PAGES:
+        hero, rest2 = extract_hero(rest)
+        car = CAROUSEL.get(num)
+        if car:
+            names, _ = car
+            seq = names + names[:1]
+            slides = "".join(f'<img src="assets/{n}{EXT.get(n, ".png")}" alt="" loading="lazy">' for n in seq)
+            media = f'<div class="fade-stack"><div class="fade-track" data-n="{len(seq)}">{slides}</div></div>'
+        else:
+            media = img_tag(hero["src"]) if hero else ""
+        return f'''
+<div class="page wide-page" data-page="sec-{num}">
+  <div class="wide-text">
+    <p class="kicker">{esc(kicker)}</p>
+    {title_html}
+    {render_children(rest2)}
+  </div>
+  <div class="wide-media">{media}</div>
+</div>'''
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
     car = CAROUSEL.get(num)
@@ -698,7 +723,7 @@ NAV_GROUPS = [
     ("Products", "products-lead", ["products-lead", "sec-05", "sec-07", "sec-06"]),
     ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
-    ("BX", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
+    ("Branding", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
 ]
 nav_html = "".join(
     f'<button type="button" class="pill" data-target="{target}" data-members="{",".join(members)}">{esc(label)}</button>'

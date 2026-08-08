@@ -224,6 +224,19 @@
     100%{opacity:0;transform:rotate(var(--r)) scale(.9)}
   }
 
+  /* 피그마 27:302 "텍스트+이미지 크게쓰고싶을 때" 실측.
+     텍스트 좌우 여백 80(6.639cqw), 이미지 1185x449 · 좌우 10 · 하단 10 · 라운드 40. */
+  .page.wide-page{flex-direction:column;padding:0}
+  .wide-text{flex:none;padding:4.15cqw 6.639cqw 0}
+  .wide-media{flex:1 1 auto;min-height:0;margin:0 0.830cqw 0.830cqw;
+    border-radius:3.320cqw;overflow:hidden;position:relative}
+  .wide-media img,.wide-media .fade-stack{width:100%;height:100%;object-fit:cover;
+    border-radius:3.320cqw;display:block}
+  @media (max-width:640px){
+    .wide-text{padding:6vw 5vw 0}
+    .wide-media{margin:0 5vw 5vw;border-radius:5vw}
+    .wide-media img{aspect-ratio:1185/449}
+  }
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
@@ -1329,7 +1342,9 @@
   const RIPPLE_SEL = 'button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint';
   addEventListener('pointerdown', e => {
     const host = e.target.closest && e.target.closest(RIPPLE_SEL);
-    if (host && !host.disabled) addRipple({ currentTarget: host, clientX: e.clientX, clientY: e.clientY });
+    // 좌우 페이지 넘김 영역은 화면 절반짜리라 리플이 과하다 — 제외한다
+    if (host && !host.disabled && !host.classList.contains('nav-zone'))
+      addRipple({ currentTarget: host, clientX: e.clientX, clientY: e.clientY });
   }, true);
   function addRipple(e){
     const btn = e.currentTarget, rect = btn.getBoundingClientRect();
