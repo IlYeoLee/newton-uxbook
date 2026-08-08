@@ -27,14 +27,14 @@ const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
 export default function Lanyard({
   people = [],
-  position = [0, 0, 19],
+  position = [0, 0, 20],
   gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
   imageFit = 'cover',
   lanyardImage = null,
   lanyardWidth = 1,
-  gap = 2.78,
+  gap = 2.5,
   selected = null,
   flipped = false,
   onSelect = () => {}
@@ -205,7 +205,7 @@ function Band({
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.7]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, 2.267, 0]
+    [0, 2.0, 0]
   ]);
 
   useEffect(() => {
@@ -288,10 +288,10 @@ function Band({
           <BallCollider args={[0.1]} />
         </RigidBody>
         <RigidBody position={[0, -2, 0]} ref={card} {...segmentProps} type={cardType}>
-          <CuboidCollider args={[1.209, 1.700, 0.02]} />
+          <CuboidCollider args={[1.067, 1.500, 0.02]} />
           <group
-            scale={3.4}
-            position={[0, -1.813, -0.05]}
+            scale={3}
+            position={[0, -1.6, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={e => {
@@ -320,7 +320,7 @@ function Band({
                 opacity={dimmed ? 0.28 : 1}
               />
             </mesh>
-            <Html transform position={[0, 0.533, 0.024]} scale={(2.416 / 300) / 3.4} zIndexRange={[8, 0]}
+            <Html transform position={[0, 0.533, 0.0283]} scale={0.09481} zIndexRange={[8, 0]}
                   style={{ pointerEvents: "none" }}>
               <div className="cc3d-slot" ref={slot} />
             </Html>
