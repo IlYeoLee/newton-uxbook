@@ -984,7 +984,7 @@
               <div class="cc-blob"></div>
               <div class="cc-chips cc-chips-top"><span class="cc-chip">UX</span></div>
               <p class="cc-desc">UX Design.</p>
-              <div class="cc-links"><span class="cc-sns" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></span><span class="cc-sns" aria-label="behance"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg></span></div>
+              <div class="cc-links"><a class="cc-sns" href="https://www.instagram.com/leeilyeoo" target="_blank" rel="noopener" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></a><a class="cc-sns" href="https://www.behance.net/leeilyeoo" target="_blank" rel="noopener" aria-label="behance"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg></a></div>
               <p class="cc-sig">Ilyeo Lee</p>
             </div>
           </div>
@@ -1010,7 +1010,7 @@
               <div class="cc-blob"></div>
               <div class="cc-chips cc-chips-top"><span class="cc-chip">ID</span></div>
               <p class="cc-desc">Industrial Design.</p>
-              <div class="cc-links"><span class="cc-sns" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></span><span class="cc-sns" aria-label="behance"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg></span></div>
+              <div class="cc-links"><a class="cc-sns" href="https://www.instagram.com/o3_so_j" target="_blank" rel="noopener" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></a><a class="cc-sns" href="https://www.behance.net/sojin_" target="_blank" rel="noopener" aria-label="behance"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg></a></div>
               <p class="cc-sig">SoJin Kim</p>
             </div>
           </div>
@@ -1036,7 +1036,7 @@
               <div class="cc-blob"></div>
               <div class="cc-chips cc-chips-top"><span class="cc-chip">ID</span></div>
               <p class="cc-desc">Industrial Design.</p>
-              <div class="cc-links"><span class="cc-sns" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></span></div>
+              <div class="cc-links"><a class="cc-sns" href="https://www.instagram.com/juparki_03" target="_blank" rel="noopener" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></a></div>
               <p class="cc-sig">Juwon Park</p>
             </div>
           </div>
@@ -1062,7 +1062,7 @@
               <div class="cc-blob"></div>
               <div class="cc-chips cc-chips-top"><span class="cc-chip">VD</span></div>
               <p class="cc-desc">Video Direction.</p>
-              <div class="cc-links"><span class="cc-sns" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></span><span class="cc-sns" aria-label="behance"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg></span></div>
+              <div class="cc-links"><a class="cc-sns" href="https://www.instagram.com/nadabiniii" target="_blank" rel="noopener" aria-label="instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg></a><a class="cc-sns" href="https://www.behance.net/davinjeon" target="_blank" rel="noopener" aria-label="behance"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg></a></div>
               <p class="cc-sig">Dabin Jeon</p>
             </div>
           </div>
@@ -1968,6 +1968,19 @@ void main(){
   pages[0].classList.add('active');
   updateChrome();
   staggerIn(pages[0]);
+</script>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module">
+  import { initLanyard3D } from "./assets/lanyard3d.js";
+  const stage = document.getElementById("lanyStage");
+  if (stage) {
+    const hang = [0.208,0.300,0.239,0.282,0.295];
+    const people = [...stage.querySelectorAll(".lany")].map((l,i) => ({
+      front: "assets/person" + (i+1) + ".png", back: null, hang: hang[i] ?? 0.28 }));
+    initLanyard3D(stage, people)
+      .then(r => console.log("lanyard3d OK", r.items.length, "cards"))
+      .catch(e => console.error("lanyard3d FAIL:", e));
+  }
 </script>
 </body>
 </html>

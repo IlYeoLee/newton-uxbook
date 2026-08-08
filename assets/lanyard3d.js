@@ -3,7 +3,7 @@
 // three 만 로컬로 쓰고 물리는 베를레 로프로 직접 돌린다.
 // card.glb 의 UV 아틀라스는 왼쪽 절반이 앞면, 오른쪽 절반이 뒷면이다.
 import * as THREE from '../vendor/three.module.js';
-import { GLTFLoader } from '../vendor/GLTFLoader.js';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
 
 const FRONT_UV = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV = { x: 0.5, y: 0, w: 0.5, h: 0.757 };

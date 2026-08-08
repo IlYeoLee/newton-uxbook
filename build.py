@@ -562,16 +562,20 @@ playwith_page = f'''
 ROLE_NAME = {"PL": "Project Lead", "ID": "Industrial Design",
              "UX": "UX Design", "VD": "Video Direction"}
 PEOPLE = [
+    # 링크의 추적 파라미터(igsh, utm_source)는 떼고 넣는다
     {"ko": "송시헌", "en": "Siheon Song", "img": "person1",
-     "roles": ["PL", "ID"], "sns": {"instagram": "", "behance": ""}},
-    {"ko": "이일여", "en": "Ilyeo Lee", "img": "person2",
-     "roles": ["UX"], "sns": {"instagram": "", "behance": ""}},
-    {"ko": "김소진", "en": "SoJin Kim", "img": "person3",
-     "roles": ["ID"], "sns": {"instagram": "", "behance": ""}},
-    {"ko": "박주원", "en": "Juwon Park", "img": "person4",
-     "roles": ["ID"], "sns": {"instagram": ""}},      # 피그마상 비핸스 없음
-    {"ko": "전다빈", "en": "Dabin Jeon", "img": "person5",
-     "roles": ["VD"], "sns": {"instagram": "", "behance": ""}},
+     "roles": ["PL", "ID"], "sns": {"instagram": "", "behance": ""}},   # 아직 못 받음
+    {"ko": "이일여", "en": "Ilyeo Lee", "img": "person2", "roles": ["UX"],
+     "sns": {"instagram": "https://www.instagram.com/leeilyeoo",
+             "behance": "https://www.behance.net/leeilyeoo"}},
+    {"ko": "김소진", "en": "SoJin Kim", "img": "person3", "roles": ["ID"],
+     "sns": {"instagram": "https://www.instagram.com/o3_so_j",
+             "behance": "https://www.behance.net/sojin_"}},
+    {"ko": "박주원", "en": "Juwon Park", "img": "person4", "roles": ["ID"],
+     "sns": {"instagram": "https://www.instagram.com/juparki_03"}},     # 비핸스 없음
+    {"ko": "전다빈", "en": "Dabin Jeon", "img": "person5", "roles": ["VD"],
+     "sns": {"instagram": "https://www.instagram.com/nadabiniii",
+             "behance": "https://www.behance.net/davinjeon"}},
 ]
 
 SNS_ICON = {
