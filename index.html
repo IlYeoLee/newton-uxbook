@@ -385,8 +385,9 @@
     inset:0.830cqw 0.830cqw 0.996cqw;border-radius:3.320cqw;overflow:hidden}
   .credits-page .lany-stage{background:#050505}
   .lany3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:5}
-  .cc-kicker{position:absolute;top:11.6cqw;left:0;right:0;text-align:center;margin:0;z-index:2;
-    font-size:1.16cqw;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.55)}
+  /* Extensibility 등에 쓰는 .kicker 와 같은 크기·색. 가운데 정렬에 하단 40px(1205 기준). */
+  .cc-kicker{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;margin:0;z-index:2;
+    color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em}
   /* perspective 는 자식에게 걸리는 속성이다. 스테이지에 두어야 카드의 호버 기울기가
      입체로 보이고, 카드/이너에 preserve-3d 를 이어줘야 앞뒤 플립이 산다. */
   .lany-stage{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;
@@ -511,7 +512,7 @@
     .lany-stage{gap:2vw}
     .lany{width:34vw}
     .cc{width:34vw}
-    .cc-kicker{font-size:3.4vw;top:8vw}
+    .cc-kicker{font-size:3.6vw;bottom:8vw;top:auto}
     .cc-name{font-size:6.4vw}
     .cc-chip,.cc-sig{font-size:2.6vw}
     .cc-desc{font-size:3.2vw}
