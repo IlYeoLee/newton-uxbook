@@ -6,7 +6,7 @@
 //   3) 확대 중 한 번 더 누르면 Y축 180° 회전으로 뒷면
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
+import { useGLTF, useTexture, Environment, Lightformer, Html } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 
@@ -63,7 +63,7 @@ export default function Lanyard({
         gl={{ alpha: transparent }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
-        <ambientLight intensity={Math.PI * 0.45} />
+        <ambientLight intensity={Math.PI} />
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
           {people.map((p, i) => (
             <Band
@@ -72,6 +72,7 @@ export default function Lanyard({
               anchorX={anchors[i]}
               hangY={p.hangY ?? 4}
               isMobile={isMobile}
+              cardEl={p.el}
               frontImage={p.front}
               backImage={p.back}
               imageFit={imageFit}
@@ -85,10 +86,10 @@ export default function Lanyard({
           ))}
         </Physics>
         <Environment blur={0.75}>
-          <Lightformer intensity={0.9} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-          <Lightformer intensity={1.2} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-          <Lightformer intensity={1.2} color="white" position={[1, 1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-          <Lightformer intensity={3.2} color="white" position={[-10, 0, 14]} rotation={[0, Math.PI / 2, Math.PI / 3]} scale={[100, 10, 1]} />
+          <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={3} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={3} color="white" position={[1, 1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={10} color="white" position={[-10, 0, 14]} rotation={[0, Math.PI / 2, Math.PI / 3]} scale={[100, 10, 1]} />
         </Environment>
       </Canvas>
     </div>
@@ -102,6 +103,7 @@ function Band({
   index = 0,
   anchorX = 0,
   hangY = 4,
+  cardEl = null,
   frontImage = null,
   backImage = null,
   imageFit = 'cover',
@@ -128,6 +130,23 @@ function Band({
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
   const backTex = useTexture(backImage || BLANK_PIXEL);
   const { camera } = useThree();
+  const slot = useRef();
+  // .cc 를 통째로 복제해 넣는다. 원본은 .lany 안에서 숨은 채 남아 있어
+  // 예전 CSS-3D 루프가 계속 돌아도 화면에 영향을 주지 않는다.
+  useEffect(() => {
+    if (!cardEl || !slot.current) return;
+    const clone = cardEl.cloneNode(true);
+    clone.removeAttribute("style");            // 예전 루프가 남긴 인라인 transform 제거
+    clone.classList.remove("grabbing", "flipped");
+    slot.current.appendChild(clone);
+    slot.current._cc = clone;
+    return () => { clone.remove(); };
+  }, [cardEl]);
+  // 앞뒤 뒤집기는 메시를 돌리지 않고 기존 .cc.flipped CSS 규칙에 맡긴다.
+  useEffect(() => {
+    const cc = slot.current && slot.current._cc;
+    if (cc) cc.classList.toggle("flipped", !!flipped);
+  }, [flipped]);
 
   const cardMap = useMemo(() => {
     const baseMap = materials.base.map;
@@ -181,9 +200,9 @@ function Band({
   // 끌었는지 눌렀는지 구분한다. 끈 거리가 짧으면 "탭"으로 보고 확대한다.
   const moved = useRef(0);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.14]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.14]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.14]);
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.7]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.7]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.7]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
     [0, 2.267, 0]
@@ -212,16 +231,15 @@ function Band({
 
     if (zoomed && card.current) {
       // 카메라 앞 8 만큼 되는 지점으로 부드럽게 끌어온다.
-      zoomTarget.set(0, 0, -13).applyQuaternion(camera.quaternion).add(camera.position);
+      zoomTarget.set(0, 0, -8).applyQuaternion(camera.quaternion).add(camera.position);
       const cur = card.current.translation();
       const k = 1 - Math.pow(0.001, delta);      // 프레임레이트와 무관한 감쇠
       card.current.setNextKinematicTranslation({
         x: cur.x + (zoomTarget.x - cur.x) * k,
-        y: cur.y + (zoomTarget.y - cur.y) * k,
+        y: cur.y + (zoomTarget.y + 1.2 - cur.y) * k,
         z: cur.z + (zoomTarget.z - cur.z) * k
       });
       zoomQuat.copy(camera.quaternion);
-      if (flipped) zoomQuat.multiply(tmpQ.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
       const cq = card.current.rotation();
       tmpQ.set(cq.x, cq.y, cq.z, cq.w).slerp(zoomQuat, k);
       card.current.setNextKinematicRotation({ x: tmpQ.x, y: tmpQ.y, z: tmpQ.z, w: tmpQ.w });
@@ -293,8 +311,7 @@ function Band({
           >
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
-                map={cardMap}
-                map-anisotropy={16}
+                color="#101215"
                 clearcoat={isMobile ? 0 : 0.35}
                 clearcoatRoughness={0.15}
                 roughness={0.62}
@@ -303,6 +320,10 @@ function Band({
                 opacity={dimmed ? 0.28 : 1}
               />
             </mesh>
+            <Html transform position={[0, 0.533, 0.024]} scale={(2.416 / 300) / 3.4} zIndexRange={[8, 0]}
+                  style={{ pointerEvents: "none" }}>
+              <div className="cc3d-slot" ref={slot} />
+            </Html>
             <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
             <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
           </group>
