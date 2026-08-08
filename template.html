@@ -401,15 +401,15 @@
      좌우 가장자리 점을 이어 폴리곤으로 만들고, 폭을 가로지르는 그라디언트로
      원통감을 낸다. 위로 갈수록 살짝 좁아져 멀어지는 느낌을 준다. */
   .rp-ribbon{stroke:none}
-  .rp-logos image{opacity:.92}
+  .rp-logos image{filter:brightness(0) invert(1);opacity:.95}
   /* 실물 목걸이는 금속이 아니라 플라스틱 버클 + 후크다(레퍼런스 사진 기준).
      무광 몸체에 위쪽 하이라이트만 얇게 넣어야 플라스틱으로 읽힌다. */
-  .lany-clip{position:absolute;left:0;top:0;width:1.62cqw;height:1.5cqw;border-radius:.18cqw;
+  .lany-clip{position:absolute;left:0;top:0;width:1.5cqw;height:1.35cqw;border-radius:.16cqw;transform-origin:50% 0;
     background:linear-gradient(180deg,#3A4048 0%,#20252B 38%,#171B20 100%);
     box-shadow:inset 0 .06cqw 0 rgba(255,255,255,.28),0 .1cqw .24cqw rgba(0,0,0,.55);
     pointer-events:none}
   /* 후크: 아래로 이어지는 갈고리. 한쪽 테두리를 비운 원환으로 만든다 */
-  .lany-hook{position:absolute;left:50%;bottom:-1.5cqw;transform:translateX(-50%);
+  .lany-hook{position:absolute;left:50%;bottom:-1.35cqw;transform:translateX(-50%);
     width:1.15cqw;height:1.15cqw;border-radius:50%;
     border:.24cqw solid #262B31;border-top-color:transparent;border-right-color:transparent;
     box-shadow:-.02cqw .04cqw .08cqw rgba(0,0,0,.6)}
@@ -1239,7 +1239,7 @@
           const a = pts[Math.max(0, i - 1)], c = pts[Math.min(SEG, i + 1)];
           const tx = c.x - a.x, ty = c.y - a.y;
           const m = Math.hypot(tx, ty) || 1e-4;
-          const w = W0 * (0.74 + 0.26 * (i / SEG));     // 위 0.74배 → 아래 1배
+          const w = W0 * (0.94 + 0.06 * (i / SEG));     // 거의 일정한 폭 — 실물 끈은 테이퍼가 없다
           const nx = -ty / m * w, ny = tx / m * w;
           L.push([pts[i].x + nx, pts[i].y + ny]);
           R.push([pts[i].x - nx, pts[i].y - ny]);
@@ -1263,7 +1263,9 @@
           im.setAttribute('width', LW);  im.setAttribute('height', LH);
           im.setAttribute('transform', `translate(${pts[idx].x},${pts[idx].y}) rotate(${deg})`);
         });
-        r.clip.style.transform = `translate(${end.x}px,${end.y}px) translate(-50%,-50%)`;
+        // 버클은 줄 끝에서 시작해야 한다 — 중앙 정렬하면 줄과 사이가 벌어진다
+        const bang = Math.atan2(end.x - pts[SEG-1].x, -(end.y - pts[SEG-1].y)) * 180 / Math.PI;
+        r.clip.style.transform = `translate(${end.x}px,${end.y}px) translate(-50%,0) rotate(${bang}deg)`;
       }
       requestAnimationFrame(step);
     }

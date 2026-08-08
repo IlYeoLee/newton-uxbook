@@ -599,11 +599,10 @@ def credits_page():
         <svg class="lany-rope" aria-hidden="true">
           <defs>
             <linearGradient id="bg{i}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="0">
-              <stop offset="0"    stop-color="#8E1212"/>
-              <stop offset="0.22" stop-color="#E02525"/>
-              <stop offset="0.46" stop-color="#FF4A3A"/>
-              <stop offset="0.72" stop-color="#E02525"/>
-              <stop offset="1"    stop-color="#7E0F0F"/>
+              <stop offset="0"    stop-color="#D42020"/>
+              <stop offset="0.18" stop-color="#FA3030"/>
+              <stop offset="0.82" stop-color="#FA3030"/>
+              <stop offset="1"    stop-color="#D42020"/>
             </linearGradient>
           </defs>
           <path class="rp-ribbon" fill="url(#bg{i})"/>
