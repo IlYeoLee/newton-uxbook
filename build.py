@@ -175,7 +175,9 @@ def video_tag(src, wrap="figure v-figure"):
         '<button class="v-sound" type="button" aria-pressed="false" aria-label="소리 켜기">'
         '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-mute"></use></svg></button>')
     return (
-        f'<figure class="{wrap}">'
+        # --poster 는 모바일에서 세로 화면을 메우는 흐린 배경에 쓴다. 영상을 하나 더
+        # 얹으면 폰에서 디코딩이 두 배가 되므로 정지 포스터로 채운다.
+        f'<figure class="{wrap}" style="--poster:url(assets/{stem}-poster.jpg)">'
         f'<video src="assets/{src}" poster="assets/{stem}-poster.jpg" '
         f'playsinline muted loop preload="metadata"></video>'
         f'<div class="v-bar">'
