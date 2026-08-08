@@ -2720,6 +2720,11 @@ void main(){
       addEventListener('pointercancel', endDrag, true);
       addEventListener('blur', () => release());
       addEventListener('mouseleave', () => release());
+      // 마지막 안전장치: 문서 어디서든 버튼을 누르지 않은 채 마우스가 움직이면
+      // 잡고 있던 카드를 놓는다. pointerup 이 어디로 새든 이걸로 반드시 풀린다.
+      document.addEventListener('pointermove', e => {
+        if (downSlot && e.buttons === 0) release();
+      }, true);
 
       handle = window.NewtonLanyard.mount(host, {
         people: list,
