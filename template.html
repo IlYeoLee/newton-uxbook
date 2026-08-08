@@ -923,13 +923,16 @@
 
   // stagger the page's own elements in from the top ("차라락"), any direction
   function staggerIn(page){
-    // one system: covers both layouts (two-column: media + text, vertical: head/content/hero)
+    // 레이아웃 셋을 한 시스템으로 덮는다 — 2단(미디어+텍스트), 세로(헤드/본문/히어로),
+    // 가로형(텍스트 위 + 전폭 이미지). 새 레이아웃을 만들면 여기에 추가해야 한다.
     const items = [
       page.querySelector('.page-media'),
       ...page.querySelectorAll('.page-text > *'),
+      ...page.querySelectorAll('.wide-text > *'),
       ...page.querySelectorAll('.head-block'),
       ...page.querySelectorAll('.page-content > *'),
       page.querySelector('.page-hero'),
+      page.querySelector('.wide-media'),
     ].filter(Boolean);
     items.forEach((el, n) => {
       el.classList.remove('stagger');
