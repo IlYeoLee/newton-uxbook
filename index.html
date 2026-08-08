@@ -441,10 +441,12 @@
      — 결과 간격은 피그마의 lh 60/100 과 같다. */
   .cc-name{position:absolute;left:6%;width:88%;top:57%;text-align:center;
     font-size:calc(var(--cw)*.235);line-height:1;font-weight:700;letter-spacing:-.05em;
-    /* 흰색 + 웜톤 그라디언트. 글자 모양으로 잘라 쓴다. */
+    color:transparent}
+  /* 그라디언트를 부모에 걸면 칠하는 주체가 부모가 되어, 자식(.n1)에 건 페이드 마스크가
+     먹지 않는다. 줄마다 각자 칠하게 두어야 윗줄 하단 페이드가 살아난다. */
+  .cc-name span{display:block;
     background:linear-gradient(180deg,#FFFFFF 0%,#FFF3DC 42%,#FFD5A8 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent}
-  .cc-name span{display:block}
   .cc-name .n2{margin-top:-.4em}
   /* 피그마의 흰 판(323x65)은 글자(299x60)보다 커서 페이드가 글자 '바깥'에서 일어난다.
      마스크를 글자보다 넉넉히 잡아야 위아래가 깎이지 않는다. */
