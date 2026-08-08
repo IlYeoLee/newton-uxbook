@@ -397,12 +397,12 @@
   .lany-rope{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
   /* 레퍼런스(reactbits Lanyard)처럼 검은 납작한 스트랩이다. 굵은 스트로크로 띠를 깔고,
      가장자리에 얇은 하이라이트를 얹어 두께감을 주고, NEWTON 을 textPath 로 흘린다. */
-  /* 스트로크를 3겹으로 쌓아 폭 방향 음영을 만든다 — 가장자리는 어둡고 가운데가 밝아야
-     납작한 끈이 아니라 물리적인 띠로 읽힌다. SVG 는 스트로크 폭을 따라 그라디언트를
-     못 넣어서 이렇게 겹치는 편이 확실하다. */
-  .rp-band {fill:none;stroke:#05070A;stroke-width:1.95cqw;stroke-linecap:butt;stroke-linejoin:round}
-  .rp-mid  {fill:none;stroke:#0E1114;stroke-width:1.52cqw;stroke-linecap:butt;stroke-linejoin:round}
-  .rp-sheen{fill:none;stroke:rgba(255,255,255,.045);stroke-width:.5cqw;stroke-linecap:butt}
+  /* 줄은 채워진 리본이다. 선(stroke)으로는 폭 방향 음영도 테이퍼도 못 준다.
+     좌우 가장자리 점을 이어 폴리곤으로 만들고, 폭을 가로지르는 그라디언트로
+     원통감을 낸다. 위로 갈수록 살짝 좁아져 멀어지는 느낌을 준다. */
+  .rp-ribbon{stroke:none}
+  .rp-stitch,.rp-stitch2{fill:none;stroke:rgba(255,255,255,.16);stroke-width:.06cqw;
+    stroke-dasharray:.22cqw .26cqw;stroke-linecap:round}
   .rp-logos image{opacity:.92}
   /* 스트랩 끝: 검은 커넥터 탭 + 금속 링(카드 구멍에 걸리는 부분) */
   .lany-clip{position:absolute;left:0;top:0;width:1.72cqw;height:2.1cqw;border-radius:.3cqw;
@@ -1049,7 +1049,9 @@
 
     [...stage.querySelectorAll('.lany')].forEach(el => {
       const card = el.querySelector('.cc');
-      const paths = [...el.querySelectorAll('.rp-band')];
+      const ribbon = el.querySelector('.rp-ribbon');
+      const grad = el.querySelector('linearGradient');
+      const stitches = [el.querySelector('.rp-stitch'), el.querySelector('.rp-stitch2')];
       const clip = el.querySelector('.lany-clip');
       // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
       // 줄에 찍히는 워드마크 — 앱바와 같은 로고를 일정 간격으로 반복한다
@@ -1062,7 +1064,7 @@
         logoG.appendChild(im);
         logos.push(im);
       }
-      const r = { el, card, paths, clip, logos, pts: [], len: 0, anchor: {x:0,y:0},
+      const r = { el, card, ribbon, grad, stitches, clip, logos, pts: [], len: 0, anchor: {x:0,y:0},
                   drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
@@ -1226,13 +1228,37 @@
         r.card.style.transform = ropeTransform(r) +
           ` rotateX(${r.tilt.x}deg) rotateY(${r.tilt.y + r.spin}deg)`;
 
-        let d = `M ${pts[0].x} ${pts[0].y}`;
-        for (let i = 1; i <= SEG; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
-        r.paths[0].setAttribute('d', d);
-        r.el.querySelectorAll('.rp-mid,.rp-sheen').forEach(p => p.setAttribute('d', d));
+        // 리본: 좌우 가장자리 점을 만들어 하나의 폴리곤으로 잇는다.
+        // 폭은 위로 갈수록 좁아진다(멀어지는 느낌) — 선으로는 못 하는 부분이다.
+        const W0 = r.card.offsetWidth * 0.052;          // 카드 쪽 반폭
+        const L = [], R = [];
+        let minX = 1e9, maxX = -1e9;
+        for (let i = 0; i <= SEG; i++) {
+          const a = pts[Math.max(0, i - 1)], c = pts[Math.min(SEG, i + 1)];
+          const tx = c.x - a.x, ty = c.y - a.y;
+          const m = Math.hypot(tx, ty) || 1e-4;
+          const w = W0 * (0.74 + 0.26 * (i / SEG));     // 위 0.74배 → 아래 1배
+          const nx = -ty / m * w, ny = tx / m * w;
+          L.push([pts[i].x + nx, pts[i].y + ny]);
+          R.push([pts[i].x - nx, pts[i].y - ny]);
+          minX = Math.min(minX, pts[i].x - w); maxX = Math.max(maxX, pts[i].x + w);
+        }
+        r.ribbon.setAttribute('d',
+          'M ' + L.map(p => p[0] + ' ' + p[1]).join(' L ') +
+          ' L ' + R.slice().reverse().map(p => p[0] + ' ' + p[1]).join(' L ') + ' Z');
+        // 그라디언트를 실제 폭에 맞춰 걸어야 원통감이 산다
+        r.grad.setAttribute('x1', minX); r.grad.setAttribute('x2', maxX);
+        r.grad.setAttribute('y1', pts[0].y); r.grad.setAttribute('y2', pts[0].y);
+        // 가장자리 스티치
+        const inset = (arr, s) => 'M ' + arr.map((p, i) => {
+          const q = (s > 0 ? R : L)[i];
+          return (p[0] + (q[0] - p[0]) * 0.22) + ' ' + (p[1] + (q[1] - p[1]) * 0.22);
+        }).join(' L ');
+        r.stitches[0].setAttribute('d', inset(L, 1));
+        r.stitches[1].setAttribute('d', inset(R, -1));
 
         // 워드마크를 줄 위에 일정 간격으로 얹는다. 접선 각도로 돌려 곡선을 따라간다.
-        const strapW = r.card.offsetWidth * 0.0934;      // .rp-band stroke-width 와 같은 비율
+        const strapW = r.card.offsetWidth * 0.104;       // 리본 전체 폭(반폭 0.052 x2)
         const LW = strapW * 2.6, LH = LW / 6.98;        // wordmark.svg 는 872x125
         r.logos.forEach((im, k) => {
           const idx = 2 + k * 2;                          // SEG=14 구간에 6개

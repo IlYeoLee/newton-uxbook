@@ -597,9 +597,18 @@ def credits_page():
         cards += f'''
       <div class="lany" data-i="{i}">
         <svg class="lany-rope" aria-hidden="true">
-          <path id="rp{i}" class="rp-band"/>
-          <path class="rp-mid" d=""/>
-          <path class="rp-sheen" d=""/>
+          <defs>
+            <linearGradient id="bg{i}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="0">
+              <stop offset="0"    stop-color="#04060A"/>
+              <stop offset="0.30" stop-color="#2A3038"/>
+              <stop offset="0.52" stop-color="#3A424B"/>
+              <stop offset="0.78" stop-color="#161A1F"/>
+              <stop offset="1"    stop-color="#04060A"/>
+            </linearGradient>
+          </defs>
+          <path class="rp-ribbon" fill="url(#bg{i})"/>
+          <path class="rp-stitch"/>
+          <path class="rp-stitch2"/>
           <g class="rp-logos"></g>
         </svg>
         <div class="lany-clip"><i class="lany-ring"></i></div>
