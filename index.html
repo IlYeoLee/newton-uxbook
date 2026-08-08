@@ -584,7 +584,22 @@
      가라앉으므로 딤은 배경만 덮으면 된다. */
   .credits-page.zoomed .lany-stage{z-index:50}
   .lany.on .cc{z-index:60;cursor:pointer}
+  /* 확대하면 3D 를 벗어나 카드를 DOM 으로 가운데 띄운다. 3D 안에서 카메라 쪽으로
+     끌어오면 잘리고, 판이 pointer-events:none 이라 SNS 버튼도 못 누른다. */
+  .cc-zoom{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:31.3cqw;height:44cqw;--cw:31.3cqw;z-index:80;pointer-events:auto;cursor:pointer}
+  .cc-zoom .cc{position:absolute;inset:0;width:100%;height:100%;
+    transform:none;transition:none;pointer-events:auto;
+    filter:drop-shadow(0 2.5cqw 5cqw rgba(0,0,0,.6))}
+  .cc-zoom .cc-inner{transform:none;transform-style:flat;transition:none}
+  .cc-zoom .cc-face{transform:none;backface-visibility:visible;transition:opacity .38s ease}
+  .cc-zoom .cc-back{opacity:0}
+  .cc-zoom .cc.flipped .cc-front{opacity:0}
+  .cc-zoom .cc.flipped .cc-back{opacity:1}
+  .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer}
+  @media (max-width:640px){ .cc-zoom{width:70vw;height:98vw;--cw:70vw} }
   .cc-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;
+    -webkit-backdrop-filter:blur(0.9cqw);backdrop-filter:blur(0.9cqw);
     transition:opacity .24s ease;z-index:40;border-radius:inherit}
   .credits-page.zoomed .cc-dim{opacity:1;pointer-events:auto}
   /* 이미지 라이트박스의 .lb-close 를 그대로 쓴다(48x48 원형, 아이콘 20px, 같은 그림자).
@@ -2559,14 +2574,41 @@ void main(){
       host.className = 'lany3d-host';
       stage.appendChild(host);
       stage.classList.add('is3d');
+      // 확대는 3D 가 아니라 DOM 으로 한다. 3D 안에서 카메라 쪽으로 끌어오면
+      // 잘리고, 카드 판이 pointer-events:none 이라 SNS 버튼도 못 누른다.
+      let zoomEl = null;
+      function closeZoom(){
+        if (zoomEl){ zoomEl.remove(); zoomEl = null; }
+        page.classList.remove('zoomed');
+      }
+      function openZoom(i){
+        closeZoom();
+        const src = list[i] && list[i].el;
+        if (!src) return;
+        zoomEl = document.createElement('div');
+        zoomEl.className = 'cc-zoom';
+        const clone = src.cloneNode(true);
+        clone.removeAttribute('style');
+        clone.classList.remove('grabbing', 'flipped');
+        // 카드 아무 데나 누르면 앞뒤가 뒤집힌다. 단, SNS 버튼은 링크로 살린다.
+        clone.addEventListener('click', e => {
+          if (e.target.closest('.cc-sns')) return;
+          clone.classList.toggle('flipped');
+        });
+        zoomEl.appendChild(clone);
+        page.appendChild(zoomEl);
+        page.classList.add('zoomed');
+      }
+
       handle = window.NewtonLanyard.mount(host, {
         people: list,
         bandImage: 'assets/lanyard-band.png',
-        onZoom: i => page.classList.toggle('zoomed', i !== null)
+        onZoom: i => { if (i === null) closeZoom(); else openZoom(i); }
       });
+      page.__closeZoom = closeZoom;
       const closeBtn = page.querySelector('.cc-close');
       const dim = page.querySelector('.cc-dim');
-      const close = () => handle && handle.close();
+      const close = () => { closeZoom(); if (handle) handle.close(); };
       if (closeBtn) closeBtn.addEventListener('click', close);
       if (dim) dim.addEventListener('click', close);
       addEventListener('keydown', e => { if (e.key === 'Escape') close(); });

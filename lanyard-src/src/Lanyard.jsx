@@ -186,21 +186,6 @@ function Band({
       card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
     }
 
-    if (zoomed && card.current) {
-      // 카메라 앞 8 만큼 되는 지점으로 부드럽게 끌어온다.
-      zoomTarget.set(0, 0, -8).applyQuaternion(camera.quaternion).add(camera.position);
-      const cur = card.current.translation();
-      const k = 1 - Math.pow(0.001, delta);      // 프레임레이트와 무관한 감쇠
-      card.current.setNextKinematicTranslation({
-        x: cur.x + (zoomTarget.x - cur.x) * k,
-        y: cur.y + (zoomTarget.y + 1.2 - cur.y) * k,
-        z: cur.z + (zoomTarget.z - cur.z) * k
-      });
-      zoomQuat.copy(camera.quaternion);
-      const cq = card.current.rotation();
-      tmpQ.set(cq.x, cq.y, cq.z, cq.w).slerp(zoomQuat, k);
-      card.current.setNextKinematicRotation({ x: tmpQ.x, y: tmpQ.y, z: tmpQ.z, w: tmpQ.w });
-    }
 
     if (fixed.current) {
       [j1, j2].forEach(ref => {
@@ -229,7 +214,7 @@ function Band({
   curve.curveType = 'chordal';
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-  const cardType = dragged || zoomed ? 'kinematicPosition' : 'dynamic';
+  const cardType = dragged ? 'kinematicPosition' : 'dynamic';
 
   return (
     <>
