@@ -232,17 +232,19 @@
      kicker 는 블록 상단에서 50(4.15cqw), 타이틀/본문 행은 97(8.05cqw). */
   /* 텍스트는 내용만큼만. flex 로 늘리면 남는 공간이 본문과 이미지 사이로 몰려
      간격이 페이지마다 달라진다. 본문 아래 50(4.15cqw)만 고정으로 띄운다. */
-  .wide-text{flex:0 1 auto;min-height:0;padding:4.15cqw 6.639cqw 4.15cqw;overflow:hidden}
+  .wide-text{flex:none;padding:4.15cqw 6.639cqw 3.485cqw}
   /* 피그마 27:302 실측 그대로. 타이틀 32px lh45 폭 264, 본문 18px lh27 폭 761,
      둘 사이 간격 20. 이 값들은 이미 .head-title/.head-row 가 갖고 있으므로
      폭이나 크기를 덮어쓰지 않는다 — 덮어쓰면 두 줄 제목이 부서진다. */
   /* .head-block 은 세로 페이지용 자체 패딩을 갖고 있다. 여기서는 .wide-text 가
      여백을 책임지므로 죽인다 — 안 그러면 값이 두 배로 더해진다. */
+  /* 칸 나누기(.head-row: 타이틀 264 고정 + 본문 나머지, 간격 20)는 전역 규칙이
+     이미 피그마 27:302 와 같다. 여기서 다시 정의하면 오히려 본문 폭이 무너진다. */
   .wide-text .head-block{margin:0;padding:0}
   /* 타이포는 전역 .head-title / .head-body 값이 이미 피그마와 같다. 덮어쓰지 않는다. */
   /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
      object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
-  .wide-media{flex:none;aspect-ratio:1185/449;margin:auto 0.830cqw 0.830cqw;
+  .wide-media{flex:0 1 auto;min-height:0;aspect-ratio:1185/449;margin:auto 0.830cqw 0.830cqw;
     border-radius:3.320cqw;overflow:hidden;position:relative}
   /* cover 는 비율이 조금만 어긋나도 잘라낸다. contain 이면 어떤 비율이 와도
      이미지가 통째로 안에 들어온다. */
@@ -422,8 +424,23 @@
     background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 42%,rgba(0,0,0,0) 100%)}
   .lany3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:5}
   /* Extensibility 등에 쓰는 .kicker 와 같은 크기·색. 가운데 정렬에 하단 40px(1205 기준). */
-  .cc-kicker{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;margin:0;z-index:2;
+  /* 하단 고정 묶음: DESIGNED BY 위, thanks to 블록 아래. 카드가 이 위로 매달린다. */
+  .credits-foot{position:absolute;left:0;right:0;bottom:0;z-index:8;pointer-events:none;
+    padding:0 3.320cqw 3.320cqw}
+  .cc-kicker{text-align:center;margin:0 0 2.490cqw;
     color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em}
+  /* 피그마 61:388 "추가되는레이아웃" 실측: 좌우 40, thanks to 16/700 아래 18,
+     4열 각 239 · 열 간격 32, 열 안에서 역할 120 + 이름 120, 본문 14/lh21. */
+  .cr-label{margin:0 0 1.494cqw;font-size:1.328cqw;font-weight:700;color:#fff}
+  .cr-cols{display:grid;grid-template-columns:repeat(4,19.834cqw);column-gap:2.656cqw}
+  .cr-col{display:flex;flex-direction:column;gap:0.830cqw}
+  .cr-item{display:flex;align-items:flex-start}
+  .cr-role{flex:none;width:9.959cqw;margin:0;font-size:1.162cqw;font-weight:500;
+    line-height:1.5;color:rgba(255,255,255,.62)}
+  .cr-names{display:flex;flex-direction:column;gap:0.913cqw}
+  .cr-name{display:flex;flex-direction:column;font-size:1.162cqw;line-height:1.5}
+  .cr-ko{font-weight:600;color:#fff}
+  .cr-en{font-weight:400;color:rgba(255,255,255,.62)}
   /* perspective 는 자식에게 걸리는 속성이다. 스테이지에 두어야 카드의 호버 기울기가
      입체로 보이고, 카드/이너에 preserve-3d 를 이어줘야 앞뒤 플립이 산다. */
   .lany-stage{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;
@@ -543,7 +560,12 @@
     .lany-stage{gap:2vw}
     .lany{width:34vw}
     .cc{width:34vw}
-    .cc-kicker{font-size:3.6vw;bottom:8vw;top:auto}
+    .credits-foot{padding:0 5vw 5vw}
+    .cc-kicker{font-size:3.6vw;margin-bottom:4vw}
+    .cr-cols{grid-template-columns:1fr 1fr;column-gap:4vw;row-gap:4vw}
+    .cr-label{font-size:3.4vw}
+    .cr-role{width:26vw;font-size:3vw}
+    .cr-name{font-size:3vw}
     .cc-name{font-size:6.4vw}
     .cc-chip,.cc-sig{font-size:2.6vw}
     .cc-desc{font-size:3.2vw}

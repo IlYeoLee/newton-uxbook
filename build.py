@@ -591,6 +591,8 @@ ROLE_NAME = {"PL": "Project Lead", "ID": "Industrial Design",
 PEOPLE = [
     # 링크의 추적 파라미터(igsh, utm_source)는 떼고 넣는다
     {"ko": "송시헌", "en": "Siheon Song", "img": "person1", "roles": ["PL", "ID"],
+     "desc": ["Product Design Lead", "3D Modeling", "3D Rendering",
+              "Prototyping", "Mockup Engineering", "Film Directing"],
      "sns": {"instagram": "https://www.instagram.com/halcy_heon",
              "behance": "https://www.behance.net/halcyheon"}},
     {"ko": "이일여", "en": "Ilyeo Lee", "img": "person2", "roles": ["UX"],
@@ -604,6 +606,8 @@ PEOPLE = [
     {"ko": "박주원", "en": "Juwon Park", "img": "person4", "roles": ["ID"],
      "sns": {"instagram": "https://www.instagram.com/juparki_03"}},     # 비핸스 없음
     {"ko": "전다빈", "en": "Dabin Jeon", "img": "person5", "roles": ["VD"],
+     "desc": ["Logo & Graphic Design", "Mobile GUI Design & Development",
+              "Motion Graphics", "Goods & Poster Design"],
      "sns": {"instagram": "https://www.instagram.com/nadabiniii",
              "behance": "https://www.behance.net/davinjeon"}},
 ]
@@ -614,31 +618,31 @@ SNS_ICON = {
 }
 
 # 피그마 49:2014 pc_credit_tutor 실측. 라벨 / 역할 / 이름(한·영) 3열이다.
-CREDIT_BLOCKS = [
-    ("Tutor", [
-        ("Advisory Professor", "심유리", "Yuri Sim"),
-        ("ID Tutor", "주호영", "Hoyoung Joo"),
-        ("ID Tutor", "정수헌", "Soohun Jung"),
-        ("ID Tutor", "이문환", "Moonhwan Lee"),
-        ("VD Tutor", "워크스", "WORKS"),
-    ]),
-    ("Thanks to", [
-        ("Videographer", "양의열", "Euiyeol Yang"),
-        ("", "조수완", "Cho Suwan"),
-        ("", "이문환", "Moonhwan Lee"),
-    ]),
+# 피그마 61:388 "추가되는레이아웃" 그대로. 한 덩어리("thanks to") 아래 4열이고,
+# 각 열은 [역할 라벨 | 이름들] 컴포넌트를 세로로 쌓는다. 2열만 컴포넌트가 둘이다.
+CREDIT_COLS = [
+    [("Advisory\nProfessor", [("심유리", "Yuri Sim"), ("이문환", "Moonhwan Lee")])],
+    [("ID Tutor", [("주호영", "Hoyoung Joo")]),
+     ("ID tutor", [("정수헌", "Soohun Jung")])],
+    [("VD Tutor", [("워크스", "WORKS")])],
+    [("Videographer", [("양의열", "Euiyeol Yang"), ("조수완", "Cho Suwan"),
+                       ("이문환", "Moonhwan Lee")])],
 ]
 
 def credit_rows():
-    out = ""
-    for label, rows in CREDIT_BLOCKS:
-        items = "".join(
-            f'<div class="cr-row"><span class="cr-role">{esc(role)}</span>'
-            f'<span class="cr-name">{esc(ko)}</span>'
-            f'<span class="cr-en">{esc(en)}</span></div>'
-            for role, ko, en in rows)
-        out += f'<div class="cr-block"><p class="cr-label">{esc(label)}</p><div class="cr-list">{items}</div></div>'
-    return out
+    cols = ""
+    for groups in CREDIT_COLS:
+        blocks = ""
+        for role, names in groups:
+            people = "".join(
+                f'<div class="cr-name"><span class="cr-ko">{esc(ko)}</span>'
+                f'<span class="cr-en">{esc(en)}</span></div>'
+                for ko, en in names)
+            role_html = esc(role).replace("\n", "<br>")
+            blocks += (f'<div class="cr-item"><p class="cr-role">{role_html}</p>'
+                       f'<div class="cr-names">{people}</div></div>')
+        cols += f'<div class="cr-col">{blocks}</div>'
+    return f'<p class="cr-label">thanks to</p><div class="cr-cols">{cols}</div>'
 
 def credits_page():
     cards = ""
@@ -691,11 +695,13 @@ def credits_page():
       </div>'''
     return f'''
 <div class="page credits-page" data-page="credits">
-  <p class="cc-kicker">Designed By</p>
   <div class="cc-dim"></div>
   <div class="lany-stage" id="lanyStage">{cards}
   </div>
-  <div class="cr-wrap">{credit_rows()}</div>
+  <div class="credits-foot">
+    <p class="cc-kicker">DESIGNED BY</p>
+    <div class="cr-wrap">{credit_rows()}</div>
+  </div>
   <button class="lb-close cc-close" type="button" aria-label="닫기">
     <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
