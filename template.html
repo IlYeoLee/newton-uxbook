@@ -242,16 +242,16 @@
      이미 피그마 27:302 와 같다. 여기서 다시 정의하면 오히려 본문 폭이 무너진다. */
   .wide-text .head-block{margin:0;padding:0}
   /* 타이포는 전역 .head-title / .head-body 값이 이미 피그마와 같다. 덮어쓰지 않는다. */
-  /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
-     object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
-  .wide-media{flex:0 1 auto;min-height:0;aspect-ratio:1185/449;margin:auto 0.830cqw 0.830cqw;
+  /* 비율을 1185:449 로 못 박으면, 그 비율이 아닌 이미지는 contain 때문에 좌우에
+     빈 띠가 생겨 다른 레이아웃보다 여백이 넓어 보인다. 컨테이너가 이미지 비율을
+     따라가게 두면 좌우가 꽉 차고 여백은 다른 페이지와 같은 0.830cqw 가 된다. */
+  .wide-media{flex:0 1 auto;min-height:0;margin:auto 0.830cqw 0.830cqw;
     border-radius:3.320cqw;overflow:hidden;position:relative}
-  /* cover 는 비율이 조금만 어긋나도 잘라낸다. contain 이면 어떤 비율이 와도
-     이미지가 통째로 안에 들어온다. */
-  /* object-fit 은 이미지에만 먹는다. .fade-stack 은 div 라서 여기에 걸면 아무 일도
-     안 일어나고 안쪽 img 가 컨테이너를 넘어 잘린다. 안쪽 img 까지 같이 잡는다. */
-  .wide-media img,.wide-media .fade-stack,.wide-media .fade-stack img{width:100%;height:100%;object-fit:contain;
-    border-radius:3.320cqw;display:block}
+  /* height:auto 라야 이미지가 제 비율대로 폭을 꽉 채운다. 세로가 남는 만큼은
+     .wide-media 의 margin:auto 가 흡수한다. */
+  .wide-media img,.wide-media .fade-stack img{width:100%;height:auto;display:block;
+    border-radius:3.320cqw}
+  .wide-media .fade-stack{width:100%;border-radius:3.320cqw;overflow:hidden}
   .wide-media .fade-track img{object-fit:contain}
   @media (max-width:640px){
     .wide-text{padding:6vw 5vw 0}
@@ -657,6 +657,38 @@
   .cover-slide p{position:relative;z-index:1}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:var(--uxbook);margin:0;letter-spacing:-.02em}
 
+  /* ── 표지 오버레이 (피그마 62:543, 1920x1080 기준을 비율로 옮김) ──
+     딤 290/1080 = 26.85%, 글자는 폭 기준(25/1920, 34/1920), 세로는 높이 기준. */
+  .cv-scrim{position:absolute;left:0;right:0;height:26.85%;z-index:1;pointer-events:none}
+  .cv-top{top:0;background:linear-gradient(0deg,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 70%)}
+  .cv-bottom{bottom:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 70%)}
+  .cover-slide .cv-eyebrow,.cover-slide .cv-title,.cover-slide .cv-cta{
+    position:absolute;left:0;right:0;text-align:center;color:#fff;z-index:2}
+  .cover-slide .cv-eyebrow{top:5.56%;font-size:1.302cqw;font-weight:400;letter-spacing:.02em}
+  .cover-slide .cv-title  {top:11.11%;font-size:1.771cqw;font-weight:700}
+  .cover-slide .cv-cta    {top:90.19%;font-size:1.771cqw;font-weight:700}
+  .cv-touch{position:absolute;left:50%;top:67.69%;transform:translateX(-50%);
+    width:8.44cqw;height:auto;z-index:2;overflow:visible;pointer-events:none}
+
+  /* codepen.io/pshkll/pen/JjmYqdz 를 그대로. 원본은 흰 면 + 검정 선인데,
+     여기서는 면을 빼고 선만 흰색으로 둔다. */
+  .touchon-hand-stroke{fill:none;stroke:#fff;stroke-width:12;
+    stroke-linecap:round;stroke-linejoin:round;
+    animation:2.2s linear .6s infinite handTouch;transform-origin:50% 50%}
+  .hand-touch-1,.hand-touch-2,.hand-touch-3{fill:none;stroke:#fff;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
+  .hand-touch-1{animation:2.2s linear 0s infinite touch-1}
+  .hand-touch-2{animation:2.2s linear 0s infinite touch-2;opacity:0}
+  .hand-touch-3{animation:2.2s linear 0s infinite touch-3;opacity:0}
+  @keyframes touch-1{0%{r:0}70%{r:0}80%{r:50;opacity:1}100%{opacity:0}}
+  @keyframes touch-2{0%{r:0}50%{r:0}80%{r:110;opacity:.8}95%{opacity:0}}
+  @keyframes touch-3{30%{r:0;opacity:0}80%{r:160;opacity:.7}90%{opacity:0}}
+  @keyframes handTouch{0%{transform:scale(1,1)}10%{transform:scale(.7,.7)}20%{transform:scale(1,1)}}
+  @media (prefers-reduced-motion:reduce){
+    .touchon-hand-stroke,.hand-touch-1,.hand-touch-2,.hand-touch-3{animation:none}
+    .hand-touch-2,.hand-touch-3{opacity:0}
+  }
+
   /* side page-turn zones: whole left/right strip flips pages; blocks image-zoom there */
   .nav-zone{
     position:absolute;top:5.394cqw;bottom:0;width:6cqw;z-index:7;
@@ -832,6 +864,9 @@
 
     /* cover */
     .cover-slide p{font-size:4.4vw}
+    .cover-slide .cv-eyebrow{font-size:3vw}
+    .cover-slide .cv-title,.cover-slide .cv-cta{font-size:4.4vw}
+    .cv-touch{width:22vw}
 
     /* pager: bottom-centered bar — ‹  n/N  › — so arrows never overlap content */
     .pager{top:auto;bottom:4vw;left:0;right:0;transform:none;justify-content:center;align-items:center;gap:6vw}
@@ -905,6 +940,18 @@
       <div class="cover-slide">
         <video class="cover-video" src="assets/cover.mp4" poster="assets/cover-poster.jpg"
                autoplay muted loop playsinline aria-hidden="true"></video>
+        <div class="cv-scrim cv-top"></div>
+        <div class="cv-scrim cv-bottom"></div>
+        <p class="cv-eyebrow">PROCESS · DEVELOPMENT · ARCHIV</p>
+        <p class="cv-title">Inside Newton</p>
+        <!-- codepen.io/pshkll/pen/JjmYqdz — 면은 빼고 흰 아웃라인만 남겼다 -->
+        <svg class="cv-touch" viewBox="0 0 640 640" fill="none" aria-hidden="true">
+          <circle class="hand-touch-1" cx="299" cy="201" r="50"  stroke-width="14"/>
+          <circle class="hand-touch-2" cx="299" cy="201" r="110" stroke-width="14"/>
+          <circle class="hand-touch-3" cx="299" cy="201" r="160" stroke-width="14"/>
+          <path class="touchon-hand-stroke" d="M327.223 308.7C328.023 273.6 380.223 273.3 380.923 308.7V335M327.223 308.7V213.7C325.723 178.1 275.023 178.1 273.523 213.7V304.3V427.5C273.523 458.8 273.523 452.1 230.123 422.3C195.323 398.5 164.023 420.6 165.023 435.7C166.023 450.8 252.823 528.6 252.823 528.6C352.123 643.8 455.923 571 475.023 515.2C494.123 459.3 489 361.3 489 361.3C488 346.5 476.423 334.4 461.623 334.4C446.823 334.4 434.623 347.3 434.623 361.3M327.223 308.7V388.8M380.923 335C382.323 300 433.723 300.7 434.623 335.5V361.3M380.923 335V388.8M434.623 361.3V399.3"/>
+        </svg>
+        <p class="cv-cta">Touch To read</p>
       </div>
     </div>
 
