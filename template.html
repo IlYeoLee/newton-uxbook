@@ -603,6 +603,7 @@
   .cc-zoom .cc{transform:none !important}
   .cc-zoom .cc-inner{transform-style:preserve-3d;transform:rotateY(0deg) !important;
     transition:transform .62s cubic-bezier(.4,.05,.2,1)}
+  .cc-zoom.no-anim .cc-inner{transition:none !important}
   .cc-zoom .cc.flipped .cc-inner{transform:rotateY(180deg) !important}
   .cc-zoom .cc-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;
     opacity:1 !important;transition:none}
@@ -2288,9 +2289,15 @@ void main(){
           if (e.target.closest('.cc-sns')) return;
           clone.classList.toggle('flipped');
         });
+        // 붙이기 전에 뒷면으로 맞춰 넣는다. 붙인 뒤에 클래스를 주면 앞면에서
+        // 뒷면으로 도는 게 그대로 보인다(진입하자마자 플립되는 것처럼).
+        zoomEl.classList.add('no-anim');
         zoomEl.appendChild(clone);
         page.appendChild(zoomEl);
         page.classList.add('zoomed');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          zoomEl && zoomEl.classList.remove('no-anim');
+        }));
       }
 
       // 3D 레이캐스트는 보이는 판과 계속 어긋났다(어느 카드를 눌러도 첫 사람만
