@@ -594,9 +594,10 @@ def credits_page():
       <div class="lany" data-i="{i}">
         <svg class="lany-rope" aria-hidden="true">
           <path id="rp{i}" class="rp-band"/>
-          <text class="rp-mark"><textPath href="#rp{i}" startOffset="4">{"NEWTON&#160;&#160;" * 7}</textPath></text>
+          <path class="rp-sheen" d=""/>
+          <text class="rp-mark"><textPath href="#rp{i}" startOffset="6">{"NEWTON&#160;&#160;&#160;" * 7}</textPath></text>
         </svg>
-        <div class="lany-clip"></div>
+        <div class="lany-clip"><i class="lany-ring"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="{esc(p["en"])} 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
