@@ -167,14 +167,14 @@ SCENARIO_MEDIA = {
 }
 SILENT = {"sc5.mp4"}   # 오디오 트랙이 없는 영상 → 사운드 버튼을 달지 않는다
 
-def video_tag(src):
+def video_tag(src, wrap="figure v-figure"):
     """자동재생은 스크롤 위치가 정하고(스크립트), 소리는 사용자가 켤 때만 난다."""
     stem = src.rsplit(".", 1)[0]
     sound = "" if src in SILENT else (
         '<button class="v-sound" type="button" aria-pressed="false" aria-label="소리 켜기">'
         '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-mute"></use></svg></button>')
     return (
-        f'<figure class="figure v-figure">'
+        f'<figure class="{wrap}">'
         f'<video src="assets/{src}" poster="assets/{stem}-poster.jpg" '
         f'playsinline muted loop preload="metadata"></video>'
         f'<div class="v-bar">'
@@ -554,6 +554,14 @@ playwith_page = f'''
   </div>
 </div>'''
 
+# 탭의 첫 장으로 들어가는 전면 영상 페이지 (피그마 "이미지 큰비율로 넣고플때" 레이아웃).
+# 텍스트 없이 영상이 페이지를 꽉 채운다. 재생/사운드 조작은 본문 영상과 같다.
+def lead_page(page_id, src):
+    return f'''
+<div class="page lead-page" data-page="{page_id}">
+  {video_tag(src, wrap="v-figure")}
+</div>'''
+
 # 내용상 프로젝션 유닛이 스테이션보다 먼저 온다. structure_full 의 문서 순서는 건드리지
 # 않는다 — 위쪽 구간 슬라이싱이 마커의 문서 위치에 의존하므로, 출력 순서만 바꾼다.
 PAGE_ORDER = [
@@ -562,13 +570,17 @@ PAGE_ORDER = [
     "08 Scenario", "09 Extensibility",
 ]
 assert sorted(PAGE_ORDER) == sorted(MARKERS), "PAGE_ORDER 가 MARKERS 를 그대로 담고 있지 않다"
+FIRST_PRODUCT = "05 Wearable Robotics"
 LAST_PRODUCT = "06 Station"   # "Play with Newton!" 은 Products 마지막 페이지 뒤에 들어간다
 
 seg_of = dict(sections)
 pages_out = []
 for m in PAGE_ORDER:
+    if m == FIRST_PRODUCT:
+        pages_out.append(lead_page("products-lead", "lead_products.mp4"))
     pages_out.append(render_page(m, seg_of[m]))
     if m == LAST_PRODUCT:
+        pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
         pages_out.append(playwith_page)
 sections_html = "".join(pages_out)
 
@@ -585,8 +597,9 @@ intro_page_html = render_vertical("intro", "Now, Your Turn!",
 NAV_GROUPS = [
     ("Background", "sec-01", ["sec-01", "sec-02", "sec-03"]),
     ("Solution", "sec-04", ["sec-04"]),
-    ("Products", "sec-05", ["sec-05", "sec-06", "sec-07"]),
-    ("Scenario", "playwith", ["playwith", "sec-08"]),
+    # 탭을 누르면 전면 영상부터 나온다 → target 이 lead 페이지다
+    ("Products", "products-lead", ["products-lead", "sec-05", "sec-07", "sec-06"]),
+    ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
 ]
 nav_html = "".join(

@@ -361,6 +361,12 @@
   .v-time{flex:none;color:#fff;font-size:0.93cqw;font-variant-numeric:tabular-nums}
   .v-sound[aria-pressed="true"]{color:var(--red)}
 
+  /* 탭 첫 장: 텍스트 없이 영상이 페이지를 꽉 채운다 (피그마 "이미지 큰비율로 넣고플때") */
+  .page.lead-page{padding:0;overflow:hidden}
+  .lead-page .v-figure{position:absolute;inset:0;margin:0;cursor:default}
+  .lead-page .v-figure video{width:100%;height:100%;object-fit:cover;border-radius:0}
+  .lead-page .v-bar{left:12cqw;right:12cqw;bottom:2.5cqw}
+
   blockquote.quote{
     font-size:1.826cqw;font-weight:700;color:var(--red);
     border-left:0.249cqw solid var(--red);
@@ -650,7 +656,7 @@
 <div class="book is-cover" id="book">
   <div class="book-nav">
     <a class="brand" href="#" data-nav="cover"><span class="brand-logo" role="img" aria-label="NEWTON"></span></a>
-    <div class="pillbar"><button type="button" class="pill" data-target="sec-01" data-members="sec-01,sec-02,sec-03">Background</button><button type="button" class="pill" data-target="sec-04" data-members="sec-04">Solution</button><button type="button" class="pill" data-target="sec-05" data-members="sec-05,sec-06,sec-07">Products</button><button type="button" class="pill" data-target="playwith" data-members="playwith,sec-08">Scenario</button><button type="button" class="pill" data-target="sec-09" data-members="sec-09">Extensibility</button></div>
+    <div class="pillbar"><button type="button" class="pill" data-target="sec-01" data-members="sec-01,sec-02,sec-03">Background</button><button type="button" class="pill" data-target="sec-04" data-members="sec-04">Solution</button><button type="button" class="pill" data-target="products-lead" data-members="products-lead,sec-05,sec-07,sec-06">Products</button><button type="button" class="pill" data-target="scenario-lead" data-members="scenario-lead,playwith,sec-08">Scenario</button><button type="button" class="pill" data-target="sec-09" data-members="sec-09">Extensibility</button></div>
     <div class="nav-tools">
       <button class="tool-btn theme-toggle" id="themeToggle" aria-label="테마 전환">
         <svg class="sun-and-moon" viewBox="0 0 24 24" aria-hidden="true">
@@ -713,6 +719,9 @@
     <p class="body" data-en="From a pro&#x27;s steps, a creator&#x27;s routine, to a club expert&#x27;s move. Movements you want to try become Challenge Packs. Choose the Pack that appeals to you, and Newton reveals clues to help you follow the moves. Saved movements connect on walls, floors, and outdoor surfaces, turning your space into a challenge you can start right away.  ▶ View Newton&#x27;s full play journey">프로의 스텝, 크리에이터의 루틴, 동호회 고수의 한 수까지.<br>따라 해 보고 싶은 움직임은 Challenge Pack이 됩니다. 지금 끌리는 Pack을 고르면, <br>Newton은 그 움직임을 따라 해 볼 수 있는 단서로 펼쳐냅니다. 보고 저장해 둔 움직임은 벽면과 바닥, 야외 지면 위에 이어지고, 내가 있는 공간에서 바로 시작할 수 있는 도전이 됩니다.<br><br>▶ Newton의 전체 플레이 여정 보기</p><div class="group"><details class="toggle"><summary data-en="Pack → workout">NEWTON 감각 Pack이 운동 경험이 되는 구조</summary><div class="toggle-body"><div class="finding"><div class="finding-icon"></div><div class="finding-body"><p class="finding-title" data-en="Not just saved — learned by body">움직임을 저장하는 데서 끝나지 않고, 몸으로 익히는 경험으로</p><p class="body" data-en="NEWTON turns a pro&#x27;s moves into a Pack, tunes it to your body, and reads your session for the next.">NEWTON은 숙련자의 움직임을 감각 Pack으로 만들고, 오늘의 몸과 환경에 맞는 실행값으로 번역한 뒤, 운동 중 수행을 읽어 다음 세션으로 이어집니다.</p><p class="subhead" data-en="01 Designing the feel">01 따라 하고 싶은 감각의 설계</p><p class="body" data-en="Moves from pros and creators — video, sensors, audio — are cleared for rights and safety, then distilled to the essentials as a Pack.">프로 선수, 크리에이터, 숙련 사용자의 움직임에서 Pack의 원천을 찾습니다. 영상, 센서, 코칭 음성까지 모아 권리와 품질, 안전성을 확인하고, 발 순서, 방향, 리듬, 착지, 회복처럼 움직임의 핵심만 남깁니다. 흩어진 데이터가 따라 하고 싶은 감각 Pack으로 정리됩니다.</p><figure class="figure"><img class="media" src="assets/img_11.png" alt="" loading="lazy"></figure><p class="subhead" data-en="02 Tuned to your body">02 오늘의 몸으로 바뀌는 실행값</p><p class="body" data-en="The pro&#x27;s rhythm stays; your difficulty changes cue density, preview and audio. With today&#x27;s state and mode, wearables soften, load or assist to fit your body.">Pack 속 숙련자의 리듬과 시그니처는 유지됩니다. 대신 내가 정한 난이도에 따라 지면 UI와 벽면 UI의 단서 밀도, 미리보기, 음성 큐가 달라집니다. 여기에 오늘의 컨디션과 선택한 모드가 더해지면, 하체 웨어러블은 충격을 줄이거나, 부하를 더하거나, 추진을 보조하며 지금 내 몸에 맞는 실행값을 만듭니다.</p><figure class="figure"><img class="media" src="assets/img_12.png" alt="" loading="lazy"></figure><p class="subhead" data-en="03 Records for next time">03 다음 세션을 준비하는 수행 기록</p><p class="body" data-en="It reads your feet, rhythm and balance, steps in when risky, and turns the session into a report, next picks and tuning.">운동 중에는 발 위치, 리듬, 착지, 균형, 반응을 읽습니다. Pack을 얼마나 잘 살렸는지, 얼마나 안정적으로 움직였는지 보고, 위험한 순간에는 안전 개입이 먼저 작동합니다. 세션이 끝나면 기록은 리포트와 다음 추천, 힌트 양, 사전 익히기 시간, 웨어러블 강도 조정으로 이어집니다.</p><figure class="figure"><img class="media" src="assets/img_13.png" alt="" loading="lazy"></figure></div></div></div></details><details class="toggle"><summary data-en="What sets us apart">NEWTON의 차별화 포인트</summary><div class="toggle-body"><div class="finding"><div class="finding-icon"></div><div class="finding-body"><p class="finding-label" data-en="Copy, adjust, continue — the difference">따라하고, 조정하고, 이어가는 경험의 차별화</p><p class="finding-headline" data-en="Others show, record or assist separately. NEWTON ties visual guide, data and wearable into one Pack-centered experience — translating a pro&#x27;s moves onto your body and real ground.">기존 제품은 각각 바닥에 보여주기, 움직임 기록하기, 힘 보조하기에 강점을 가집니다. NEWTON은 이 기능들을 따로 제공하지 않고, 운동 감각 Pack을 중심으로 시각 가이드·수행 데이터·웨어러블 개입을 하나의 운동 경험으로 연결합니다. 즉, 차별점은 숙련자의 움직임을 내 몸과 실제 지면 위에서 따라 할 수 있는 경험으로 번역한다는 점입니다.</p><figure class="figure"><img class="media" src="assets/img_17.jpg" alt="" loading="lazy"></figure></div></div></div></details></div>
   </div>
 </div>
+<div class="page lead-page" data-page="products-lead">
+  <figure class="v-figure"><video src="assets/lead_products.mp4" poster="assets/lead_products-poster.jpg" playsinline muted loop preload="metadata"></video><div class="v-bar"><button class="v-play" type="button" aria-pressed="false" aria-label="재생"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-play"></use></svg></button><div class="v-seek" role="slider" tabindex="0" aria-label="재생 위치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i class="v-fill"></i></div><span class="v-time">0:00</span><button class="v-sound" type="button" aria-pressed="false" aria-label="소리 켜기"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-mute"></use></svg></button></div></figure>
+</div>
 <div class="page" data-page="sec-05">
   <div class="page-media"><div class="fade-stack"><div class="fade-track" data-n="4"><img src="assets/img_18.png" alt="" loading="lazy"><img src="assets/img_18-2.png" alt="" loading="lazy"><img src="assets/img_18-3.png" alt="" loading="lazy"><img src="assets/img_18.png" alt="" loading="lazy"></div></div><img class="media m-only" src="assets/m6.png" alt="" loading="lazy"></div>
   <div class="page-text">
@@ -736,6 +745,9 @@
     <h2 class="chapter-title" data-en="Station to help you prepare for your challenge">도전을 시작할<br>준비를 돕는 Station</h2>
     <p class="body" data-en="Station is a docking hub that charges and stores Newton. When not exercising, it checks the hardware status and adjusts the placement and projection angle of the Core unit indoors. Your next move is prepared here, and the moment you wear the wearable robot, a new challenge begins.">Station은 Newton을 충전하고 보관하는 거치형 허브입니다. 운동하지 않을 때는 하드웨어의 상태를 점검하고, 실내에서 Core 유닛이 놓일 위치와 투사 각도를 조정합니다. 다음 움직임은 <br>이 자리에서 준비되고, 웨어러블 로봇을 착용하는 순간 새로운 도전으로 이어집니다.</p>
   </div>
+</div>
+<div class="page lead-page" data-page="scenario-lead">
+  <figure class="v-figure"><video src="assets/lead_scenario.mp4" poster="assets/lead_scenario-poster.jpg" playsinline muted loop preload="metadata"></video><div class="v-bar"><button class="v-play" type="button" aria-pressed="false" aria-label="재생"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-play"></use></svg></button><div class="v-seek" role="slider" tabindex="0" aria-label="재생 위치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i class="v-fill"></i></div><span class="v-time">0:00</span><button class="v-sound" type="button" aria-pressed="false" aria-label="소리 켜기"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-mute"></use></svg></button></div></figure>
 </div>
 <div class="page" data-page="playwith">
   <div class="page-media"><img class="media" src="assets/img_14.png" alt="" loading="lazy" data-msrc="assets/m9.png"></div>
@@ -863,6 +875,8 @@
     pages.forEach((p, n) => p.classList.toggle('active', n === i));
     updateChrome();
     staggerIn(pages[i]);   // slide-in plays going forward AND backward
+    pageMedia(pages[prev], false);   // 떠난 페이지의 영상은 멈춘다
+    pageMedia(pages[i], true);       // 들어온 페이지의 영상은 첫 프레임부터
   }
 
   // ---- 시나리오 영상: 스크롤 자동재생 + 재생바/사운드 ----
@@ -923,23 +937,45 @@
       sync();
     });
 
-    // 자동재생 시점 = 영상 하단이 대지(스크롤 영역) 하단에 닿는 순간.
-    // 영상이 대지보다 크면 그 순간이 오지 않으므로 60% 들어왔을 때로 대신한다.
-    const root = figs[0].closest('.page-scroll') || null;
-    const io = new IntersectionObserver(entries => {
-      for (const e of entries) {
-        const v = e.target.querySelector('video');
-        if (!v) continue;
-        const rb = e.rootBounds, b = e.boundingClientRect;
-        if (!e.isIntersecting) { v.pause(); continue; }
-        if (v.dataset.userPaused === '1') continue;
-        const reached = rb && (b.bottom <= rb.bottom + 1 ||
-                               (b.height > rb.height && e.intersectionRatio >= 0.6));
-        if (reached) v.play().catch(() => {});
-      }
-    }, { root, threshold: [0, 0.2, 0.4, 0.6, 0.8, 0.95, 1] });
-    figs.forEach(f => io.observe(f));
+    // 본문 영상은 스크롤이 재생을 정한다. 시점은 영상 하단이 대지(스크롤 영역) 하단에
+    // 닿는 순간이고, 영상이 대지보다 크면 그 순간이 오지 않으므로 60% 진입으로 대신한다.
+    // 전면 영상(.lead-page)은 스크롤이 없어 페이지 전환이 재생을 정한다(아래 pageMedia).
+    const scrolled = new Map();
+    figs.forEach(f => {
+      const r = f.closest('.page-scroll');
+      if (!r) return;
+      if (!scrolled.has(r)) scrolled.set(r, []);
+      scrolled.get(r).push(f);
+    });
+    scrolled.forEach((list, root) => {
+      const io = new IntersectionObserver(entries => {
+        for (const e of entries) {
+          const v = e.target.querySelector('video');
+          if (!v) continue;
+          const rb = e.rootBounds, b = e.boundingClientRect;
+          if (!e.isIntersecting) { v.pause(); continue; }
+          if (v.dataset.userPaused === '1') continue;
+          const reached = rb && (b.bottom <= rb.bottom + 1 ||
+                                 (b.height > rb.height && e.intersectionRatio >= 0.6));
+          if (reached) v.play().catch(() => {});
+        }
+      }, { root, threshold: [0, 0.2, 0.4, 0.6, 0.8, 0.95, 1] });
+      list.forEach(f => io.observe(f));
+    });
   })();
+
+  // ---- 페이지에 붙박인 영상(표지 · 탭 첫 장) ----
+  // 스크롤이 없는 자리라 재생 시점은 페이지 전환이 정한다. 앞뒤 어느 쪽에서 넘어오든
+  // 첫 프레임부터 다시 튼다. 떠날 때는 멈춰서 안 보이는 영상이 계속 돌지 않게 한다.
+  function pageMedia(page, on){
+    if (!page) return;
+    page.querySelectorAll('.cover-video, .lead-page video').forEach(v => {
+      if (!on) { v.pause(); return; }
+      v.currentTime = 0;
+      v.dataset.userPaused = '0';
+      v.play().catch(() => {});
+    });
+  }
 
   // ripple on the round chevron buttons
   function addRipple(e){
