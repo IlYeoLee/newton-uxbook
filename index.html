@@ -19,6 +19,15 @@
     font-family:'Supreme';font-weight:700;font-style:normal;font-display:swap;
     src:url('fonts/Supreme-Bold.woff2') format('woff2');
   }
+  /* 직군 배지(UX·ID·PL·VD) 전용. 67.7% 숫자에 쓰인 그 도트 페이스다. */
+  @font-face{
+    font-family:'OffBit';font-weight:400;font-style:normal;font-display:swap;
+    src:url('fonts/OffBitTrial-Dot.woff2') format('woff2');
+  }
+  @font-face{
+    font-family:'OffBit';font-weight:700;font-style:normal;font-display:swap;
+    src:url('fonts/OffBitTrial-DotBold.woff2') format('woff2');
+  }
   @font-face{
     font-family:'Freesentation';font-weight:400;font-style:normal;font-display:swap;
     src:url('fonts/Freesentation-Regular.woff2') format('woff2');
@@ -457,7 +466,7 @@
     gap:calc(var(--cw)*.0152);justify-content:center}
   .cc-chips-top{top:18.15%}
   .cc-chip{min-width:calc(var(--cw)*.127);height:calc(var(--cw)*.0787);border-radius:999px;
-    background:rgba(255,255,255,.2);color:#fff;font-size:calc(var(--cw)*.061);font-weight:400;
+    background:rgba(255,255,255,.2);color:#fff;font-family:'OffBit',inherit;font-size:calc(var(--cw)*.072);font-weight:700;
     letter-spacing:-.04em;display:grid;place-items:center;padding:0 calc(var(--cw)*.018)}
   /* 설명도 이름과 같이 blend=OVERLAY 다(피그마 49:1771 실측) */
   .cc-desc{position:absolute;left:21.32%;width:57.61%;top:32.25%;margin:0;text-align:center;
