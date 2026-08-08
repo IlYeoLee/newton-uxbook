@@ -671,7 +671,7 @@ def archive_page():
     return ('\n<div class="page archive-page" data-page="archive">\n'
             '  <div class="ar-stage" id="arStage"><div class="ar-track">' + items + '</div></div>\n'
             '  <div class="ar-foot">\n'
-            '    <p class="ar-title" data-en="Ideation">아이디에이션</p>\n'
+            '    <p class="ar-title">Ideation</p>\n'   # 아카이빙 제목은 언제나 영문
             '    <p class="ar-count"><span class="ar-cur">1</span>/' + str(n) + '</p>\n'
             '  </div>\n'
             '</div>')
