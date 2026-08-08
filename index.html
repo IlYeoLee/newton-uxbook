@@ -438,7 +438,7 @@
   .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
   .lany3d-host .lanyard-wrapper{height:100%}
-  .lany3d-host canvas{display:block;touch-action:none}
+  .lany3d-host canvas{display:block;touch-action:none;pointer-events:none}
   /* 3D 카드 위에 얹히는 DOM 판. 기존 .cc 를 그대로 복제해 넣으므로 지금 CSS 가
      그대로 먹는다 — 사진·블롭·이름 마스킹·칩·뒷면이 전부 코드로 남는다. */
   /* drei 가 Html 바깥에 만드는 래퍼들까지 포인터를 끊어야, 카드를 눌렀을 때
@@ -2660,7 +2660,8 @@ void main(){
       // 화면상 사각형으로 어느 카드인지 직접 고른다. 겹치면 앞쪽(뒤에 그린 것)을
       // 고른다 — 그게 눈에 보이는 카드다.
       const pick = e => {
-        const slots = [...host.querySelectorAll('.cc3d-slot')];
+        // drei 가 Html 을 어디에 붙이든 찾도록 문서 전체에서 고른다.
+        const slots = [...document.querySelectorAll('.cc3d-slot')];
         for (let i = slots.length - 1; i >= 0; i--) {
           const r = slots[i].getBoundingClientRect();
           if (!r.width) continue;
