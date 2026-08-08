@@ -314,6 +314,9 @@
   .head-title{font-size:2.656cqw;font-weight:700;color:var(--text);width:21.90cqw;flex:none;line-height:1.4;letter-spacing:-.03em;margin:0}
   /* English titles render in Supreme (wider than the KO face) → tighten a touch, EN only */
   :root[data-lang="en"] .head-title,:root[data-lang="en"] .chapter-title,:root[data-lang="en"] .step-title{letter-spacing:-.045em}
+  /* 한글은 기본값(break-word)이면 어절 한가운데서 끊긴다. keep-all 이라야
+     띄어쓰기 단위로 넘어가 문장 줄바꿈이 어색하지 않다. */
+  .head-body,.head-title{word-break:keep-all;overflow-wrap:anywhere}
   .head-body{flex:1;min-width:0;font-size:1.494cqw;color:var(--text-body);line-height:1.5;margin:0}
   /* intro: credit under the title in the left column (keeps header compact → hero grows) */
   .head-titlecol{width:21.90cqw;flex:none;display:flex;flex-direction:column}
@@ -457,7 +460,11 @@
   .rp-ribbon{stroke:none}
   .rp-logos image{filter:brightness(0) invert(1);opacity:.95}
   /* 버클과 후크는 SVG 안에 둔다. CSS div 로 두면 로프와 좌표계가 달라 어긋난다. */
-  .rp-buckle{fill:#3B424A;stroke:rgba(255,255,255,.45);stroke-width:.5}
+  /* 크림프 금속. 채움은 mt{i} 그라디언트가 하고, 테두리는 아주 얇은 어두운 선만
+     둔다 — 밝은 테두리를 두르면 스티커처럼 납작해 보인다. */
+  .rp-buckle{stroke:rgba(0,0,0,.55);stroke-width:.4}
+  .rp-bhl{fill:rgba(255,255,255,.55)}      /* 윗면에 걸리는 빛 */
+  .rp-bcrease{fill:rgba(0,0,0,.38)}        /* 접힌 자국 */
 
   /* 카드 본체 — 앞/뒤를 3D 로 뒤집는다 */
   .cc{position:absolute;left:0;top:0;width:var(--cw);aspect-ratio:209/328;
@@ -1119,6 +1126,8 @@
       const ribbon = el.querySelector('.rp-ribbon');
       const grad = el.querySelector('linearGradient');
       const buckle = el.querySelector('.rp-buckle');
+      const hl = el.querySelector('.rp-bhl');
+      const crease = el.querySelector('.rp-bcrease');
       // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
       // 줄에 찍히는 워드마크 — 앱바와 같은 로고를 일정 간격으로 반복한다
       const logoG = el.querySelector('.rp-logos');
@@ -1130,7 +1139,7 @@
         logoG.appendChild(im);
         logos.push(im);
       }
-      const r = { el, card, ribbon, grad, buckle, logos, pts: [], len: 0, anchor: {x:0,y:0},
+      const r = { el, card, ribbon, grad, buckle, hl, crease, logos, pts: [], len: 0, anchor: {x:0,y:0},
                   drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
@@ -1190,6 +1199,12 @@
       // (50% 0 기준의 보정 계산 없이) 가운데 정렬이 흔들리지 않는다.
       return `translate(${(b.width - cw * s) / 2}px,${(b.height - ch * s) / 2}px) scale(${s})`;
     }
+    function setRect(el, x, y, w, h, at){
+      if (!el) return;
+      el.setAttribute('x', x); el.setAttribute('y', y);
+      el.setAttribute('width', w); el.setAttribute('height', h);
+      el.setAttribute('transform', at);
+    }
     function ropeTransform(r){
       const end = r.pts[SEG], prev = r.pts[SEG - 1];
       const ang = Math.atan2(end.x - prev.x, end.y - prev.y) * -180 / Math.PI;
@@ -1197,12 +1212,27 @@
       // 버클(1.35cqw)+후크(1.35cqw) 높이만큼 카드를 내려 그 사이를 비운다.
       // 카드 상단 = 버클 하단이 되게 한다. 버클 높이(W0*2.1, W0=폭*0.060)와 같은 값이라야
       // 틈도 겹침도 안 생긴다. 한쪽을 바꾸면 다른 쪽도 같이 바꿔야 한다.
-      const gap = r.card.offsetWidth * 0.060 * 2.1;
+      const gap = r.card.offsetWidth * 0.060 * 1.45;   // = 버클 높이(bh). 한쪽만 바꾸면 틈이 생긴다
       return `translate(${end.x - r.card.offsetWidth / 2}px,${end.y + gap}px) rotate(${ang}deg)`;
     }
 
+    // 닫기 뒷정리는 애니메이션이 끝난 뒤(ZOOM_MS)에 한다. 그 사이에 카드를 또 누르면
+    // 이 타이머가 "확대 도중에" 터져서 frozen 을 풀고 zoom 플래그를 지워버린다.
+    // 그러면 줄이 튀고 닫기도 안 먹는다. 새 동작이 시작되면 먼저 즉시 마무리한다.
+    let closeTimer = null;
+    function finishClose(){
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      ropes.forEach(o => {
+        o.el.classList.remove('on');
+        o.zoom = false;
+        o.card.style.transition = '';
+        o.card.style.transformOrigin = '';
+      });
+      frozen = false;
+    }
     function open(r){
       if (page.classList.contains('zoomed')) { r.card.classList.toggle('flipped'); return; }
+      finishClose();                       // 직전 닫기가 아직 안 끝났으면 여기서 끝낸다
       frozen = true;                       // 여기서 모든 움직임이 선다
       // 매 프레임 넣던 인라인 drop-shadow 를 비운다. 인라인이 남아 있으면
       // 확대 시 흐리게 하는 CSS 규칙(filter:blur)을 덮어써서 딤/블러가 안 걸린다.
@@ -1215,18 +1245,13 @@
       r.card.style.transform = centerTransform(r);
     }
     function close(){
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       const r = ropes.find(o => o.zoom);
       page.classList.remove('zoomed');
       ropes.forEach(o => o.card.classList.remove('flipped'));
-      if (!r) { frozen = false; return; }
+      if (!r) { finishClose(); return; }
       r.card.style.transform = ropeTransform(r);      // 매달려 있던 자리로 되돌아간다
-      setTimeout(() => {
-        r.el.classList.remove('on');
-        r.zoom = false;
-        r.card.style.transition = '';
-        r.card.style.transformOrigin = '';
-        frozen = false;                               // 그 다음에 물리를 다시 돌린다
-      }, ZOOM_MS);
+      closeTimer = setTimeout(finishClose, ZOOM_MS);  // 그 다음에 물리를 다시 돌린다
     }
     closeBtn.addEventListener('click', close);
     dim.addEventListener('click', close);
@@ -1353,13 +1378,17 @@
         const bang = Math.atan2(end.x - pts[SEG-1].x, end.y - pts[SEG-1].y) * -180 / Math.PI;
         // W0 는 반폭이라 줄의 전체 폭은 W0*2 다. 버클을 W0*1.9 로 두면 줄보다 좁아져
         // 줄이 양옆으로 삐져나온다 — 실제 버클은 줄보다 넓게 물린다.
-        const bw = W0 * 2.7, bh = W0 * 2.1;
+        // 실물 크림프는 줄보다 아주 조금 넓고 납작하다. 크게 잡으면 2D 판때기로 보인다.
+        const bw = W0 * 2.35, bh = W0 * 1.45;
         const at = `translate(${end.x},${end.y}) rotate(${bang})`;
         r.buckle.setAttribute('x', -bw / 2);
         r.buckle.setAttribute('y', 0);
         r.buckle.setAttribute('width', bw);
         r.buckle.setAttribute('height', bh);
         r.buckle.setAttribute('transform', at);
+        // 윗면 빛 한 줄과 접힌 자국 한 줄. 이 둘이 있어야 두께가 읽힌다.
+        setRect(r.hl, -bw / 2 + bw * 0.14, bh * 0.13, bw * 0.34, bh * 0.10, at);
+        setRect(r.crease, -bw / 2 + bw * 0.06, bh * 0.62, bw * 0.88, bh * 0.07, at);
       }
       requestAnimationFrame(step);
     }

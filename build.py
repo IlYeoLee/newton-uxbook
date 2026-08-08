@@ -537,8 +537,11 @@ def render_page(marker, seg):
         else:
             media = img_tag(hero["src"]) if hero else ""
         # 피그마 27:302 는 kicker 위, 타이틀 좌 / 본문 우다 — 기존 head_block 이 그 구조다
-        first_p, rest3 = first_paragraph(rest2)
-        body_text = first_p.get('x', '') if first_p else ''
+        # 본문 문단은 전부 타이틀 우측 칸(.head-body)에 넣는다. 첫 문단만 넣으면
+        # 나머지가 .head-row 밖으로 빠져 타이틀 아래 전체 폭으로 흘러내린다.
+        paras = [n for n in rest2 if n["t"] == "P"]
+        rest3 = [n for n in rest2 if n["t"] != "P"]
+        body_text = "\n".join(n.get("x", "") for n in paras if n.get("x"))
         head = head_block(kicker, h4['x'] if h4 else '', body_text)
         return f'''
 <div class="page wide-page" data-page="sec-{num}">
@@ -668,11 +671,23 @@ def credits_page():
               <stop offset="0.82" stop-color="#FA3030"/>
               <stop offset="1"    stop-color="#D42020"/>
             </linearGradient>
+            <!-- 크림프(집게)의 금속면. objectBoundingBox 라 버클이 돌아가도 같이 돈다.
+                 가로로 어둡게-밝게-어둡게 가야 평면이 아니라 둥근 쇠로 읽힌다. -->
+            <linearGradient id="mt{i}" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0"    stop-color="#191D22"/>
+              <stop offset="0.16" stop-color="#5F6B76"/>
+              <stop offset="0.34" stop-color="#B6C0C8"/>
+              <stop offset="0.48" stop-color="#828D97"/>
+              <stop offset="0.72" stop-color="#3D454C"/>
+              <stop offset="1"    stop-color="#14181C"/>
+            </linearGradient>
           </defs>
           <path class="rp-ribbon" fill="url(#bg{i})"/>
           <g class="rp-logos"></g>
           <g class="rp-hw">
-            <rect class="rp-buckle" rx="2"/>
+            <rect class="rp-buckle" rx="2" fill="url(#mt{i})"/>
+            <rect class="rp-bhl"/>
+            <rect class="rp-bcrease"/>
           </g>
         </svg>
         <div class="cc" tabindex="0" role="button" aria-label="{esc(p["en"])} 카드">
