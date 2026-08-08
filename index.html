@@ -619,6 +619,8 @@
     border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
     color:#000;padding:0;
   }
+  /* 리플은 호스트 안에서만 퍼져야 한다 — 클릭 가능한 요소 전부에 걸어둔다 */
+  button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint{position:relative;overflow:hidden}
   .ripple{
     position:absolute;border-radius:50%;background:rgba(0,0,0,.16);
     transform:scale(0);pointer-events:none;animation:ripple .6s ease-out;
@@ -1398,7 +1400,10 @@
     function ropeTransform(r){
       const end = r.pts[SEG], prev = r.pts[SEG - 1];
       const ang = Math.atan2(end.x - prev.x, end.y - prev.y) * -180 / Math.PI;
-      return `translate(${end.x - r.card.offsetWidth / 2}px,${end.y}px) rotate(${ang}deg)`;
+      // 로프 끝과 카드 상단이 같은 자리면 버클이 카드에 박힌다.
+      // 버클(1.35cqw)+후크(1.35cqw) 높이만큼 카드를 내려 그 사이를 비운다.
+      const gap = r.card.offsetWidth * 0.155;
+      return `translate(${end.x - r.card.offsetWidth / 2}px,${end.y + gap}px) rotate(${ang}deg)`;
     }
 
     function open(r){
@@ -1501,18 +1506,21 @@
 
         // 리본: 좌우 가장자리 점을 만들어 하나의 폴리곤으로 잇는다.
         // 폭은 위로 갈수록 좁아진다(멀어지는 느낌) — 선으로는 못 하는 부분이다.
-        const W0 = r.card.offsetWidth * 0.052;          // 카드 쪽 반폭
+        const W0 = r.card.offsetWidth * 0.060;          // 반폭 (띠 전체 폭 = 이 값의 2배)
         const L = [], R = [];
         let minX = 1e9, maxX = -1e9;
-        for (let i = 0; i <= SEG; i++) {
-          const a = pts[Math.max(0, i - 1)], c = pts[Math.min(SEG, i + 1)];
+        // 앵커 위로 한 마디 더 뽑는다. 많이 잡아당기면 줄 시작점의 자른 끝이 보이는데,
+        // 스테이지 밖으로 내보내면 overflow:hidden 이 잘라준다.
+        const ext = { x: pts[0].x * 2 - pts[1].x, y: pts[0].y - (pts[1].y - pts[0].y) - W0 * 6 };
+        const seq = [ext, ...pts];
+        for (let i = 0; i < seq.length; i++) {
+          const a = seq[Math.max(0, i - 1)], c = seq[Math.min(seq.length - 1, i + 1)];
           const tx = c.x - a.x, ty = c.y - a.y;
           const m = Math.hypot(tx, ty) || 1e-4;
-          const w = W0;                                 // 실물 끈은 폭이 일정하다 — 테이퍼 없음
-          const nx = -ty / m * w, ny = tx / m * w;
-          L.push([pts[i].x + nx, pts[i].y + ny]);
-          R.push([pts[i].x - nx, pts[i].y - ny]);
-          minX = Math.min(minX, pts[i].x - w); maxX = Math.max(maxX, pts[i].x + w);
+          const nx = -ty / m * W0, ny = tx / m * W0;   // 실물 끈은 폭이 일정하다
+          L.push([seq[i].x + nx, seq[i].y + ny]);
+          R.push([seq[i].x - nx, seq[i].y - ny]);
+          minX = Math.min(minX, seq[i].x - W0); maxX = Math.max(maxX, seq[i].x + W0);
         }
         r.ribbon.setAttribute('d',
           'M ' + L.map(p => p[0] + ' ' + p[1]).join(' L ') +
@@ -1522,8 +1530,8 @@
         r.grad.setAttribute('y1', pts[0].y); r.grad.setAttribute('y2', pts[0].y);
 
         // 워드마크를 줄 위에 일정 간격으로 얹는다. 접선 각도로 돌려 곡선을 따라간다.
-        const strapW = r.card.offsetWidth * 0.104;       // 리본 전체 폭(반폭 0.052 x2)
-        const LW = strapW * 1.45, LH = LW / 6.98;     // 띠 폭보다 짧게 → 서로 안 붙는다        // wordmark.svg 는 872x125
+        const strapW = r.card.offsetWidth * 0.120;       // 리본 전체 폭(반폭 0.060 x2)
+        const LW = strapW * 1.85, LH = LW / 6.98;     // 기본 뷰포트에서도 읽히는 크기        // wordmark.svg 는 872x125
         r.logos.forEach((im, k) => {
           const idx = 3 + k * 4;                          // SEG=14 구간에 3개, 간격 넓게
           const p0 = pts[Math.max(0, idx - 1)], p1 = pts[Math.min(SEG, idx + 1)];
@@ -1554,7 +1562,12 @@
     });
   }
 
-  // ripple on the round chevron buttons
+  // 리플: 클릭 속성이 있는 요소 전부에 위임으로 건다. 개별 부착은 빠뜨리기 쉽다.
+  const RIPPLE_SEL = 'button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint';
+  addEventListener('pointerdown', e => {
+    const host = e.target.closest && e.target.closest(RIPPLE_SEL);
+    if (host && !host.disabled) addRipple({ currentTarget: host, clientX: e.clientX, clientY: e.clientY });
+  }, true);
   function addRipple(e){
     const btn = e.currentTarget, rect = btn.getBoundingClientRect();
     const d = Math.max(rect.width, rect.height);
@@ -1569,20 +1582,18 @@
 
   const prevBtn = document.getElementById('prevBtn'), nextBtn = document.getElementById('nextBtn');
   const nextIdx = () => idx >= pages.length - 1 ? 0 : idx + 1;   // wrap last → first
-  prevBtn.addEventListener('click', e => { addRipple(e); show(idx - 1); });
-  nextBtn.addEventListener('click', e => { addRipple(e); show(nextIdx()); });
+  prevBtn.addEventListener('click', e => { show(idx - 1); });
+  nextBtn.addEventListener('click', e => { show(nextIdx()); });
   document.getElementById('nzLeft').addEventListener('click', () => show(idx - 1));
   document.getElementById('nzRight').addEventListener('click', () => show(nextIdx()));
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
-    addRipple(e);
     show(ids.indexOf(p.dataset.target));
   }));
 
   // theme toggle (light ↔ dark)
   document.getElementById('themeToggle').addEventListener('click', e => {
-    addRipple(e);
     const root = document.documentElement;
     root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   });
@@ -1595,7 +1606,6 @@
     });
   }
   document.getElementById('langToggle').addEventListener('click', e => {
-    addRipple(e);
     lang = lang === 'ko' ? 'en' : 'ko';
     document.getElementById('langLabel').textContent = lang === 'ko' ? 'EN' : 'KO';
     document.documentElement.setAttribute('data-lang', lang);
@@ -1776,9 +1786,9 @@
     const fig = e.target.closest('figure.figure img');   // only inline content images, not the fixed media panel
     if (fig) openLb(fig.src);
   });
-  document.getElementById('lbClose').addEventListener('click', e => { addRipple(e); closeLb(); });
-  document.getElementById('lbPlus').addEventListener('click', e => { addRipple(e); setScale(scale + STEP); });
-  document.getElementById('lbMinus').addEventListener('click', e => { addRipple(e); setScale(scale - STEP); });
+  document.getElementById('lbClose').addEventListener('click', e => { closeLb(); });
+  document.getElementById('lbPlus').addEventListener('click', e => { setScale(scale + STEP); });
+  document.getElementById('lbMinus').addEventListener('click', e => { setScale(scale - STEP); });
   window.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
 
   // wheel zoom
