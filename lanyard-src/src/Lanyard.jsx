@@ -6,7 +6,7 @@
 //   3) 확대 중 한 번 더 누르면 Y축 180° 회전으로 뒷면
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
+import { useGLTF, useTexture, Environment, Lightformer, Html } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 
@@ -72,6 +72,7 @@ export default function Lanyard({
               anchorX={anchors[i]}
               hangY={p.hangY ?? 4}
               isMobile={isMobile}
+              cardEl={p.el}
               frontImage={p.front}
               backImage={p.back}
               imageFit={imageFit}
@@ -102,6 +103,7 @@ function Band({
   index = 0,
   anchorX = 0,
   hangY = 4,
+  cardEl = null,
   frontImage = null,
   backImage = null,
   imageFit = 'cover',
@@ -128,6 +130,23 @@ function Band({
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
   const backTex = useTexture(backImage || BLANK_PIXEL);
   const { camera } = useThree();
+  const slot = useRef();
+  // .cc 를 통째로 복제해 넣는다. 원본은 .lany 안에서 숨은 채 남아 있어
+  // 예전 CSS-3D 루프가 계속 돌아도 화면에 영향을 주지 않는다.
+  useEffect(() => {
+    if (!cardEl || !slot.current) return;
+    const clone = cardEl.cloneNode(true);
+    clone.removeAttribute("style");            // 예전 루프가 남긴 인라인 transform 제거
+    clone.classList.remove("grabbing", "flipped");
+    slot.current.appendChild(clone);
+    slot.current._cc = clone;
+    return () => { clone.remove(); };
+  }, [cardEl]);
+  // 앞뒤 뒤집기는 메시를 돌리지 않고 기존 .cc.flipped CSS 규칙에 맡긴다.
+  useEffect(() => {
+    const cc = slot.current && slot.current._cc;
+    if (cc) cc.classList.toggle("flipped", !!flipped);
+  }, [flipped]);
 
   const cardMap = useMemo(() => {
     const baseMap = materials.base.map;
@@ -221,7 +240,6 @@ function Band({
         z: cur.z + (zoomTarget.z - cur.z) * k
       });
       zoomQuat.copy(camera.quaternion);
-      if (flipped) zoomQuat.multiply(tmpQ.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
       const cq = card.current.rotation();
       tmpQ.set(cq.x, cq.y, cq.z, cq.w).slerp(zoomQuat, k);
       card.current.setNextKinematicRotation({ x: tmpQ.x, y: tmpQ.y, z: tmpQ.z, w: tmpQ.w });
@@ -293,16 +311,19 @@ function Band({
           >
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
-                map={cardMap}
-                map-anisotropy={16}
-                clearcoat={isMobile ? 0 : 1}
+                color="#101215"
+                clearcoat={isMobile ? 0 : 0.35}
                 clearcoatRoughness={0.15}
-                roughness={0.9}
-                metalness={0.8}
+                roughness={0.62}
+                metalness={0.32}
                 transparent
                 opacity={dimmed ? 0.28 : 1}
               />
             </mesh>
+            <Html transform position={[0, 0.533, 0.024]} scale={(2.416 / 300) / 3.4} zIndexRange={[8, 0]}
+                  style={{ pointerEvents: "none" }}>
+              <div className="cc3d-slot" ref={slot} />
+            </Html>
             <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
             <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
           </group>
