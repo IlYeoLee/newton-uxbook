@@ -554,6 +554,78 @@ playwith_page = f'''
   </div>
 </div>'''
 
+# ---- 마지막 장: 목걸이(lanyard)에 매달린 크레딧 카드 ----
+# 카드 앞/뒤 모두 CSS 로 그린다. 이미지로 구우면 확대·플립할 때 그라디언트에 밴딩이
+# 생기고 사진 페이드 마스크가 깨진다. 사진만 넣고 나머지는 벡터로 둔다.
+# roles/desc/socials 는 피그마가 아직 1번 카드 양식만 채워둬서 그 값을 따랐다.
+# 역할 약어는 피그마 "인물원본+정보"(49:1927)의 이름 뒤 라벨 그대로다.
+ROLE_NAME = {"PL": "Project Lead", "ID": "Industrial Design",
+             "UX": "UX Design", "VD": "Video Direction"}
+PEOPLE = [
+    {"ko": "송시헌", "en": "Siheon Song", "img": "person1",
+     "roles": ["PL", "ID"], "sns": {"instagram": "", "behance": ""}},
+    {"ko": "이일여", "en": "Ilyeo Lee", "img": "person2",
+     "roles": ["UX"], "sns": {"instagram": "", "behance": ""}},
+    {"ko": "김소진", "en": "SoJin Kim", "img": "person3",
+     "roles": ["ID"], "sns": {"instagram": "", "behance": ""}},
+    {"ko": "박주원", "en": "Juwon Park", "img": "person4",
+     "roles": ["ID"], "sns": {"instagram": ""}},      # 피그마상 비핸스 없음
+    {"ko": "전다빈", "en": "Dabin Jeon", "img": "person5",
+     "roles": ["VD"], "sns": {"instagram": "", "behance": ""}},
+]
+
+SNS_ICON = {
+    "instagram": '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-ig"></use></svg>',
+    "behance": '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg>',
+}
+
+def credits_page():
+    cards = ""
+    for i, p in enumerate(PEOPLE):
+        chips = "".join(f'<span class="cc-chip">{esc(r)}</span>' for r in p["roles"])
+        first, _, last = p["en"].partition(" ")
+        # 뒷면 설명은 역할 약어를 풀어 쓴 것이다(피그마엔 1번 카드 양식만 채워져 있다)
+        desc = ",<br>".join(esc(ROLE_NAME.get(r, r)) for r in p["roles"]) + "."
+        links = ""
+        for kind, url in p["sns"].items():
+            tag, attrs = ("a", f' href="{url}" target="_blank" rel="noopener"') if url else ("span", "")
+            links += f'<{tag} class="cc-sns"{attrs} aria-label="{kind}">{SNS_ICON[kind]}</{tag}>'
+        cards += f'''
+      <div class="lany" data-i="{i}">
+        <svg class="lany-rope" aria-hidden="true">
+          <path id="rp{i}" class="rp-band"/>
+          <text class="rp-mark"><textPath href="#rp{i}" startOffset="4">{"NEWTON&#160;&#160;" * 7}</textPath></text>
+        </svg>
+        <div class="lany-clip"></div>
+        <div class="cc" tabindex="0" role="button" aria-label="{esc(p["en"])} 카드">
+          <div class="cc-inner">
+            <div class="cc-face cc-front">
+              <img class="cc-photo" src="assets/{p["img"]}.png" alt="{esc(p["en"])}" loading="lazy" draggable="false">
+              <div class="cc-blob"></div>
+              <div class="cc-name"><span class="n1">{esc(first)}</span><span class="n2">{esc(last)}</span></div>
+              <div class="cc-chips">{chips}</div>
+            </div>
+            <div class="cc-face cc-back">
+              <div class="cc-blob"></div>
+              <div class="cc-chips cc-chips-top">{chips}</div>
+              <p class="cc-desc">{desc}</p>
+              <div class="cc-links">{links}</div>
+              <p class="cc-sig">{esc(p["en"])}</p>
+            </div>
+          </div>
+        </div>
+      </div>'''
+    return f'''
+<div class="page credits-page" data-page="credits">
+  <p class="cc-kicker">Designed By</p>
+  <div class="cc-dim"></div>
+  <div class="lany-stage" id="lanyStage">{cards}
+  </div>
+  <button class="lb-close cc-close" type="button" aria-label="닫기">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+</div>'''
+
 # 탭의 첫 장으로 들어가는 전면 영상 페이지 (피그마 "이미지 큰비율로 넣고플때" 레이아웃).
 # 텍스트 없이 영상이 페이지를 꽉 채운다. 재생/사운드 조작은 본문 영상과 같다.
 def lead_page(page_id, src):
@@ -582,6 +654,7 @@ for m in PAGE_ORDER:
     if m == LAST_PRODUCT:
         pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
         pages_out.append(playwith_page)
+pages_out.append(credits_page())      # 마지막 장
 sections_html = "".join(pages_out)
 
 # intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
