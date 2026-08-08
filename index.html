@@ -595,11 +595,17 @@
     transform:none;transition:none;pointer-events:auto;
     filter:drop-shadow(0 2.5cqw 5cqw rgba(0,0,0,.6))}
   .cc-zoom .cc-inner{transform:none;transform-style:flat;transition:none}
-  .cc-zoom .cc,.cc-zoom .cc-inner,.cc-zoom .cc-face{transform:none !important}
-  .cc-zoom .cc-face{backface-visibility:visible;transition:opacity .38s ease}
-  .cc-zoom .cc-back{opacity:0}
-  .cc-zoom .cc.flipped .cc-front{opacity:0}
-  .cc-zoom .cc.flipped .cc-back{opacity:1}
+  /* 확대 상태는 3D 캔버스 밖이라 진짜 CSS 3D 플립을 걸 수 있다.
+     누를 때마다 Y축으로 돌아 앞뒤가 바뀐다. 기본은 뒷면. */
+  .cc-zoom{perspective:120cqw}
+  .cc-zoom .cc{transform:none !important}
+  .cc-zoom .cc-inner{transform-style:preserve-3d;transform:rotateY(0deg) !important;
+    transition:transform .62s cubic-bezier(.4,.05,.2,1)}
+  .cc-zoom .cc.flipped .cc-inner{transform:rotateY(180deg) !important}
+  .cc-zoom .cc-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    opacity:1 !important;transition:none}
+  .cc-zoom .cc-front{transform:rotateY(0deg) !important}
+  .cc-zoom .cc-back{transform:rotateY(180deg) !important}
   .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer}
   @media (max-width:640px){ .cc-zoom{width:70vw;height:98vw;--cw:70vw} }
   .cc-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;
