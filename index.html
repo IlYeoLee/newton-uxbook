@@ -385,24 +385,9 @@
        --cover-grad stays as a static fallback shown when WebGL is unavailable. */
     background:var(--cover-grad);
   }
-  /* grainient motion (reactbits): noise-driven gradient rotation, warp & grain off.
-     Overscan 1px on every edge so a high-DPR subpixel seam can't reveal the white bg at the
-     top edge; the parent's overflow:hidden clips the bleed. */
-  .cover-canvas{position:absolute;top:-2px;left:-2px;width:calc(100% + 4px);height:calc(100% + 4px);display:block;z-index:0}
-  .cover-slide .wordmark,.cover-slide p{position:relative;z-index:1}
-  .cover-slide .wordmark{width:72.20cqw;aspect-ratio:872/125;margin-bottom:0.5cqw;cursor:pointer;touch-action:none;user-select:none;display:block;
-    background:var(--wordmark);-webkit-mask:url(assets/wordmark.svg) center/contain no-repeat;mask:url(assets/wordmark.svg) center/contain no-repeat}
-  /* glitch: black-only sliced jitter (no color split) while touched/rubbed */
-  @keyframes glitch{
-    0%,100%{transform:translate(0);clip-path:none}
-    10%{transform:translate(-3px,1px)}
-    25%{transform:translate(3px,-1px);clip-path:inset(8% 0 62% 0)}
-    40%{transform:translate(-2px,1px);clip-path:inset(56% 0 18% 0)}
-    55%{transform:translate(2px,0);clip-path:inset(34% 0 40% 0)}
-    70%{transform:translate(-1px,-1px)}
-    85%{transform:translate(1px,1px);clip-path:none}
-  }
-  .cover-slide .wordmark.glitch{animation:glitch .38s steps(2,end)}
+  /* cover video fills the slide, same in light and dark (no theme variant) */
+  .cover-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0}
+  .cover-slide p{position:relative;z-index:1}
   .cover-slide p{font-size:1.577cqw;font-weight:700;color:var(--uxbook);margin:0;letter-spacing:-.02em}
 
   /* side page-turn zones: whole left/right strip flips pages; blocks image-zoom there */
@@ -574,7 +559,6 @@
     table{font-size:3.2vw;min-width:0}
 
     /* cover */
-    .cover-slide .wordmark{width:78vw}
     .cover-slide p{font-size:4.4vw}
 
     /* pager: bottom-centered bar — ‹  n/N  › — so arrows never overlap content */
@@ -634,8 +618,8 @@
   <div class="stage">
     <div class="page active" data-page="cover">
       <div class="cover-slide">
-        <canvas class="cover-canvas" aria-hidden="true"></canvas>
-        <span class="wordmark" role="img" aria-label="NEWTON"></span>
+        <video class="cover-video" src="assets/cover.mp4" poster="assets/cover-poster.jpg"
+               autoplay muted loop playsinline aria-hidden="true"></video>
         <p>UX Book</p>
       </div>
     </div>
@@ -835,7 +819,6 @@
     pages.forEach((p, n) => p.classList.toggle('active', n === i));
     updateChrome();
     staggerIn(pages[i]);   // slide-in plays going forward AND backward
-    if (i === 0) glitch();  // entering cover by any path → glitch immediately
     if (prev === 0 && i === 1) onboard(pages[i]);   // cover → intro: big-title morph-in
   }
 
@@ -988,13 +971,6 @@
       el._shine = a; a.onfinish = a.oncancel = clear;
     });
   }
-
-  // logo glitch: fires automatically once every 5s
-  const wm = document.querySelector('.cover-slide .wordmark');
-  function glitch(){ if (!wm.classList.contains('glitch')) wm.classList.add('glitch'); }
-  wm.addEventListener('animationend', () => wm.classList.remove('glitch'));
-  glitch();                    // fire immediately on load (cover)
-  setInterval(glitch, 5000);
 
   // toggle: springy height grow + single fade (no per-child flicker)
   function expandToggle(d, body){
