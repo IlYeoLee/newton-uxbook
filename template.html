@@ -2270,32 +2270,36 @@ void main(){
       const canvas = host.querySelector('canvas');
       let downSlot = null, moved = 0, sx = 0, sy = 0;
 
-      // 끌기는 3D 물리가 해야 한다. 같은 좌표로 캔버스에 포인터 이벤트를
-      // 그대로 흘려보내면 rapier 쪽 드래그가 원래대로 동작한다.
-      const relay = (type, e) => {
-        if (!canvas) return;
-        canvas.dispatchEvent(new PointerEvent(type, {
-          pointerId: e.pointerId, pointerType: e.pointerType, isPrimary: true,
-          clientX: e.clientX, clientY: e.clientY, button: 0, buttons: type === 'pointerup' ? 0 : 1,
-          bubbles: true, cancelable: true, composed: true
-        }));
+      // 끌기: 캔버스로 이벤트를 흘려보내면 결국 레이캐스트를 타서 첫 카드로
+      // 몰린다. 판마다 자기 카드의 물리를 직접 미는 API(__band)를 들고 있으므로
+      // 그걸 부른다. 좌표는 캔버스 기준 NDC(-1~1)로 바꿔 넘긴다.
+      const ndc = e => {
+        const r = canvas.getBoundingClientRect();
+        return [((e.clientX - r.left) / r.width) * 2 - 1,
+                -((e.clientY - r.top) / r.height) * 2 + 1];
       };
+      const band = slot => slot && slot.__band;
 
       host.addEventListener('pointerdown', e => {
         if (page.classList.contains('zoomed')) return;
         downSlot = e.target.closest && e.target.closest('.cc3d-slot');
         moved = 0; sx = e.clientX; sy = e.clientY;
-        if (downSlot) relay('pointerdown', e);
+        if (!downSlot) return;
+        host.setPointerCapture && host.setPointerCapture(e.pointerId);
+        const b = band(downSlot);
+        if (b) b.start(...ndc(e));
       });
       host.addEventListener('pointermove', e => {
         if (!downSlot) return;
         moved += Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
         sx = e.clientX; sy = e.clientY;
-        relay('pointermove', e);
+        const b = band(downSlot);
+        if (b) b.move(...ndc(e));
       });
       const endDrag = e => {
         if (!downSlot) return;
-        relay('pointerup', e);
+        const b = band(downSlot);
+        if (b) b.end();
         const slot = downSlot, dist = moved;
         downSlot = null; moved = 0;
         if (dist > 8) return;                       // 끌었으면 확대하지 않는다

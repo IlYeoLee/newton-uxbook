@@ -124,6 +124,7 @@ function Band({
   const texture = useTexture(lanyardImage || lanyard);
   const { camera } = useThree();
   const slot = useRef();
+  const manual = useRef(null);   // DOM 판이 직접 미는 동안의 포인터(NDC)
   // .cc 를 통째로 복제해 넣는다. 원본은 .lany 안에서 숨은 채 남아 있어
   // 예전 CSS-3D 루프가 계속 돌아도 화면에 영향을 주지 않는다.
   useEffect(() => {
@@ -139,6 +140,12 @@ function Band({
       clone.classList.remove("grabbing", "flipped");
       slot.current.appendChild(clone);
       slot.current._cc = clone;
+      // 이 판이 곧 이 카드다. 판이 자기 물리를 직접 민다(레이캐스트를 안 탄다).
+      slot.current.__band = {
+        start: (nx, ny) => { manual.current = { x: nx, y: ny }; drag(new THREE.Vector3()); },
+        move:  (nx, ny) => { if (manual.current) manual.current = { x: nx, y: ny }; },
+        end:   () => { manual.current = null; drag(false); }
+      };
     };
     put();
     return () => { cancelAnimationFrame(raf); if (clone) clone.remove(); };
@@ -179,7 +186,8 @@ function Band({
 
   useFrame((state, delta) => {
     if (dragged && !zoomed) {
-      vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
+      const pt = manual.current || state.pointer;
+      vec.set(pt.x, pt.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
       [card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp());
