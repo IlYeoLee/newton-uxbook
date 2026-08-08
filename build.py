@@ -668,9 +668,14 @@ def archive_page():
             items += ('<figure class="ar-item" data-ko="%s" data-en="%s">'
                       '<img src="assets/arch%02d.webp" alt="" loading="lazy" draggable="false">'
                       '</figure>') % (esc(ko), esc(en), n)
+    chips, at = "", 0
+    for ko, en, cnt in ARCHIVE:
+        chips += ('<button class="ar-chip" type="button" data-at="%d">%s</button>' % (at, esc(en)))
+        at += cnt
     return ('\n<div class="page archive-page" data-page="archive">\n'
             '  <div class="ar-stage" id="arStage"><div class="ar-track">' + items + '</div></div>\n'
             '  <div class="ar-foot">\n'
+            '    <div class="ar-chips">' + chips + '</div>\n'
             '    <p class="ar-title">Ideation</p>\n'   # 아카이빙 제목은 언제나 영문
             '    <p class="ar-count"><span class="ar-cur">1</span>/' + str(n) + '</p>\n'
             '  </div>\n'

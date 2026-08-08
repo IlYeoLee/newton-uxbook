@@ -444,10 +444,9 @@
   /* drei 가 Html 바깥에 만드는 래퍼들까지 포인터를 끊어야, 카드를 눌렀을 때
      옆 카드가 대신 잡히지 않는다. 클릭은 캔버스(메시)가 받아야 한다. */
   .lany3d-host > div:not(canvas){pointer-events:none}
-  .lany3d-host .cc3d-slot,.lany3d-host .cc3d-slot *{pointer-events:auto}
   .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;
-    pointer-events:auto;cursor:pointer}
-  .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;
+    pointer-events:none}
+  .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
     /* drei 의 CSS3D 행렬이 이 배치에서 X 를 뒤집는다. 여기서 되돌린다. */
     transform:scaleX(-1);transition:none;cursor:default;pointer-events:none;
     filter:drop-shadow(0 18px 26px rgba(0,0,0,.55))}
@@ -829,6 +828,19 @@
   .ar-item.is-center{cursor:zoom-in}
   .ar-foot{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
+  /* 묶음 바로가기 칩. 지금 묶음은 빨간 밑줄로 표시된다. */
+  .ar-chips{display:flex;justify-content:center;flex-wrap:wrap;gap:1.660cqw;
+    margin:0 0 1.245cqw;pointer-events:auto}
+  .ar-chip{border:none;background:none;padding:0 0 0.415cqw;cursor:pointer;
+    font-family:inherit;font-size:1.079cqw;font-weight:500;letter-spacing:-.01em;
+    color:rgba(255,255,255,.42);position:relative;overflow:hidden;
+    transition:color .25s ease}
+  .ar-chip:hover{color:rgba(255,255,255,.8)}
+  .ar-chip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0.166cqw;
+    background:var(--red);transform:scaleX(0);transform-origin:50% 50%;
+    transition:transform .32s cubic-bezier(.22,.7,.24,1)}
+  .ar-chip.on{color:#fff}
+  .ar-chip.on::after{transform:scaleX(1)}
   .ar-title{margin:0;font-size:1.494cqw;font-weight:700;color:#fff;letter-spacing:-.02em}
   .ar-count{margin:0.5cqw 0 0;font-size:0.996cqw;font-weight:400;color:rgba(255,255,255,.55)}
   @media (max-width:640px){
@@ -838,6 +850,8 @@
     .ar-item img{border-radius:3vw}
     .ar-title{font-size:3.3vw}
     .ar-count{font-size:2.3vw}
+    .ar-chips{gap:3.5vw;margin-bottom:3vw}
+    .ar-chip{font-size:2.6vw}
     .ar-foot{bottom:6vw}
   }
 
@@ -1223,6 +1237,7 @@
 <div class="page archive-page" data-page="archive">
   <div class="ar-stage" id="arStage"><div class="ar-track"><figure class="ar-item" data-ko="아이디에이션" data-en="Ideation"><img src="assets/arch01.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="아이디에이션" data-en="Ideation"><img src="assets/arch02.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch03.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch04.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch05.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch06.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch07.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch08.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="인스퍼" data-en="Inspiration"><img src="assets/arch09.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch10.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch11.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch12.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch13.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch14.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch15.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch16.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch17.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="스케일 체크" data-en="Scale Check"><img src="assets/arch18.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch19.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch20.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch21.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch22.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch23.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch24.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch25.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch26.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="목업" data-en="Mockup"><img src="assets/arch27.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch28.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch29.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch30.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch31.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch32.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch33.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch34.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="비주얼 / 폼 스터디" data-en="Visual / Form"><img src="assets/arch35.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch36.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch37.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch38.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch39.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch40.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch41.webp" alt="" loading="lazy" draggable="false"></figure><figure class="ar-item" data-ko="촬영" data-en="Shooting"><img src="assets/arch42.webp" alt="" loading="lazy" draggable="false"></figure></div></div>
   <div class="ar-foot">
+    <div class="ar-chips"><button class="ar-chip" type="button" data-at="0">Ideation</button><button class="ar-chip" type="button" data-at="2">Inspiration</button><button class="ar-chip" type="button" data-at="9">Scale Check</button><button class="ar-chip" type="button" data-at="18">Mockup</button><button class="ar-chip" type="button" data-at="27">Visual / Form</button><button class="ar-chip" type="button" data-at="35">Shooting</button></div>
     <p class="ar-title">Ideation</p>
     <p class="ar-count"><span class="ar-cur">1</span>/42</p>
   </div>
@@ -2462,7 +2477,11 @@ void main(){
     const page = stage.closest('.archive-page');
     const titleEl = page.querySelector('.ar-title');
     const curEl = page.querySelector('.ar-cur');
+    const chips = [...page.querySelectorAll('.ar-chip')];
     let cur = 0;
+
+    // 칩을 누르면 그 묶음의 첫 장으로. 한 칸씩 굴리지 않고 바로 옮긴다.
+    chips.forEach(c => c.addEventListener('click', () => go(+c.dataset.at)));
 
     const STEP = 22;     // 이웃 한 칸당 돌아가는 각도
     const R = 46;        // 원통 반지름(cqw 대신 %로 환산해 쓰기 좋은 값)
@@ -2493,6 +2512,10 @@ void main(){
         // 아카이빙 제목은 언제나 영문이다(한/영 전환과 무관).
         const en = c.dataset.en;
         if (titleEl.textContent !== en) titleEl.textContent = en;
+        // 지금 묶음의 칩에 표시를 옮긴다
+        let act = 0;
+        chips.forEach((ch, k) => { if (+ch.dataset.at <= cur) act = k; });
+        chips.forEach((ch, k) => ch.classList.toggle('on', k === act));
       }
     }
     // 끝에 닿으면 처음으로 돌아온다(무한 루프)
