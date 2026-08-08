@@ -433,7 +433,8 @@
   .lany3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:5}
   /* 3D 가 붙으면 CSS 3D 카드는 물러난다. 마크업은 남겨둔다 — 사진 경로와
      이름·역할 정보를 여기서 읽어 텍스처로 굽기 때문이다. */
-  .lany-stage.is3d .lany{display:none}
+  .lany-stage .lany{display:none}
+  .lany-stage.no3d .lany{display:block}
   .lany3d-host{position:absolute;inset:0;z-index:5}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
   .lany3d-host .lanyard-wrapper{height:100%}
@@ -2256,11 +2257,12 @@ void main(){
         const s = document.createElement('script');
         s.src = 'assets/lanyard.bundle.js';
         s.onload = () => { loading = false; tryBoot(); };
-        s.onerror = () => { loading = false; };   // 실패해도 책은 그대로 돌아간다
+        // 번들을 못 받으면 예전 CSS 카드로 되돌린다(그때만 보인다).
+        s.onerror = () => { loading = false; stage.classList.add('no3d'); };
         document.body.appendChild(s);
         return;
       }
-      try { boot(); } catch (e) { console.error('lanyard 3D 실패', e); }
+      try { boot(); } catch (e) { console.error('lanyard 3D 실패', e); stage.classList.add('no3d'); }
     }
     new MutationObserver(tryBoot).observe(page, { attributes: true, attributeFilter: ['class'] });
     tryBoot();
