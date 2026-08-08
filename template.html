@@ -801,6 +801,11 @@
     transition:transform .5s cubic-bezier(.22,.7,.24,1),opacity .5s ease}
   .ar-item img{width:100%;height:auto;display:block;border-radius:1.245cqw;
     box-shadow:0 2cqw 4cqw rgba(0,0,0,.55)}
+  /* 뒤로 물러난 장은 이미지 자체를 투명하게 하면 그 뒤 이미지가 비쳐 지저분해진다.
+     이미지는 불투명하게 두고 위에 검정 레이어를 덮어 어둡게만 만든다. */
+  .ar-item::after{content:"";position:absolute;inset:0;border-radius:1.245cqw;
+    background:#000;opacity:var(--dim,0);pointer-events:none;
+    transition:opacity .5s ease}
   .ar-item.is-center{cursor:zoom-in}
   .ar-foot{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
@@ -2085,12 +2090,14 @@ void main(){
         const d = i - cur;
         const ad = Math.abs(d);
         // 5칸 밖은 아예 빼서 노드 수가 많아도 무겁지 않게 한다
-        if (ad > 4){ el.style.opacity = 0; el.style.transform = 'translate(-50%,-50%) scale(.2)'; return; }
+        if (ad > 3){ el.style.visibility = 'hidden'; return; }
+        el.style.visibility = 'visible';
         const ang = d * STEP;
         const rad = ang * Math.PI / 180;
         const x = Math.sin(rad) * R * w / 100;
         const z = (Math.cos(rad) - 1) * R * w / 100;
-        el.style.opacity = ad === 0 ? 1 : (ad === 1 ? 0.30 : ad === 2 ? 0.13 : 0);
+        // 이미지는 항상 불투명. 물러난 정도는 위에 덮는 검정 레이어로만 준다.
+        el.style.setProperty('--dim', ad === 0 ? 0 : ad === 1 ? 0.62 : ad === 2 ? 0.80 : 0.90);
         el.style.zIndex = String(50 - ad);
         el.style.transform =
           `translate(-50%,-50%) translate3d(${x}px,0,${z}px) rotateY(${-ang}deg) scale(${ad === 0 ? 1 : 0.78})`;
