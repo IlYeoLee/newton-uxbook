@@ -367,7 +367,11 @@
   /* 치수는 피그마 "마지막장"(1205x753) 실측을 그대로 옮긴 것이다.
      카드 209x328 r21, 간격 12.5, 행 시작 y213. 확대 시 394x617 이라 배율 1.885.
      --cw = 카드 폭. 내부 수치는 전부 카드 폭 대비 비율이라 확대·플립해도 안 깨진다. */
-  .credits-page{padding:0;overflow:hidden;background:#050505}
+  /* 전면 페이지와 같은 프레임 규칙: 좌우 10 · 하 12 여백, 라운드 40 (1205 기준).
+     .page 의 패딩이 inset:0 인 절대 배치 자식까지 밀어내므로 스테이지·딤이 함께 들어온다. */
+  .credits-page{padding:0.830cqw 0.830cqw 0.996cqw;overflow:hidden;background:transparent}
+  .credits-page .lany-stage{background:#050505;border-radius:3.320cqw;overflow:hidden}
+  .credits-page .cc-dim{border-radius:3.320cqw}
   .cc-kicker{position:absolute;top:11.6cqw;left:0;right:0;text-align:center;margin:0;z-index:2;
     font-size:1.16cqw;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.55)}
   /* perspective 는 자식에게 걸리는 속성이다. 스테이지에 두어야 카드의 호버 기울기가
@@ -380,17 +384,22 @@
   .lany-rope{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
   /* 레퍼런스(reactbits Lanyard)처럼 검은 납작한 스트랩이다. 굵은 스트로크로 띠를 깔고,
      가장자리에 얇은 하이라이트를 얹어 두께감을 주고, NEWTON 을 textPath 로 흘린다. */
-  .rp-band{fill:none;stroke:#15181B;stroke-width:1.62cqw;stroke-linecap:butt;stroke-linejoin:round}
-  .rp-sheen{fill:none;stroke:rgba(255,255,255,.14);stroke-width:.14cqw;stroke-linecap:butt}
-  .rp-mark{fill:rgba(255,255,255,.86);font-size:.52cqw;font-weight:700;letter-spacing:.14em;
+  /* 스트로크를 3겹으로 쌓아 폭 방향 음영을 만든다 — 가장자리는 어둡고 가운데가 밝아야
+     납작한 끈이 아니라 물리적인 띠로 읽힌다. SVG 는 스트로크 폭을 따라 그라디언트를
+     못 넣어서 이렇게 겹치는 편이 확실하다. */
+  .rp-band {fill:none;stroke:#05070A;stroke-width:1.95cqw;stroke-linecap:butt;stroke-linejoin:round}
+  .rp-mid  {fill:none;stroke:#1C2127;stroke-width:1.52cqw;stroke-linecap:butt;stroke-linejoin:round}
+  .rp-sheen{fill:none;stroke:rgba(255,255,255,.09);stroke-width:.5cqw;stroke-linecap:butt}
+  .rp-mark{fill:rgba(255,255,255,.92);font-size:.62cqw;font-weight:700;letter-spacing:.18em;
     dominant-baseline:middle}
-  /* 스트랩 끝 커넥터 + 금속 링 */
-  .lany-clip{position:absolute;left:0;top:0;width:1.5cqw;height:1.9cqw;border-radius:.35cqw;
-    background:linear-gradient(180deg,#20242a,#0e1114);pointer-events:none}
-  .lany-ring{position:absolute;left:50%;bottom:-.75cqw;transform:translateX(-50%);
-    width:1.05cqw;height:1.05cqw;border-radius:50%;
-    border:.2cqw solid #9aa1a8;background:transparent;
-    box-shadow:inset 0 .06cqw .12cqw rgba(255,255,255,.55)}
+  /* 스트랩 끝: 검은 커넥터 탭 + 금속 링(카드 구멍에 걸리는 부분) */
+  .lany-clip{position:absolute;left:0;top:0;width:1.72cqw;height:2.1cqw;border-radius:.3cqw;
+    background:linear-gradient(90deg,#05070A 0%,#2A3038 45%,#12161A 100%);pointer-events:none;
+    box-shadow:0 .12cqw .3cqw rgba(0,0,0,.6)}
+  .lany-ring{position:absolute;left:50%;bottom:-1.15cqw;transform:translateX(-50%);
+    width:1.35cqw;height:1.35cqw;border-radius:50%;background:transparent;
+    border:.22cqw solid;border-color:#cfd4d9 #8f979f #6d747b #b6bcc2;
+    box-shadow:inset 0 .07cqw .14cqw rgba(255,255,255,.6),0 .1cqw .22cqw rgba(0,0,0,.5)}
 
   /* 카드 본체 — 앞/뒤를 3D 로 뒤집는다 */
   .cc{position:absolute;left:0;top:0;width:var(--cw);aspect-ratio:209/328;
@@ -406,8 +415,10 @@
   .cc-back{transform:rotateY(180deg)}
   /* 그라디언트는 레이어를 겹치지 않는다. 피그마가 라디얼 타원 하나에 큰 레이어 블러를
      먹인 형태라 그대로 재현한다(stops: #FA3030 2% → #FE6E3C 64% → #FEC389 83% → #D1FEFF 96%). */
+  /* 피그마 49:2452 의 gradientHandlePositions 를 그대로 옮긴다.
+     중심 (51%,44%), 반지름 가로 51% · 세로 58%. closest-side 로 중앙에 두면 다른 그림이 된다. */
   .cc-blob{position:absolute;border-radius:50%;pointer-events:none;
-    background:radial-gradient(closest-side,#FA3030 2%,#FE6E3C 64%,#FEC389 83%,#D1FEFF 96%)}
+    background:radial-gradient(51% 58% at 51% 44%,#FA3030 2%,#FE6E3C 64%,#FEC389 83%,#D1FEFF 96%)}
   .cc-front .cc-blob{width:225.4%;height:138.1%;left:-61.4%;top:29.2%;filter:blur(calc(var(--cw)*.246))}
   .cc-back  .cc-blob{width:176.6%;height:145.1%;left:-41.4%;top:3.2%;filter:blur(calc(var(--cw)*.0744))}
   .cc-photo{position:absolute;left:0;top:-2.1%;width:100.3%;height:85.7%;
@@ -446,7 +457,7 @@
     background:rgba(255,255,255,.2);display:grid;place-items:center;color:#fff;text-decoration:none}
   .cc-sns svg{width:24%;height:24%;fill:currentColor}
   .cc-sig{position:absolute;left:0;right:0;top:90.1%;margin:0;text-align:center;
-    color:rgba(255,255,255,.4);font-size:calc(var(--cw)*.0406);font-weight:600;letter-spacing:-.05em}
+    color:rgba(255,255,255,.4);font-size:calc(var(--cw)*.0406);font-weight:700;letter-spacing:-.05em}
 
   /* 확대 상태 — 딤과 닫기 버튼은 이미지 라이트박스와 같은 것을 쓴다 */
   .credits-page.zoomed .lany-rope,.credits-page.zoomed .lany-clip{opacity:0}
@@ -1156,15 +1167,19 @@
           }
         }
         const end = pts[SEG];
+        // 흔들릴 때 Y축으로 비틀린다 → 실제로 뒷면이 드러난다(3D 카드처럼).
+        // 가로 속도에 비례해 돌리고 서서히 되돌아오게 감쇠를 준다.
+        const vx = end.x - end.px;
+        r.spin = (r.spin || 0) * 0.90 + vx * 3.4;
+        r.spin = Math.max(-72, Math.min(72, r.spin));
         r.card.style.transition = '';
         r.card.style.transform = ropeTransform(r) +
-          ` rotateX(${r.tilt.x}deg) rotateY(${r.tilt.y}deg)`;
+          ` rotateX(${r.tilt.x}deg) rotateY(${r.tilt.y + r.spin}deg)`;
 
         let d = `M ${pts[0].x} ${pts[0].y}`;
         for (let i = 1; i <= SEG; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
         r.paths[0].setAttribute('d', d);
-        const sheen = r.el.querySelector('.rp-sheen');
-        if (sheen) sheen.setAttribute('d', d);
+        r.el.querySelectorAll('.rp-mid,.rp-sheen').forEach(p => p.setAttribute('d', d));
         r.clip.style.transform = `translate(${end.x}px,${end.y}px) translate(-50%,-50%)`;
       }
       requestAnimationFrame(step);
