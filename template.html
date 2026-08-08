@@ -796,11 +796,12 @@
     touch-action:pan-y;cursor:grab}
   .ar-stage.dragging{cursor:grabbing}
   .ar-track{position:absolute;left:0;right:0;top:0;bottom:11cqw;transform-style:preserve-3d}
-  .ar-item{position:absolute;left:50%;top:50%;margin:0;width:30cqw;
+  .ar-item{position:absolute;left:50%;top:50%;margin:0;
     transform-style:preserve-3d;will-change:transform,opacity;
     transition:transform .5s cubic-bezier(.22,.7,.24,1),opacity .5s ease}
-  .ar-item img{width:100%;height:auto;display:block;border-radius:1.245cqw;
-    box-shadow:0 2cqw 4cqw rgba(0,0,0,.55)}
+  /* 세로 사진이 스테이지를 넘지 않도록 가로·세로 둘 다 못 박는다. */
+  .ar-item img{display:block;width:auto;height:auto;max-width:30cqw;max-height:32cqw;
+    border-radius:1.245cqw;box-shadow:0 2cqw 4cqw rgba(0,0,0,.55)}
   /* 뒤로 물러난 장은 이미지 자체를 투명하게 하면 그 뒤 이미지가 비쳐 지저분해진다.
      이미지는 불투명하게 두고 위에 검정 레이어를 덮어 어둡게만 만든다. */
   .ar-item::after{content:"";position:absolute;inset:0;border-radius:1.245cqw;
@@ -809,15 +810,15 @@
   .ar-item.is-center{cursor:zoom-in}
   .ar-foot{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
-  .ar-title{margin:0;font-size:2.490cqw;font-weight:700;color:#fff;letter-spacing:-.02em}
-  .ar-count{margin:0.5cqw 0 0;font-size:1.660cqw;font-weight:400;color:rgba(255,255,255,.55)}
+  .ar-title{margin:0;font-size:1.494cqw;font-weight:700;color:#fff;letter-spacing:-.02em}
+  .ar-count{margin:0.5cqw 0 0;font-size:0.996cqw;font-weight:400;color:rgba(255,255,255,.55)}
   @media (max-width:640px){
     .archive-page{overflow:hidden}
     .ar-stage{inset:5vw 5vw 5vw;border-radius:5vw;perspective:160vw}
-    .ar-item{width:62vw}
+    .ar-item img{max-width:62vw;max-height:58vw}
     .ar-item img{border-radius:3vw}
-    .ar-title{font-size:5.4vw}
-    .ar-count{font-size:3.8vw}
+    .ar-title{font-size:3.3vw}
+    .ar-count{font-size:2.3vw}
     .ar-foot{bottom:6vw}
   }
 
@@ -1595,23 +1596,11 @@
   const nextIdx = () => idx >= pages.length - 1 ? 0 : idx + 1;   // wrap last → first
   // 모바일에서는 .nav-zone 이 숨겨지고 이 버튼이 페이지를 넘긴다. 아카이빙 장에서는
   // 여기서도 갤러리를 먼저 넘겨야 좌우 어느 쪽으로 조작하든 같게 동작한다.
-  prevBtn.addEventListener('click', e => {
-    if (window.__archiveNav && window.__archiveNav(-1)) return;
-    show(idx - 1);
-  });
-  nextBtn.addEventListener('click', e => {
-    if (window.__archiveNav && window.__archiveNav(1)) return;
-    show(nextIdx());
-  });
+  prevBtn.addEventListener('click', e => { show(idx - 1); });
+  nextBtn.addEventListener('click', e => { show(nextIdx()); });
   // 아카이빙 장에서는 좌우 버튼이 먼저 갤러리를 넘긴다. 양 끝에 닿으면 페이지가 넘어간다.
-  document.getElementById('nzLeft').addEventListener('click', () => {
-    if (window.__archiveNav && window.__archiveNav(-1)) return;
-    show(idx - 1);
-  });
-  document.getElementById('nzRight').addEventListener('click', () => {
-    if (window.__archiveNav && window.__archiveNav(1)) return;
-    show(nextIdx());
-  });
+  document.getElementById('nzLeft').addEventListener('click', () => show(idx - 1));
+  document.getElementById('nzRight').addEventListener('click', () => show(nextIdx()));
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
@@ -2112,13 +2101,17 @@ void main(){
         if (titleEl.textContent !== en) titleEl.textContent = en;
       }
     }
-    function go(n){ cur = Math.max(0, Math.min(items.length - 1, n)); layout(); }
+    // 끝에 닿으면 처음으로 돌아온다(무한 루프)
+    function go(n){ const L = items.length; cur = ((n % L) + L) % L; layout(); }
 
     // 드래그 / 탭. 마우스 click 만 쓰면 터치에서 드래그 판정에 먹혀 안 열린다.
     // 끌지 않고 뗀 경우만 "탭"으로 보고 처리한다.
-    let sx = null, dragged = false;
+    // 포인터를 캡처하면 pointerup 의 target 이 스테이지로 바뀐다. 그래서 누른
+    // 카드를 알 수 없어 확대가 안 열렸다. 누를 때의 대상을 기억해 둔다.
+    let sx = null, dragged = false, downTarget = null;
     stage.addEventListener('pointerdown', e => {
       sx = e.clientX; dragged = false;
+      downTarget = e.target.closest && e.target.closest('.ar-item');
       stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
       stage.classList.add('dragging');
     });
@@ -2130,9 +2123,8 @@ void main(){
     stage.addEventListener('pointerup', e => {
       const wasDrag = dragged;
       sx = null; dragged = false; stage.classList.remove('dragging');
-      if (wasDrag) return;
-      const it = e.target.closest && e.target.closest('.ar-item');
-      if (!it) return;
+      const it = downTarget; downTarget = null;
+      if (wasDrag || !it) return;
       const i = items.indexOf(it);
       if (i !== cur){ go(i); return; }          // 옆 장을 누르면 그 장이 가운데로
       const img = it.querySelector('img');      // 가운데 장 → 기존 이미지 확대 그대로
@@ -2145,15 +2137,8 @@ void main(){
       go(cur + (e.deltaY > 0 || e.deltaX > 0 ? 1 : -1));
     }, { passive: false });
 
-    // 이 장에 있는 동안에는 좌우 페이지 버튼이 갤러리를 넘긴다.
-    // 양 끝에 닿았을 때만 페이지가 넘어간다.
-    window.__archiveNav = dir => {
-      if (!page.classList.contains('active')) return false;
-      const next = cur + dir;
-      if (next < 0 || next >= items.length) return false;   // 끝 → 페이지 넘김
-      go(next);
-      return true;
-    };
+    // 갤러리는 오직 스와이프(드래그)와 휠로만 넘어간다. 좌우 페이지 버튼은
+    // 건드리지 않는다 — 그걸 가로채면 이 장에서 다음 페이지로 못 나간다.
 
     layout();
     addEventListener('resize', layout);
