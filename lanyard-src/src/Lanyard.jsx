@@ -142,7 +142,16 @@ function Band({
       slot.current._cc = clone;
       // 이 판이 곧 이 카드다. 판이 자기 물리를 직접 민다(레이캐스트를 안 탄다).
       slot.current.__band = {
-        start: (nx, ny) => { manual.current = { x: nx, y: ny }; drag(new THREE.Vector3()); },
+        start: (nx, ny) => {
+          manual.current = { x: nx, y: ny };
+          // 잡은 지점과 카드 중심의 차이를 기억한다. 이걸 안 하면 카드 중심이
+          // 손가락으로 확 끌려와서, 가운데를 눌렀을 땐 아무 일도 없어 보이고
+          // 모서리를 눌러야만 움직이는 것처럼 느껴진다.
+          const v = new THREE.Vector3(nx, ny, 0.5).unproject(camera);
+          const d = v.clone().sub(camera.position).normalize();
+          v.add(d.multiplyScalar(camera.position.length()));
+          drag(v.sub(new THREE.Vector3().copy(card.current.translation())));
+        },
         move:  (nx, ny) => { if (manual.current) manual.current = { x: nx, y: ny }; },
         end:   () => { manual.current = null; drag(false); }
       };
