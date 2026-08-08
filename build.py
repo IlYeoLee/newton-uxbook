@@ -669,7 +669,6 @@ def credits_page():
           <g class="rp-logos"></g>
           <g class="rp-hw">
             <rect class="rp-buckle" rx="2"/>
-            <path class="rp-hook"/>
           </g>
         </svg>
         <div class="cc" tabindex="0" role="button" aria-label="{esc(p["en"])} 카드">

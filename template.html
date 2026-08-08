@@ -226,23 +226,29 @@
 
   /* 피그마 27:302 "텍스트+이미지 크게쓰고싶을 때" 실측.
      텍스트 좌우 여백 80(6.639cqw), 이미지 1185x449 · 좌우 10 · 하단 10 · 라운드 40. */
-  .page.wide-page{flex-direction:column;padding:0}
+  .page.wide-page{flex-direction:column;padding:0;justify-content:flex-start}
   /* 피그마 27:302 실측(내비 65 제외, 본문 688 기준):
      텍스트 블록 219(18.17cqw) · 이미지 영역 469 · 좌우 여백 80(6.639cqw),
      kicker 는 블록 상단에서 50(4.15cqw), 타이틀/본문 행은 97(8.05cqw). */
-  .wide-text{flex:1 1 auto;min-height:18.17cqw;padding:4.15cqw 6.639cqw 0;overflow:hidden}
+  /* 텍스트는 내용만큼만. flex 로 늘리면 남는 공간이 본문과 이미지 사이로 몰려
+     간격이 페이지마다 달라진다. 본문 아래 50(4.15cqw)만 고정으로 띄운다. */
+  .wide-text{flex:0 1 auto;min-height:0;padding:4.15cqw 6.639cqw 4.15cqw;overflow:hidden}
   /* 피그마 27:302 실측 그대로. 타이틀 32px lh45 폭 264, 본문 18px lh27 폭 761,
      둘 사이 간격 20. 이 값들은 이미 .head-title/.head-row 가 갖고 있으므로
      폭이나 크기를 덮어쓰지 않는다 — 덮어쓰면 두 줄 제목이 부서진다. */
-  .wide-text .head-block{margin:0}
+  /* .head-block 은 세로 페이지용 자체 패딩을 갖고 있다. 여기서는 .wide-text 가
+     여백을 책임지므로 죽인다 — 안 그러면 값이 두 배로 더해진다. */
+  .wide-text .head-block{margin:0;padding:0}
   /* 타이포는 전역 .head-title / .head-body 값이 이미 피그마와 같다. 덮어쓰지 않는다. */
   /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
      object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
-  .wide-media{flex:none;aspect-ratio:1185/449;margin:0 0.830cqw 0.830cqw;
+  .wide-media{flex:none;aspect-ratio:1185/449;margin:auto 0.830cqw 0.830cqw;
     border-radius:3.320cqw;overflow:hidden;position:relative}
   /* cover 는 비율이 조금만 어긋나도 잘라낸다. contain 이면 어떤 비율이 와도
      이미지가 통째로 안에 들어온다. */
-  .wide-media img,.wide-media .fade-stack{width:100%;height:100%;object-fit:contain;
+  /* object-fit 은 이미지에만 먹는다. .fade-stack 은 div 라서 여기에 걸면 아무 일도
+     안 일어나고 안쪽 img 가 컨테이너를 넘어 잘린다. 안쪽 img 까지 같이 잡는다. */
+  .wide-media img,.wide-media .fade-stack,.wide-media .fade-stack img{width:100%;height:100%;object-fit:contain;
     border-radius:3.320cqw;display:block}
   .wide-media .fade-track img{object-fit:contain}
   @media (max-width:640px){
@@ -435,7 +441,6 @@
   .rp-logos image{filter:brightness(0) invert(1);opacity:.95}
   /* 버클과 후크는 SVG 안에 둔다. CSS div 로 두면 로프와 좌표계가 달라 어긋난다. */
   .rp-buckle{fill:#3B424A;stroke:rgba(255,255,255,.45);stroke-width:.5}
-  .rp-hook{fill:none;stroke:#4A525B;stroke-width:2.6;stroke-linecap:round}
 
   /* 카드 본체 — 앞/뒤를 3D 로 뒤집는다 */
   .cc{position:absolute;left:0;top:0;width:var(--cw);aspect-ratio:209/328;
@@ -1092,7 +1097,6 @@
       const ribbon = el.querySelector('.rp-ribbon');
       const grad = el.querySelector('linearGradient');
       const buckle = el.querySelector('.rp-buckle');
-      const hook = el.querySelector('.rp-hook');
       // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
       // 줄에 찍히는 워드마크 — 앱바와 같은 로고를 일정 간격으로 반복한다
       const logoG = el.querySelector('.rp-logos');
@@ -1104,7 +1108,7 @@
         logoG.appendChild(im);
         logos.push(im);
       }
-      const r = { el, card, ribbon, grad, buckle, hook, logos, pts: [], len: 0, anchor: {x:0,y:0},
+      const r = { el, card, ribbon, grad, buckle, logos, pts: [], len: 0, anchor: {x:0,y:0},
                   drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
@@ -1321,8 +1325,10 @@
           im.setAttribute('width', LW);  im.setAttribute('height', LH);
           im.setAttribute('transform', `translate(${pts[idx].x},${pts[idx].y}) rotate(${deg})`);
         });
-        // 버클 + 후크: 로프 끝에서 카드 상단까지를 잇는다. 같은 SVG 좌표계라 안 어긋난다.
-        const bang = Math.atan2(end.x - pts[SEG-1].x, -(end.y - pts[SEG-1].y)) * 180 / Math.PI;
+        // 버클: 로프 끝에서 카드 상단까지. 각도는 반드시 카드(ropeTransform 의 ang)와
+        // 같은 식이어야 한다. 예전엔 dy 부호가 반대라 버클이 180° 돌아 로프 끝 위로
+        // 올라갔고, 그 아래 bh 만큼이 통째로 빈 틈으로 보였다.
+        const bang = Math.atan2(end.x - pts[SEG-1].x, end.y - pts[SEG-1].y) * -180 / Math.PI;
         // W0 는 반폭이라 줄의 전체 폭은 W0*2 다. 버클을 W0*1.9 로 두면 줄보다 좁아져
         // 줄이 양옆으로 삐져나온다 — 실제 버클은 줄보다 넓게 물린다.
         const bw = W0 * 2.7, bh = W0 * 2.1;
@@ -1332,11 +1338,6 @@
         r.buckle.setAttribute('width', bw);
         r.buckle.setAttribute('height', bh);
         r.buckle.setAttribute('transform', at);
-        // 후크: 버클 아래에서 갈고리처럼 굽어 카드 상단으로 들어간다
-        const hr = W0 * 0.8;
-        r.hook.setAttribute('d',
-          `M 0 ${bh} v ${hr * 0.6} a ${hr} ${hr} 0 1 0 ${hr * 1.15} ${hr * 0.25}`);
-        r.hook.setAttribute('transform', at);
       }
       requestAnimationFrame(step);
     }
