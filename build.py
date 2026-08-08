@@ -635,51 +635,19 @@ CREDIT_COLS = [
 ]
 
 def credit_rows():
+    # 크레딧은 전부 영문 대문자다(한글 이름은 쓰지 않는다).
     cols = ""
     for groups in CREDIT_COLS:
         blocks = ""
         for role, names in groups:
             people = "".join(
-                f'<div class="cr-name"><span class="cr-ko">{esc(ko)}</span>'
-                f'<span class="cr-en">{esc(en)}</span></div>'
-                for ko, en in names)
-            role_html = esc(role).replace("\n", "<br>")
+                f'<div class="cr-name"><span class="cr-en">{esc(en.upper())}</span></div>'
+                for _ko, en in names)
+            role_html = esc(role.upper()).replace("\n", "<br>")
             blocks += (f'<div class="cr-item"><p class="cr-role">{role_html}</p>'
                        f'<div class="cr-names">{people}</div></div>')
         cols += f'<div class="cr-col">{blocks}</div>'
-    return f'<p class="cr-label">thanks to</p><div class="cr-cols">{cols}</div>'
-
-# ---- 아카이빙 페이지 (피그마 71:1270 소재 / 68:1116 템플릿) ----
-# 묶음 순서와 장수는 피그마 읽는 순서(위→아래, 왼→오른) 그대로다.
-ARCHIVE = [
-    ("아이디에이션",       "Ideation",      2),
-    ("인스퍼",             "Inspiration",   7),
-    ("스케일 체크",        "Scale Check",   9),
-    ("목업",               "Mockup",        9),
-    ("비주얼 / 폼 스터디",  "Visual / Form", 8),
-    ("촬영",               "Shooting",      7),
-]
-
-def archive_page():
-    items, n = "", 0
-    for ko, en, cnt in ARCHIVE:
-        for _ in range(cnt):
-            n += 1
-            items += ('<figure class="ar-item" data-ko="%s" data-en="%s">'
-                      '<img src="assets/arch%02d.webp" alt="" loading="lazy" draggable="false">'
-                      '</figure>') % (esc(ko), esc(en), n)
-    chips, at = "", 0
-    for i, (ko, en, cnt) in enumerate(ARCHIVE):
-        chips += ('<button class="ar-chip" type="button" data-at="%d" data-no="%02d">%s</button>' % (at, i + 1, esc(en)))
-        at += cnt
-    return ('\n<div class="page archive-page" data-page="archive">\n'
-            '  <div class="ar-stage" id="arStage"><div class="ar-track">' + items + '</div></div>\n'
-            '  <div class="ar-head">\n'
-            '    <p class="ar-title">Ideation</p>\n'   # 아카이빙 제목은 언제나 영문
-            '    <p class="ar-count"><span class="ar-cur">1</span>/' + str(n) + '</p>\n'
-            '  </div>\n'
-            '  <div class="ar-foot"><div class="ar-chips">' + chips + '</div></div>\n'
-            '</div>')
+    return f'<p class="cr-label">THANKS TO</p><div class="cr-cols">{cols}</div>'
 
 def credits_page():
     cards = ""
