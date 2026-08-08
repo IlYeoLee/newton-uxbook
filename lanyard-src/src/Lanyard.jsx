@@ -27,14 +27,14 @@ const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
 export default function Lanyard({
   people = [],
-  position = [0, 0, 17],
+  position = [0, 0, 19],
   gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
   imageFit = 'cover',
   lanyardImage = null,
   lanyardWidth = 1,
-  gap = 2.9,
+  gap = 2.78,
   selected = null,
   flipped = false,
   onSelect = () => {}
@@ -122,7 +122,7 @@ function Band({
     ang = new THREE.Vector3(),
     rot = new THREE.Vector3(),
     dir = new THREE.Vector3();
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 7, linearDamping: 7 };
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 13, linearDamping: 13 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
@@ -181,12 +181,12 @@ function Band({
   // 끌었는지 눌렀는지 구분한다. 끈 거리가 짧으면 "탭"으로 보고 확대한다.
   const moved = useRef(0);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.7]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.7]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.7]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, 1.5, 0]
+    [0, 2.267, 0]
   ]);
 
   useEffect(() => {
@@ -245,7 +245,7 @@ function Band({
       // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
       if (!dragged && !zoomed) {
         const t = state.clock.elapsedTime;
-        const w = Math.sin(t * 0.55 + index * 1.73) * 0.012 + Math.sin(t * 1.31 + index * 2.4) * 0.004;
+        const w = Math.sin(t * 0.55 + index * 1.73) * 0.004 + Math.sin(t * 1.31 + index * 2.4) * 0.0015;
         j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
       }
     }
@@ -270,10 +270,10 @@ function Band({
           <BallCollider args={[0.1]} />
         </RigidBody>
         <RigidBody position={[0, -2, 0]} ref={card} {...segmentProps} type={cardType}>
-          <CuboidCollider args={[0.8, 1.125, 0.01]} />
+          <CuboidCollider args={[1.209, 1.700, 0.02]} />
           <group
-            scale={2.25}
-            position={[0, -1.2, -0.05]}
+            scale={3.4}
+            position={[0, -1.813, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={e => {

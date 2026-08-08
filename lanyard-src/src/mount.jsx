@@ -37,7 +37,10 @@ function App({ people, onZoom, apiRef }) {
 }
 
 export function mount(el, { people = [], bandImage = null, onZoom = () => {} } = {}) {
-  const list = people.slice();
+  // 피그마 49:1445 처럼 카드 높이를 엇갈리게 건다. 다섯 장이 한 줄로 서면
+  // 목걸이가 아니라 진열대처럼 보인다.
+  const HANG = [4.0, 2.87, 3.93, 3.25, 2.71];
+  const list = people.map((p, i) => ({ ...p, hangY: p.hangY ?? HANG[i % HANG.length] }));
   list.bandImage = bandImage;
   const api = {};
   const root = createRoot(el);

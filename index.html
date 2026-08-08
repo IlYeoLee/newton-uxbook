@@ -437,7 +437,7 @@
   /* 하단 고정 묶음: DESIGNED BY 위, thanks to 블록 아래. 카드가 이 위로 매달린다. */
   .credits-foot{position:absolute;left:0;right:0;bottom:0;z-index:8;pointer-events:none;
     padding:0 3.320cqw 3.320cqw}
-  .cc-kicker{text-align:center;margin:0 0 2.490cqw;
+  .cc-kicker{position:absolute;left:0;right:0;top:3.320cqw;text-align:center;margin:0;z-index:9;
     color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em}
   /* 피그마 61:388 "추가되는레이아웃" 실측: 좌우 40, thanks to 16/700 아래 18,
      4열 각 239 · 열 간격 32, 열 안에서 역할 120 + 이름 120, 본문 14/lh21. */
@@ -987,7 +987,7 @@
           <circle class="hand-touch-3" cx="299" cy="201" r="160" stroke-width="14"/>
           <path class="touchon-hand-stroke" d="M327.223 308.7C328.023 273.6 380.223 273.3 380.923 308.7V335M327.223 308.7V213.7C325.723 178.1 275.023 178.1 273.523 213.7V304.3V427.5C273.523 458.8 273.523 452.1 230.123 422.3C195.323 398.5 164.023 420.6 165.023 435.7C166.023 450.8 252.823 528.6 252.823 528.6C352.123 643.8 455.923 571 475.023 515.2C494.123 459.3 489 361.3 489 361.3C488 346.5 476.423 334.4 461.623 334.4C446.823 334.4 434.623 347.3 434.623 361.3M327.223 308.7V388.8M380.923 335C382.323 300 433.723 300.7 434.623 335.5V361.3M380.923 335V388.8M434.623 361.3V399.3"/>
         </svg>
-        <p class="cv-cta">Touch To read</p>
+        <p class="cv-cta">Touch To Read</p>
         </div>
       </div>
     </div>
@@ -1355,8 +1355,8 @@
         </div>
       </div>
   </div>
+  <p class="cc-kicker">DESIGNED BY</p>
   <div class="credits-foot">
-    <p class="cc-kicker">DESIGNED BY</p>
     <div class="cr-wrap"><p class="cr-label">thanks to</p><div class="cr-cols"><div class="cr-col"><div class="cr-item"><p class="cr-role">Advisory<br>Professor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">심유리</span><span class="cr-en">Yuri Sim</span></div><div class="cr-name"><span class="cr-ko">이문환</span><span class="cr-en">Moonhwan Lee</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">ID Tutor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">주호영</span><span class="cr-en">Hoyoung Joo</span></div></div></div><div class="cr-item"><p class="cr-role">ID tutor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">정수헌</span><span class="cr-en">Soohun Jung</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">VD Tutor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">워크스</span><span class="cr-en">WORKS</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">Videographer</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">양의열</span><span class="cr-en">Euiyeol Yang</span></div><div class="cr-name"><span class="cr-ko">조수완</span><span class="cr-en">Cho Suwan</span></div><div class="cr-name"><span class="cr-ko">이문환</span><span class="cr-en">Moonhwan Lee</span></div></div></div></div></div></div>
   </div>
   <button class="lb-close cc-close" type="button" aria-label="닫기">
