@@ -21,7 +21,7 @@ extend({ MeshLineGeometry, MeshLineMaterial });
 export default function Lanyard({
   people = [],
   position = [0, 0, 20],
-  gravity = [0, -40, 0],
+  gravity = [0, -18, 0],
   fov = 20,
   transparent = true,
   imageFit = 'cover',
@@ -119,7 +119,7 @@ function Band({
     ang = new THREE.Vector3(),
     rot = new THREE.Vector3(),
     dir = new THREE.Vector3();
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 13, linearDamping: 13 };
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 20, linearDamping: 20 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
   const { camera } = useThree();
