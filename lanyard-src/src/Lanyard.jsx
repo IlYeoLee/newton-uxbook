@@ -136,13 +136,21 @@ function Band({
   // .cc 를 통째로 복제해 넣는다. 원본은 .lany 안에서 숨은 채 남아 있어
   // 예전 CSS-3D 루프가 계속 돌아도 화면에 영향을 주지 않는다.
   useEffect(() => {
-    if (!cardEl || !slot.current) return;
-    const clone = cardEl.cloneNode(true);
-    clone.removeAttribute("style");            // 예전 루프가 남긴 인라인 transform 제거
-    clone.classList.remove("grabbing", "flipped");
-    slot.current.appendChild(clone);
-    slot.current._cc = clone;
-    return () => { clone.remove(); };
+    if (!cardEl) return;
+    // drei 의 Html 은 자식을 포털로 나중에 붙인다. 첫 실행 때 slot.current 가
+    // 아직 없어서 복제본이 영영 안 들어가는 일이 있었다. 붙을 때까지 기다린다.
+    let raf = 0, clone = null;
+    const put = () => {
+      if (!slot.current) { raf = requestAnimationFrame(put); return; }
+      if (slot.current._cc) return;
+      clone = cardEl.cloneNode(true);
+      clone.removeAttribute("style");
+      clone.classList.remove("grabbing", "flipped");
+      slot.current.appendChild(clone);
+      slot.current._cc = clone;
+    };
+    put();
+    return () => { cancelAnimationFrame(raf); if (clone) clone.remove(); };
   }, [cardEl]);
   // 앞뒤 뒤집기는 메시를 돌리지 않고 기존 .cc.flipped CSS 규칙에 맡긴다.
   useEffect(() => {

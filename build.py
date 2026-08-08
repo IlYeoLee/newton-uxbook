@@ -649,6 +649,33 @@ def credit_rows():
         cols += f'<div class="cr-col">{blocks}</div>'
     return f'<p class="cr-label">thanks to</p><div class="cr-cols">{cols}</div>'
 
+# ---- 아카이빙 페이지 (피그마 71:1270 소재 / 68:1116 템플릿) ----
+# 묶음 순서와 장수는 피그마 읽는 순서(위→아래, 왼→오른) 그대로다.
+ARCHIVE = [
+    ("아이디에이션",       "Ideation",      2),
+    ("인스퍼",             "Inspiration",   7),
+    ("스케일 체크",        "Scale Check",   9),
+    ("목업",               "Mockup",        9),
+    ("비주얼 / 폼 스터디",  "Visual / Form", 8),
+    ("촬영",               "Shooting",      7),
+]
+
+def archive_page():
+    items, n = "", 0
+    for ko, en, cnt in ARCHIVE:
+        for _ in range(cnt):
+            n += 1
+            items += ('<figure class="ar-item" data-ko="%s" data-en="%s">'
+                      '<img src="assets/arch%02d.webp" alt="" loading="lazy" draggable="false">'
+                      '</figure>') % (esc(ko), esc(en), n)
+    return ('\n<div class="page archive-page" data-page="archive">\n'
+            '  <div class="ar-stage" id="arStage"><div class="ar-track">' + items + '</div></div>\n'
+            '  <div class="ar-foot">\n'
+            '    <p class="ar-title" data-en="Ideation">아이디에이션</p>\n'
+            '    <p class="ar-count"><span class="ar-cur">1</span>/' + str(n) + '</p>\n'
+            '  </div>\n'
+            '</div>')
+
 def credits_page():
     cards = ""
     for i, p in enumerate(PEOPLE):
@@ -753,6 +780,7 @@ for m in PAGE_ORDER:
     if m == LAST_PRODUCT:
         pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
         pages_out.append(playwith_page)
+pages_out.append(archive_page())      # 인물 소개 앞
 pages_out.append(credits_page())      # 마지막 장
 sections_html = "".join(pages_out)
 

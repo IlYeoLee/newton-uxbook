@@ -780,6 +780,35 @@
   .pg-right .count .tot{color:#c8c8c8;font-weight:400}
   .book.is-cover .pg-right .count{visibility:hidden}   /* cover: arrows only, no 1/N */
 
+
+  /* ── 아카이빙 페이지 (피그마 68:1116) ──
+     가운데 한 장이 크게 서고 양옆이 원통을 따라 뒤로 물러난다. 아래에 타이틀과
+     n/42 카운터. 타이틀은 그 묶음의 마지막 장을 지나면 저절로 바뀐다. */
+  .archive-page{flex-direction:column;padding:0;background:#0A0A0B;overflow:hidden}
+  .ar-stage{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;
+    margin:0.830cqw 0.830cqw 0;border-radius:3.320cqw;background:#0F0F11;
+    perspective:120cqw;touch-action:pan-y;cursor:grab}
+  .ar-stage.dragging{cursor:grabbing}
+  .ar-track{position:absolute;inset:0;transform-style:preserve-3d}
+  .ar-item{position:absolute;left:50%;top:50%;margin:0;width:30cqw;
+    transform-style:preserve-3d;will-change:transform,opacity;
+    transition:transform .5s cubic-bezier(.22,.7,.24,1),opacity .5s ease}
+  .ar-item img{width:100%;height:auto;display:block;border-radius:1.245cqw;
+    box-shadow:0 2cqw 4cqw rgba(0,0,0,.55)}
+  .ar-item.is-center{cursor:zoom-in}
+  .ar-foot{flex:none;text-align:center;padding:1.4cqw 0 2.0cqw}
+  .ar-title{margin:0;font-size:2.490cqw;font-weight:700;color:#fff;letter-spacing:-.02em}
+  .ar-count{margin:0.5cqw 0 0;font-size:1.660cqw;font-weight:400;color:rgba(255,255,255,.55)}
+  @media (max-width:640px){
+    .archive-page{overflow:hidden}
+    .ar-stage{margin:5vw 5vw 0;border-radius:5vw;perspective:160vw}
+    .ar-item{width:62vw}
+    .ar-item img{border-radius:3vw}
+    .ar-title{font-size:5.4vw}
+    .ar-count{font-size:3.8vw}
+    .ar-foot{padding:4vw 0 6vw}
+  }
+
   /* lightbox (Figma 이미지 확대) — anchored to the book so it stays inside the tablet screen */
   .lightbox{position:absolute;inset:0;background:rgba(60,60,60,.96);display:none;z-index:100;border-radius:inherit;overflow:hidden}
   .lightbox.open{display:block}
@@ -1551,8 +1580,15 @@
   const nextIdx = () => idx >= pages.length - 1 ? 0 : idx + 1;   // wrap last → first
   prevBtn.addEventListener('click', e => { show(idx - 1); });
   nextBtn.addEventListener('click', e => { show(nextIdx()); });
-  document.getElementById('nzLeft').addEventListener('click', () => show(idx - 1));
-  document.getElementById('nzRight').addEventListener('click', () => show(nextIdx()));
+  // 아카이빙 장에서는 좌우 버튼이 먼저 갤러리를 넘긴다. 양 끝에 닿으면 페이지가 넘어간다.
+  document.getElementById('nzLeft').addEventListener('click', () => {
+    if (window.__archiveNav && window.__archiveNav(-1)) return;
+    show(idx - 1);
+  });
+  document.getElementById('nzRight').addEventListener('click', () => {
+    if (window.__archiveNav && window.__archiveNav(1)) return;
+    show(nextIdx());
+  });
   document.querySelector('[data-nav="cover"]').addEventListener('click', e => { e.preventDefault(); show(0); });
   pills.forEach(p => p.addEventListener('click', e => {
     e.preventDefault();
@@ -1750,6 +1786,7 @@
     lbImg.animate([{opacity:.4}, {opacity:1}], {duration:300, easing:'ease-out'});
   }
   function closeLb(){ lightbox.classList.remove('open'); }
+  window.__openLb = openLb;   // 아카이빙 갤러리가 같은 확대 시스템을 쓴다
 
   document.addEventListener('click', e => {
     const fig = e.target.closest('figure.figure img');   // only inline content images, not the fixed media panel
@@ -2009,6 +2046,94 @@ void main(){
 </script>
   <!-- reactbits Lanyard (R3F + rapier). 크레딧 페이지에 들어갈 때만 붙인다. -->
   <script src="assets/lanyard.bundle.js" defer></script>
+  <script>
+  // ── 아카이빙 갤러리 ──
+  // reactbits Circular Gallery 와 같은 결: 가운데 한 장이 정면으로 서고, 양옆은
+  // 원통을 따라 안쪽으로 돌아가며 물러난다. WebGL 없이 CSS 3D 로만 만든다.
+  (function(){
+    const stage = document.getElementById('arStage');
+    if (!stage) return;
+    const items = [...stage.querySelectorAll('.ar-item')];
+    const page = stage.closest('.archive-page');
+    const titleEl = page.querySelector('.ar-title');
+    const curEl = page.querySelector('.ar-cur');
+    let cur = 0;
+
+    const STEP = 22;     // 이웃 한 칸당 돌아가는 각도
+    const R = 46;        // 원통 반지름(cqw 대신 %로 환산해 쓰기 좋은 값)
+
+    function layout(){
+      const w = stage.clientWidth;
+      items.forEach((el, i) => {
+        const d = i - cur;
+        const ad = Math.abs(d);
+        // 5칸 밖은 아예 빼서 노드 수가 많아도 무겁지 않게 한다
+        if (ad > 4){ el.style.opacity = 0; el.style.transform = 'translate(-50%,-50%) scale(.2)'; return; }
+        const ang = d * STEP;
+        const rad = ang * Math.PI / 180;
+        const x = Math.sin(rad) * R * w / 100;
+        const z = (Math.cos(rad) - 1) * R * w / 100;
+        el.style.opacity = ad > 3 ? 0 : (ad === 0 ? 1 : 0.55);
+        el.style.zIndex = String(50 - ad);
+        el.style.transform =
+          `translate(-50%,-50%) translate3d(${x}px,0,${z}px) rotateY(${-ang}deg) scale(${ad === 0 ? 1 : 0.86})`;
+        el.classList.toggle('is-center', ad === 0);
+      });
+      const c = items[cur];
+      if (c){
+        curEl.textContent = String(cur + 1);
+        // 묶음이 끝나면 타이틀이 저절로 바뀐다 — 각 장이 자기 묶음 이름을 갖고 있다.
+        const ko = c.dataset.ko, en = c.dataset.en;
+        if (titleEl.textContent !== ko){
+          titleEl.textContent = ko;
+          titleEl.setAttribute('data-en', en);
+          if (document.documentElement.lang === 'en') titleEl.textContent = en;
+        }
+      }
+    }
+    function go(n){ cur = Math.max(0, Math.min(items.length - 1, n)); layout(); }
+
+    // 가운데 장을 누르면 기존 이미지 확대(라이트박스)와 똑같이 열린다
+    stage.addEventListener('click', e => {
+      const it = e.target.closest('.ar-item');
+      if (!it) return;
+      const i = items.indexOf(it);
+      if (i !== cur){ go(i); return; }          // 옆 장을 누르면 그 장이 가운데로
+      const img = it.querySelector('img');
+      if (img && window.__openLb) window.__openLb(img.src);
+    });
+
+    // 드래그 / 휠 / 키보드
+    let sx = null, moved = 0;
+    stage.addEventListener('pointerdown', e => { sx = e.clientX; moved = 0; stage.classList.add('dragging'); });
+    stage.addEventListener('pointermove', e => {
+      if (sx === null) return;
+      const d = e.clientX - sx;
+      if (Math.abs(d) > stage.clientWidth * 0.06){ go(cur - Math.sign(d)); sx = e.clientX; moved += 1; }
+    });
+    const end = () => { sx = null; stage.classList.remove('dragging'); };
+    stage.addEventListener('pointerup', end);
+    stage.addEventListener('pointercancel', end);
+    stage.addEventListener('pointerleave', end);
+    stage.addEventListener('wheel', e => {
+      e.preventDefault();
+      go(cur + (e.deltaY > 0 || e.deltaX > 0 ? 1 : -1));
+    }, { passive: false });
+
+    // 이 장에 있는 동안에는 좌우 페이지 버튼이 갤러리를 넘긴다.
+    // 양 끝에 닿았을 때만 페이지가 넘어간다.
+    window.__archiveNav = dir => {
+      if (!page.classList.contains('active')) return false;
+      const next = cur + dir;
+      if (next < 0 || next >= items.length) return false;   // 끝 → 페이지 넘김
+      go(next);
+      return true;
+    };
+
+    layout();
+    addEventListener('resize', layout);
+  })();
+  </script>
   <script>
   // "Touch To read" 를 글자 단위로 쪼갠다(reactbits SplitText 와 같은 결).
   // --i 로 글자마다 등장 시각을 어긋나게 준다.
