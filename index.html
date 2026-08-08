@@ -2432,7 +2432,6 @@ void main(){
   staggerIn(pages[0]);
 </script>
   <!-- reactbits Lanyard (R3F + rapier). 크레딧 페이지에 들어갈 때만 붙인다. -->
-  <script src="assets/lanyard.bundle.js" defer></script>
   <script>
   // ── 아카이빙 갤러리 ──
   // reactbits Circular Gallery 와 같은 결: 가운데 한 장이 정면으로 서고, 양옆은
@@ -2576,19 +2575,22 @@ void main(){
     // 번들(6.4MB, defer)이 아직 안 읽혔으면 그냥 빠져나가고 다시 시도하지 않아서,
     // 두 번째 진입에서야 붙는 일이 있었다. .active 를 지켜보고, 번들이 준비될
     // 때까지 기다린다.
-    let waiting = false;
+    // 번들(6.4MB)은 이 장에 실제로 왔을 때만 불러온다. 표지에서부터 받아두면
+    // WebGL 이 없거나 텍스처가 깨질 때 책 전체가 흰 화면이 된다.
+    let loading = false;
     function tryBoot(){
       if (handle || !page.classList.contains('active')) return;
       if (!window.NewtonLanyard) {
-        if (waiting) return;
-        waiting = true;
-        const t = setInterval(() => {
-          if (!window.NewtonLanyard) return;
-          clearInterval(t); waiting = false; tryBoot();
-        }, 120);
+        if (loading) return;
+        loading = true;
+        const s = document.createElement('script');
+        s.src = 'assets/lanyard.bundle.js';
+        s.onload = () => { loading = false; tryBoot(); };
+        s.onerror = () => { loading = false; };   // 실패해도 책은 그대로 돌아간다
+        document.body.appendChild(s);
         return;
       }
-      boot();
+      try { boot(); } catch (e) { console.error('lanyard 3D 실패', e); }
     }
     new MutationObserver(tryBoot).observe(page, { attributes: true, attributeFilter: ['class'] });
     tryBoot();
