@@ -1181,7 +1181,7 @@
             const p = pts[i];
             const vx = (p.x - p.px) * DAMP, vy = (p.y - p.py) * DAMP;
             p.px = p.x; p.py = p.y;
-            p.x += vx + gust * 0.16 * (i / SEG);
+            p.x += vx + gust * 0.045 * (i / SEG);
             p.y += vy + GRAV;
           }
           for (let k = 0; k < ITER; k++) {            // 거리 구속
@@ -1203,8 +1203,11 @@
         // 가로 속도에 비례해 돌리고 서서히 되돌아오게 감쇠를 준다.
         // 상한이 72도면 90도를 못 넘어 뒷면이 절대 안 나온다. 게인을 키우고 감쇠를
         // 늦춰 흔들 때 실제로 한 바퀴 가까이 돌게 한다(±200도).
+        // 바람 정도의 미세한 속도로는 돌지 않는다. 데드존을 넘는 움직임(드래그 등)에만
+        // 회전이 붙고, 그때는 90도를 넘겨 뒷면까지 보인다.
         const vx = end.x - end.px;
-        r.spin = (r.spin || 0) * 0.965 + vx * 9;
+        const drive = Math.abs(vx) < 0.9 ? 0 : vx;
+        r.spin = (r.spin || 0) * 0.94 + drive * 7;
         r.spin = Math.max(-200, Math.min(200, r.spin));
         r.card.style.transition = '';
         r.card.style.transform = ropeTransform(r) +
