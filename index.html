@@ -2678,8 +2678,12 @@ void main(){
       // 직전에 잡았던 카드를 반드시 놓고 시작한다. 확대 중이라고 그냥 빠져나가면
       // downSlot 이 남아 있어서, 다음 마우스 움직임이 전부 그 카드로 가 마우스에
       // 달라붙는다.
+      // 마지막 카드만 놓으면, 앞서 잡힌 채로 남은 카드가 영영 마우스를 따라온다
+      // (두 장이 동시에 붙는 증상). 놓을 때는 전부 놓는다 — 여러 번 불러도 안전하다.
       const release = () => {
-        if (downSlot) { const b = band(downSlot); if (b) b.end(); }
+        document.querySelectorAll('.cc3d-slot').forEach(s => {
+          if (s.__band) s.__band.end();
+        });
         downSlot = null; moved = 0;
       };
       host.addEventListener('pointerdown', e => {
@@ -2703,10 +2707,8 @@ void main(){
       });
       const endDrag = e => {
         if (!downSlot) return;
-        const b = band(downSlot);
-        if (b) b.end();
         const slot = downSlot, dist = moved;
-        downSlot = null; moved = 0;
+        release();                     // 잡힌 카드는 전부 놓는다
         if (dist > 8) return;                       // 끌었으면 확대하지 않는다
         // 눌린 판이 품고 있는 카드가 곧 그 사람이다. 인덱스를 거치지 않는다.
         const cc = slot.querySelector('.cc');
