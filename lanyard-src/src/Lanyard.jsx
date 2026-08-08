@@ -27,14 +27,14 @@ const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
 export default function Lanyard({
   people = [],
-  position = [0, 0, 24],
+  position = [0, 0, 17],
   gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
   imageFit = 'cover',
   lanyardImage = null,
   lanyardWidth = 1,
-  gap = 2.05,
+  gap = 2.9,
   selected = null,
   flipped = false,
   onSelect = () => {}
@@ -52,7 +52,7 @@ export default function Lanyard({
   const anchors = useMemo(() => {
     const n = people.length || 1;
     const span = (n - 1) * gap;
-    return people.map((_, i) => -span / 2 + i * gap - 2);
+    return people.map((_, i) => -span / 2 + i * gap);
   }, [people, gap]);
 
   return (
@@ -122,7 +122,7 @@ function Band({
     ang = new THREE.Vector3(),
     rot = new THREE.Vector3(),
     dir = new THREE.Vector3();
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 7, linearDamping: 7 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
@@ -245,7 +245,7 @@ function Band({
       // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
       if (!dragged && !zoomed) {
         const t = state.clock.elapsedTime;
-        const w = Math.sin(t * 0.55 + index * 1.73) * 0.06 + Math.sin(t * 1.31 + index * 2.4) * 0.02;
+        const w = Math.sin(t * 0.55 + index * 1.73) * 0.012 + Math.sin(t * 1.31 + index * 2.4) * 0.004;
         j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
       }
     }
@@ -260,16 +260,16 @@ function Band({
     <>
       <group position={[anchorX, hangY, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
+        <RigidBody position={[0, -0.5, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[1, 0, 0]} ref={j2} {...segmentProps}>
+        <RigidBody position={[0, -1, 0]} ref={j2} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[1.5, 0, 0]} ref={j3} {...segmentProps}>
+        <RigidBody position={[0, -1.5, 0]} ref={j3} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={cardType}>
+        <RigidBody position={[0, -2, 0]} ref={card} {...segmentProps} type={cardType}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
             scale={2.25}
