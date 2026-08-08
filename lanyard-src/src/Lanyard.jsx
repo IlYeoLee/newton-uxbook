@@ -18,13 +18,6 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-const BLANK_PIXEL =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-
-// card.glb 의 UV 아틀라스는 왼쪽 절반이 앞면, 오른쪽 절반이 뒷면이다(원본 주석 그대로).
-const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
-const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
-
 export default function Lanyard({
   people = [],
   position = [0, 0, 20],
@@ -129,8 +122,6 @@ function Band({
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 13, linearDamping: 13 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
-  const frontTex = useTexture(frontImage || BLANK_PIXEL);
-  const backTex = useTexture(backImage || BLANK_PIXEL);
   const { camera } = useThree();
   const slot = useRef();
   // .cc 를 통째로 복제해 넣는다. 원본은 .lany 안에서 숨은 채 남아 있어
@@ -157,50 +148,6 @@ function Band({
     const cc = slot.current && slot.current._cc;
     if (cc) cc.classList.toggle("flipped", !!flipped);
   }, [flipped]);
-
-  const cardMap = useMemo(() => {
-    const baseMap = materials.base.map;
-    if (!frontImage && !backImage) return baseMap;
-
-    const baseImg = baseMap.image;
-    const W = baseImg.width;
-    const H = baseImg.height;
-    const canvas = document.createElement('canvas');
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return baseMap;
-    ctx.drawImage(baseImg, 0, 0, W, H);
-
-    const drawFitted = (img, rect) => {
-      const rx = rect.x * W;
-      const ry = rect.y * H;
-      const rw = rect.w * W;
-      const rh = rect.h * H;
-      const pick = imageFit === 'contain' ? Math.min : Math.max;
-      const scale = pick(rw / img.width, rh / img.height);
-      const dw = img.width * scale;
-      const dh = img.height * scale;
-      const dx = rx + (rw - dw) / 2;
-      const dy = ry + (rh - dh) / 2;
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(rx, ry, rw, rh);
-      ctx.clip();
-      ctx.drawImage(img, dx, dy, dw, dh);
-      ctx.restore();
-    };
-
-    if (frontImage && frontTex.image) drawFitted(frontTex.image, FRONT_UV_RECT);
-    if (backImage && backTex.image) drawFitted(backTex.image, BACK_UV_RECT);
-
-    const composite = new THREE.CanvasTexture(canvas);
-    composite.colorSpace = THREE.SRGBColorSpace;
-    composite.flipY = baseMap.flipY;
-    composite.anisotropy = 16;
-    composite.needsUpdate = true;
-    return composite;
-  }, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
 
   const [curve] = useState(
     () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
