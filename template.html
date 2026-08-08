@@ -2338,6 +2338,12 @@ void main(){
       };
       host.addEventListener('pointerup', endDrag);
       host.addEventListener('pointercancel', endDrag);
+      // 호스트에서 pointerup 을 한 번이라도 놓치면 카드가 영영 마우스를 따라다닌다.
+      // 창 전체에서도 받아 반드시 놓는다.
+      addEventListener('pointerup', endDrag, true);
+      addEventListener('pointercancel', endDrag, true);
+      addEventListener('blur', () => release());
+      addEventListener('mouseleave', () => release());
 
       handle = window.NewtonLanyard.mount(host, {
         people: list,
