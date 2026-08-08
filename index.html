@@ -2476,28 +2476,32 @@ void main(){
     }
     function go(n){ cur = Math.max(0, Math.min(items.length - 1, n)); layout(); }
 
-    // 가운데 장을 누르면 기존 이미지 확대(라이트박스)와 똑같이 열린다
-    stage.addEventListener('click', e => {
-      const it = e.target.closest('.ar-item');
-      if (!it) return;
-      const i = items.indexOf(it);
-      if (i !== cur){ go(i); return; }          // 옆 장을 누르면 그 장이 가운데로
-      const img = it.querySelector('img');
-      if (img && window.__openLb) window.__openLb(img.src);
+    // 드래그 / 탭. 마우스 click 만 쓰면 터치에서 드래그 판정에 먹혀 안 열린다.
+    // 끌지 않고 뗀 경우만 "탭"으로 보고 처리한다.
+    let sx = null, dragged = false;
+    stage.addEventListener('pointerdown', e => {
+      sx = e.clientX; dragged = false;
+      stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
+      stage.classList.add('dragging');
     });
-
-    // 드래그 / 휠 / 키보드
-    let sx = null, moved = 0;
-    stage.addEventListener('pointerdown', e => { sx = e.clientX; moved = 0; stage.classList.add('dragging'); });
     stage.addEventListener('pointermove', e => {
       if (sx === null) return;
       const d = e.clientX - sx;
-      if (Math.abs(d) > stage.clientWidth * 0.06){ go(cur - Math.sign(d)); sx = e.clientX; moved += 1; }
+      if (Math.abs(d) > stage.clientWidth * 0.06){ go(cur - Math.sign(d)); sx = e.clientX; dragged = true; }
     });
-    const end = () => { sx = null; stage.classList.remove('dragging'); };
-    stage.addEventListener('pointerup', end);
+    stage.addEventListener('pointerup', e => {
+      const wasDrag = dragged;
+      sx = null; dragged = false; stage.classList.remove('dragging');
+      if (wasDrag) return;
+      const it = e.target.closest && e.target.closest('.ar-item');
+      if (!it) return;
+      const i = items.indexOf(it);
+      if (i !== cur){ go(i); return; }          // 옆 장을 누르면 그 장이 가운데로
+      const img = it.querySelector('img');      // 가운데 장 → 기존 이미지 확대 그대로
+      if (img && window.__openLb) window.__openLb(img.currentSrc || img.src);
+    });
+    const end = () => { sx = null; dragged = false; stage.classList.remove('dragging'); };
     stage.addEventListener('pointercancel', end);
-    stage.addEventListener('pointerleave', end);
     stage.addEventListener('wheel', e => {
       e.preventDefault();
       go(cur + (e.deltaY > 0 || e.deltaX > 0 ? 1 : -1));
