@@ -401,17 +401,20 @@
      좌우 가장자리 점을 이어 폴리곤으로 만들고, 폭을 가로지르는 그라디언트로
      원통감을 낸다. 위로 갈수록 살짝 좁아져 멀어지는 느낌을 준다. */
   .rp-ribbon{stroke:none}
-  .rp-stitch,.rp-stitch2{fill:none;stroke:rgba(255,255,255,.16);stroke-width:.06cqw;
-    stroke-dasharray:.22cqw .26cqw;stroke-linecap:round}
   .rp-logos image{opacity:.92}
-  /* 스트랩 끝: 검은 커넥터 탭 + 금속 링(카드 구멍에 걸리는 부분) */
-  .lany-clip{position:absolute;left:0;top:0;width:1.72cqw;height:2.1cqw;border-radius:.3cqw;
-    background:linear-gradient(90deg,#05070A 0%,#2A3038 45%,#12161A 100%);pointer-events:none;
-    box-shadow:0 .12cqw .3cqw rgba(0,0,0,.6)}
-  .lany-ring{position:absolute;left:50%;bottom:-1.15cqw;transform:translateX(-50%);
-    width:1.35cqw;height:1.35cqw;border-radius:50%;background:transparent;
-    border:.22cqw solid;border-color:#cfd4d9 #8f979f #6d747b #b6bcc2;
-    box-shadow:inset 0 .07cqw .14cqw rgba(255,255,255,.6),0 .1cqw .22cqw rgba(0,0,0,.5)}
+  /* 실물 목걸이는 금속이 아니라 플라스틱 버클 + 후크다(레퍼런스 사진 기준).
+     무광 몸체에 위쪽 하이라이트만 얇게 넣어야 플라스틱으로 읽힌다. */
+  .lany-clip{position:absolute;left:0;top:0;width:1.62cqw;height:1.5cqw;border-radius:.18cqw;
+    background:linear-gradient(180deg,#3A4048 0%,#20252B 38%,#171B20 100%);
+    box-shadow:inset 0 .06cqw 0 rgba(255,255,255,.28),0 .1cqw .24cqw rgba(0,0,0,.55);
+    pointer-events:none}
+  /* 후크: 아래로 이어지는 갈고리. 한쪽 테두리를 비운 원환으로 만든다 */
+  .lany-hook{position:absolute;left:50%;bottom:-1.5cqw;transform:translateX(-50%);
+    width:1.15cqw;height:1.15cqw;border-radius:50%;
+    border:.24cqw solid #262B31;border-top-color:transparent;border-right-color:transparent;
+    box-shadow:-.02cqw .04cqw .08cqw rgba(0,0,0,.6)}
+  .lany-hook::before{content:"";position:absolute;left:50%;top:-.62cqw;transform:translateX(-50%);
+    width:.24cqw;height:.7cqw;background:#262B31;border-radius:.06cqw}
 
   /* 카드 본체 — 앞/뒤를 3D 로 뒤집는다 */
   .cc{position:absolute;left:0;top:0;width:var(--cw);aspect-ratio:209/328;
@@ -1051,20 +1054,19 @@
       const card = el.querySelector('.cc');
       const ribbon = el.querySelector('.rp-ribbon');
       const grad = el.querySelector('linearGradient');
-      const stitches = [el.querySelector('.rp-stitch'), el.querySelector('.rp-stitch2')];
       const clip = el.querySelector('.lany-clip');
       // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
       // 줄에 찍히는 워드마크 — 앱바와 같은 로고를 일정 간격으로 반복한다
       const logoG = el.querySelector('.rp-logos');
       const logos = [];
-      for (let k = 0; k < 6; k++) {
+      for (let k = 0; k < 3; k++) {
         const im = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         im.setAttribute('href', 'assets/wordmark.svg');
         im.setAttribute('preserveAspectRatio', 'xMidYMid meet');
         logoG.appendChild(im);
         logos.push(im);
       }
-      const r = { el, card, ribbon, grad, stitches, clip, logos, pts: [], len: 0, anchor: {x:0,y:0},
+      const r = { el, card, ribbon, grad, clip, logos, pts: [], len: 0, anchor: {x:0,y:0},
                   drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
@@ -1249,19 +1251,12 @@
         // 그라디언트를 실제 폭에 맞춰 걸어야 원통감이 산다
         r.grad.setAttribute('x1', minX); r.grad.setAttribute('x2', maxX);
         r.grad.setAttribute('y1', pts[0].y); r.grad.setAttribute('y2', pts[0].y);
-        // 가장자리 스티치
-        const inset = (arr, s) => 'M ' + arr.map((p, i) => {
-          const q = (s > 0 ? R : L)[i];
-          return (p[0] + (q[0] - p[0]) * 0.22) + ' ' + (p[1] + (q[1] - p[1]) * 0.22);
-        }).join(' L ');
-        r.stitches[0].setAttribute('d', inset(L, 1));
-        r.stitches[1].setAttribute('d', inset(R, -1));
 
         // 워드마크를 줄 위에 일정 간격으로 얹는다. 접선 각도로 돌려 곡선을 따라간다.
         const strapW = r.card.offsetWidth * 0.104;       // 리본 전체 폭(반폭 0.052 x2)
-        const LW = strapW * 2.6, LH = LW / 6.98;        // wordmark.svg 는 872x125
+        const LW = strapW * 2.2, LH = LW / 6.98;        // wordmark.svg 는 872x125
         r.logos.forEach((im, k) => {
-          const idx = 2 + k * 2;                          // SEG=14 구간에 6개
+          const idx = 2 + k * 4;                          // SEG=14 구간에 3개 — 실물처럼 간격을 넓게
           const p0 = pts[Math.max(0, idx - 1)], p1 = pts[Math.min(SEG, idx + 1)];
           const deg = Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180 / Math.PI;
           im.setAttribute('x', -LW / 2); im.setAttribute('y', -LH / 2);

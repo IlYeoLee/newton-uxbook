@@ -599,19 +599,17 @@ def credits_page():
         <svg class="lany-rope" aria-hidden="true">
           <defs>
             <linearGradient id="bg{i}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="0">
-              <stop offset="0"    stop-color="#04060A"/>
-              <stop offset="0.30" stop-color="#2A3038"/>
-              <stop offset="0.52" stop-color="#3A424B"/>
-              <stop offset="0.78" stop-color="#161A1F"/>
-              <stop offset="1"    stop-color="#04060A"/>
+              <stop offset="0"    stop-color="#8E1212"/>
+              <stop offset="0.22" stop-color="#E02525"/>
+              <stop offset="0.46" stop-color="#FF4A3A"/>
+              <stop offset="0.72" stop-color="#E02525"/>
+              <stop offset="1"    stop-color="#7E0F0F"/>
             </linearGradient>
           </defs>
           <path class="rp-ribbon" fill="url(#bg{i})"/>
-          <path class="rp-stitch"/>
-          <path class="rp-stitch2"/>
           <g class="rp-logos"></g>
         </svg>
-        <div class="lany-clip"><i class="lany-ring"></i></div>
+        <div class="lany-clip"><i class="lany-hook"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="{esc(p["en"])} 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
