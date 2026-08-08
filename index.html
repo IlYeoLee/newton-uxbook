@@ -426,6 +426,13 @@
     height:34%;pointer-events:none;z-index:6;
     background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 42%,rgba(0,0,0,0) 100%)}
   .lany3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:5}
+  /* 3D 가 붙으면 CSS 3D 카드는 물러난다. 마크업은 남겨둔다 — 사진 경로와
+     이름·역할 정보를 여기서 읽어 텍스처로 굽기 때문이다. */
+  .lany-stage.is3d .lany{display:none}
+  .lany3d-host{position:absolute;inset:0;z-index:5}
+  /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
+  .lany3d-host .lanyard-wrapper{height:100%}
+  .lany3d-host canvas{display:block;touch-action:none}
   /* Extensibility 등에 쓰는 .kicker 와 같은 크기·색. 가운데 정렬에 하단 40px(1205 기준). */
   /* 하단 고정 묶음: DESIGNED BY 위, thanks to 블록 아래. 카드가 이 위로 매달린다. */
   .credits-foot{position:absolute;left:0;right:0;bottom:0;z-index:8;pointer-events:none;
@@ -2301,5 +2308,50 @@ void main(){
   updateChrome();
   staggerIn(pages[0]);
 </script>
+  <!-- reactbits Lanyard (R3F + rapier). 크레딧 페이지에 들어갈 때만 붙인다. -->
+  <script src="assets/lanyard.bundle.js" defer></script>
+  <script>
+  // 크레딧 페이지를 처음 펼칠 때 3D 목걸이를 붙인다. 무거우니 미리 만들지 않는다.
+  (function(){
+    const stage = document.getElementById('lanyStage');
+    if (!stage) return;
+    const page = stage.closest('.credits-page');
+    let handle = null;
+
+    function people(){
+      return [...stage.querySelectorAll('.lany')].map(el => ({
+        front: el.querySelector('.cc-photo') ? el.querySelector('.cc-photo').src : null,
+        back: null
+      }));
+    }
+
+    function boot(){
+      if (handle || !window.NewtonLanyard) return;
+      const list = people();
+      if (!list.length) return;
+      const host = document.createElement('div');
+      host.className = 'lany3d-host';
+      stage.appendChild(host);
+      stage.classList.add('is3d');
+      handle = window.NewtonLanyard.mount(host, {
+        people: list,
+        bandImage: 'assets/lanyard-band.png',
+        onZoom: i => page.classList.toggle('zoomed', i !== null)
+      });
+      const closeBtn = page.querySelector('.cc-close');
+      const dim = page.querySelector('.cc-dim');
+      const close = () => handle && handle.close();
+      if (closeBtn) closeBtn.addEventListener('click', close);
+      if (dim) dim.addEventListener('click', close);
+      addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    }
+
+    // 페이지가 실제로 보이는 순간에만 띄운다.
+    new IntersectionObserver(es => {
+      if (es.some(e => e.isIntersecting)) boot();
+    }, { threshold: 0.05 }).observe(page);
+    if (page.classList.contains('active')) boot();
+  })();
+  </script>
 </body>
 </html>

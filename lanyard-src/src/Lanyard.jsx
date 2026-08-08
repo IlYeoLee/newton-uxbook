@@ -1,12 +1,15 @@
 /* eslint-disable react/no-unknown-property */
-'use client';
+// reactbits Lanyard (JS-CSS) 원본을 이 책에 맞게 확장한 것.
+// 원본과 달라진 점은 세 가지뿐이고, 물리·재질·조명은 원본 그대로 둔다.
+//   1) Band 가 anchor 를 받아 한 Canvas 안에 다섯 장이 나란히 매달린다
+//   2) 카드를 누르면(끌지 않고) 확대 — 카메라 앞으로 kinematic 이동
+//   3) 확대 중 한 번 더 누르면 Y축 180° 회전으로 뒷면
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, extend, useFrame } from '@react-three/fiber';
+import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 
-// replace with your own imports, see the usage snippet for details
 import cardGLB from './card.glb';
 import lanyard from './lanyard.png';
 
@@ -15,28 +18,26 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-// 1x1 transparent pixel — lets useTexture be called unconditionally when a
-// front/back image isn't supplied.
 const BLANK_PIXEL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
-// The card model's front face is UV-mapped to the LEFT half of the texture
-// atlas and the back face to the RIGHT half (measured from card.glb). Each
-// custom image is composited into its own half so the two faces render
-// independently, aspect-preserving (no stretching).
+// card.glb 의 UV 아틀라스는 왼쪽 절반이 앞면, 오른쪽 절반이 뒷면이다(원본 주석 그대로).
 const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 
 export default function Lanyard({
-  position = [0, 0, 30],
+  people = [],
+  position = [0, 0, 24],
   gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
-  frontImage = null,
-  backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 1
+  lanyardWidth = 1,
+  gap = 2.05,
+  selected = null,
+  flipped = false,
+  onSelect = () => {}
 }) {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
@@ -45,6 +46,14 @@ export default function Lanyard({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // 카드가 매달리는 x 좌표. 원본 Band 는 앵커에서 오른쪽으로 2 만큼 떨어진 곳에
+  // 카드가 오므로, 그만큼 빼고 전체를 가운데 정렬한다.
+  const anchors = useMemo(() => {
+    const n = people.length || 1;
+    const span = (n - 1) * gap;
+    return people.map((_, i) => -span / 2 + i * gap - 2);
+  }, [people, gap]);
 
   return (
     <div className="lanyard-wrapper">
@@ -56,58 +65,52 @@ export default function Lanyard({
       >
         <ambientLight intensity={Math.PI} />
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-          <Band
-            isMobile={isMobile}
-            frontImage={frontImage}
-            backImage={backImage}
-            imageFit={imageFit}
-            lanyardImage={lanyardImage}
-            lanyardWidth={lanyardWidth}
-          />
+          {people.map((p, i) => (
+            <Band
+              key={i}
+              index={i}
+              anchorX={anchors[i]}
+              hangY={p.hangY ?? 4}
+              isMobile={isMobile}
+              frontImage={p.front}
+              backImage={p.back}
+              imageFit={imageFit}
+              lanyardImage={lanyardImage}
+              lanyardWidth={lanyardWidth}
+              zoomed={selected === i}
+              dimmed={selected !== null && selected !== i}
+              flipped={selected === i && flipped}
+              onSelect={onSelect}
+            />
+          ))}
         </Physics>
         <Environment blur={0.75}>
-          <Lightformer
-            intensity={2}
-            color="white"
-            position={[0, -1, 5]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={3}
-            color="white"
-            position={[-1, -1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={3}
-            color="white"
-            position={[1, 1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={10}
-            color="white"
-            position={[-10, 0, 14]}
-            rotation={[0, Math.PI / 2, Math.PI / 3]}
-            scale={[100, 10, 1]}
-          />
+          <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={3} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={3} color="white" position={[1, 1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={10} color="white" position={[-10, 0, 14]} rotation={[0, Math.PI / 2, Math.PI / 3]} scale={[100, 10, 1]} />
         </Environment>
       </Canvas>
     </div>
   );
 }
+
 function Band({
   maxSpeed = 50,
   minSpeed = 0,
   isMobile = false,
+  index = 0,
+  anchorX = 0,
+  hangY = 4,
   frontImage = null,
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 1
+  lanyardWidth = 1,
+  zoomed = false,
+  dimmed = false,
+  flipped = false,
+  onSelect = () => {}
 }) {
   const band = useRef(),
     fixed = useRef(),
@@ -122,13 +125,10 @@ function Band({
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
-  // useTexture must be called unconditionally; use a blank pixel when an image
-  // isn't supplied for a given face, then skip compositing it below.
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
   const backTex = useTexture(backImage || BLANK_PIXEL);
+  const { camera } = useThree();
 
-  // Composite the front/back images into the card's texture atlas (front = left
-  // half, back = right half). Each image is drawn aspect-preserving (no stretch).
   const cardMap = useMemo(() => {
     const baseMap = materials.base.map;
     if (!frontImage && !backImage) return baseMap;
@@ -141,7 +141,6 @@ function Band({
     canvas.height = H;
     const ctx = canvas.getContext('2d');
     if (!ctx) return baseMap;
-    // Keep the original baked atlas for the card edges and any untouched face.
     ctx.drawImage(baseImg, 0, 0, W, H);
 
     const drawFitted = (img, rect) => {
@@ -173,12 +172,14 @@ function Band({
     composite.needsUpdate = true;
     return composite;
   }, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
+
   const [curve] = useState(
-    () =>
-      new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
+    () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
   );
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
+  // 끌었는지 눌렀는지 구분한다. 끈 거리가 짧으면 "탭"으로 보고 확대한다.
+  const moved = useRef(0);
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
@@ -190,27 +191,47 @@ function Band({
 
   useEffect(() => {
     if (hovered) {
-      document.body.style.cursor = dragged ? 'grabbing' : 'grab';
+      document.body.style.cursor = dragged ? 'grabbing' : 'pointer';
       return () => void (document.body.style.cursor = 'auto');
     }
   }, [hovered, dragged]);
 
+  // 확대 목표 자리 — 카메라 앞 고정 거리. 화면 가운데에 정면으로 선다.
+  const zoomTarget = useMemo(() => new THREE.Vector3(), []);
+  const zoomQuat = useMemo(() => new THREE.Quaternion(), []);
+  const tmpQ = useMemo(() => new THREE.Quaternion(), []);
+
   useFrame((state, delta) => {
-    if (dragged) {
+    if (dragged && !zoomed) {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
       [card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp());
       card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
     }
+
+    if (zoomed && card.current) {
+      // 카메라 앞 8 만큼 되는 지점으로 부드럽게 끌어온다.
+      zoomTarget.set(0, 0, -8).applyQuaternion(camera.quaternion).add(camera.position);
+      const cur = card.current.translation();
+      const k = 1 - Math.pow(0.001, delta);      // 프레임레이트와 무관한 감쇠
+      card.current.setNextKinematicTranslation({
+        x: cur.x + (zoomTarget.x - cur.x) * k,
+        y: cur.y + (zoomTarget.y + 1.2 - cur.y) * k,
+        z: cur.z + (zoomTarget.z - cur.z) * k
+      });
+      zoomQuat.copy(camera.quaternion);
+      if (flipped) zoomQuat.multiply(tmpQ.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+      const cq = card.current.rotation();
+      tmpQ.set(cq.x, cq.y, cq.z, cq.w).slerp(zoomQuat, k);
+      card.current.setNextKinematicRotation({ x: tmpQ.x, y: tmpQ.y, z: tmpQ.z, w: tmpQ.w });
+    }
+
     if (fixed.current) {
       [j1, j2].forEach(ref => {
         if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
         const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
-        ref.current.lerped.lerp(
-          ref.current.translation(),
-          delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
-        );
+        ref.current.lerped.lerp(ref.current.translation(), delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)));
       });
       curve.points[0].copy(j3.current.translation());
       curve.points[1].copy(j2.current.lerped);
@@ -220,15 +241,24 @@ function Band({
       ang.copy(card.current.angvel());
       rot.copy(card.current.rotation());
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
+
+      // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
+      if (!dragged && !zoomed) {
+        const t = state.clock.elapsedTime;
+        const w = Math.sin(t * 0.55 + index * 1.73) * 0.06 + Math.sin(t * 1.31 + index * 2.4) * 0.02;
+        j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
+      }
     }
   });
 
   curve.curveType = 'chordal';
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
+  const cardType = dragged || zoomed ? 'kinematicPosition' : 'dynamic';
+
   return (
     <>
-      <group position={[0, 4, 0]}>
+      <group position={[anchorX, hangY, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
         <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
@@ -239,18 +269,27 @@ function Band({
         <RigidBody position={[1.5, 0, 0]} ref={j3} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+        <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={cardType}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
             scale={2.25}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
-            onPointerUp={e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
-            onPointerDown={e => (
-              e.target.setPointerCapture(e.pointerId),
-              drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
-            )}
+            onPointerUp={e => {
+              e.target.releasePointerCapture(e.pointerId);
+              drag(false);
+              if (moved.current < 8) onSelect(index);   // 끌지 않았으면 탭
+            }}
+            onPointerMove={e => {
+              if (dragged) moved.current += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
+            }}
+            onPointerDown={e => {
+              e.target.setPointerCapture(e.pointerId);
+              moved.current = 0;
+              if (!zoomed)
+                drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
+            }}
           >
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
@@ -260,6 +299,8 @@ function Band({
                 clearcoatRoughness={0.15}
                 roughness={0.9}
                 metalness={0.8}
+                transparent
+                opacity={dimmed ? 0.28 : 1}
               />
             </mesh>
             <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
@@ -277,6 +318,8 @@ function Band({
           map={texture}
           repeat={[-4, 1]}
           lineWidth={lanyardWidth}
+          transparent
+          opacity={dimmed ? 0.28 : 1}
         />
       </mesh>
     </>
