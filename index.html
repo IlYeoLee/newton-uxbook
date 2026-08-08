@@ -425,8 +425,8 @@
      투명으로 빼면 안 된다. 인물이 드러나는 건 타원 상단이 카드의 29.2% 에서 시작하고
      그 가장자리가 큰 블러로 녹기 때문이다. */
   .cc-blob{position:absolute;border-radius:50%;pointer-events:none;
-    background:radial-gradient(51% 58% at 51% 44%,
-      #FA3030 2%,#FE6E3C 64%,#FEC389 83%,#D1FEFF 96%)}
+    background:radial-gradient(50.2% 57.3% at 50.6% 44.3%,
+      #FA3030 2.1%,#FE6E3C 63.7%,#FEC389 83.3%,#D1FEFF 96.2%)}
   .cc-front .cc-blob{width:225.4%;height:138.1%;left:-61.4%;top:29.2%;filter:blur(calc(var(--cw)*.246))}
   .cc-back  .cc-blob{width:176.6%;height:145.1%;left:-41.4%;top:3.2%;filter:blur(calc(var(--cw)*.0744))}
   .cc-photo{position:absolute;left:0;top:-2.1%;width:100.3%;height:85.7%;
@@ -1271,8 +1271,9 @@
       const card = el.querySelector('.cc');
       const paths = [...el.querySelectorAll('.rp-band')];
       const clip = el.querySelector('.lany-clip');
+      // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
       const r = { el, card, paths, clip, pts: [], len: 0, anchor: {x:0,y:0},
-                  drag: null, tilt: {x:0,y:0}, zoom: false };
+                  drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
       // 드래그: 로프 끝을 포인터로 끌고 다닌다
@@ -1391,13 +1392,20 @@
 
     function step(){
       if (frozen) { requestAnimationFrame(step); return; }   // 확대 중엔 전부 정지
+      // 가만히 둬도 바람이 분다. 주기가 다른 사인 둘을 겹쳐 규칙적으로 안 보이게 하고,
+      // 줄 끝으로 갈수록 세게 실어 실제로 매달린 것처럼 흔들리게 한다.
+      const t = performance.now() * 0.001;
       for (const r of ropes) {
         const pts = r.pts;
         {
-          for (const p of pts) {                      // 베를레 적분
+          const gust = Math.sin(t * 0.62 + r.phase) * 0.9 +
+                       Math.sin(t * 1.73 + r.phase * 1.6) * 0.32;
+          for (let i = 0; i < pts.length; i++) {      // 베를레 적분
+            const p = pts[i];
             const vx = (p.x - p.px) * DAMP, vy = (p.y - p.py) * DAMP;
             p.px = p.x; p.py = p.y;
-            p.x += vx; p.y += vy + GRAV;
+            p.x += vx + gust * 0.5 * (i / SEG);
+            p.y += vy + GRAV;
           }
           for (let k = 0; k < ITER; k++) {            // 거리 구속
             pts[0].x = r.anchor.x; pts[0].y = r.anchor.y;
