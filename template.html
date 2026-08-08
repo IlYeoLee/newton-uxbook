@@ -426,11 +426,18 @@
     height:34%;pointer-events:none;z-index:6;
     background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 42%,rgba(0,0,0,0) 100%)}
   .lany3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:5}
+  /* 3D 가 붙으면 CSS 3D 카드는 물러난다. 마크업은 남겨둔다 — 사진 경로와
+     이름·역할 정보를 여기서 읽어 텍스처로 굽기 때문이다. */
+  .lany-stage.is3d .lany{display:none}
+  .lany3d-host{position:absolute;inset:0;z-index:5}
+  /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
+  .lany3d-host .lanyard-wrapper{height:100%}
+  .lany3d-host canvas{display:block;touch-action:none}
   /* Extensibility 등에 쓰는 .kicker 와 같은 크기·색. 가운데 정렬에 하단 40px(1205 기준). */
   /* 하단 고정 묶음: DESIGNED BY 위, thanks to 블록 아래. 카드가 이 위로 매달린다. */
   .credits-foot{position:absolute;left:0;right:0;bottom:0;z-index:8;pointer-events:none;
     padding:0 3.320cqw 3.320cqw}
-  .cc-kicker{text-align:center;margin:0 0 2.490cqw;
+  .cc-kicker{position:absolute;left:0;right:0;top:3.320cqw;text-align:center;margin:0;z-index:9;
     color:var(--red);font-weight:700;font-size:1.494cqw;letter-spacing:-.02em}
   /* 피그마 61:388 "추가되는레이아웃" 실측: 좌우 40, thanks to 16/700 아래 18,
      4열 각 239 · 열 간격 32, 열 안에서 역할 120 + 이름 120, 본문 14/lh21. */
@@ -659,16 +666,40 @@
 
   /* ── 표지 오버레이 (피그마 62:543, 1920x1080 기준을 비율로 옮김) ──
      딤 290/1080 = 26.85%, 글자는 폭 기준(25/1920, 34/1920), 세로는 높이 기준. */
-  .cv-scrim{position:absolute;left:0;right:0;height:26.85%;z-index:1;pointer-events:none}
-  .cv-top{top:0;background:linear-gradient(0deg,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 70%)}
-  .cv-bottom{bottom:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 70%)}
+  /* 안쪽으로 들어가는 구간을 길게 끌고 끝을 완전한 검정 대신 0.78 로 둔다.
+     1.0 에서 70% 로 끊으면 띠 경계가 그림자처럼 도드라진다. */
+  .cv-scrim{position:absolute;left:0;right:0;height:30%;z-index:1;pointer-events:none}
+  .cv-top{top:0;background:linear-gradient(0deg,
+    rgba(0,0,0,0) 0%,rgba(0,0,0,.18) 38%,rgba(0,0,0,.48) 68%,rgba(0,0,0,.78) 100%)}
+  .cv-bottom{bottom:0;background:linear-gradient(180deg,
+    rgba(0,0,0,0) 0%,rgba(0,0,0,.18) 38%,rgba(0,0,0,.48) 68%,rgba(0,0,0,.78) 100%)}
   .cover-slide .cv-eyebrow,.cover-slide .cv-title,.cover-slide .cv-cta{
     position:absolute;left:0;right:0;text-align:center;color:#fff;z-index:2}
-  .cover-slide .cv-eyebrow{top:5.56%;font-size:1.302cqw;font-weight:400;letter-spacing:.02em}
+  /* 피그마 25px 에서 4 뺀 21px(1920 기준) */
+  .cover-slide .cv-eyebrow{top:5.56%;font-size:1.094cqw;font-weight:400;
+    letter-spacing:.02em;opacity:.4}
   .cover-slide .cv-title  {top:11.11%;font-size:1.771cqw;font-weight:700}
-  .cover-slide .cv-cta    {top:90.19%;font-size:1.771cqw;font-weight:700}
-  .cv-touch{position:absolute;left:50%;top:67.69%;transform:translateX(-50%);
+  .cover-slide .cv-cta    {top:92.04%;font-size:1.771cqw;font-weight:700}
+  .cv-touch{position:absolute;left:50%;top:69.54%;transform:translateX(-50%);
     width:8.44cqw;height:auto;z-index:2;overflow:visible;pointer-events:none}
+
+  /* 손 + "Touch To read" 를 한 덩어리로 묶어 3초 떴다 사라지길 되풀이한다.
+     inset:0 이라 두 요소의 원래 위치는 그대로 두고 투명도만 함께 움직인다. */
+  .cv-touchgroup{position:absolute;inset:0;z-index:2;pointer-events:none;
+    animation:cvPulse 4.2s ease-in-out infinite}
+  @keyframes cvPulse{
+    0%{opacity:0} 10%{opacity:1} 76%{opacity:1} 90%{opacity:0} 100%{opacity:0}}
+  /* reactbits SplitText 와 같은 결 — 글자마다 조금씩 늦게 아래에서 올라온다.
+     투명도는 그룹이 담당하므로 여기서는 움직임만 준다. */
+  .cv-cta span{display:inline-block;white-space:pre;
+    animation:cvChar 4.2s cubic-bezier(.22,.7,.24,1) infinite;
+    animation-delay:calc(var(--i) * 45ms)}
+  @keyframes cvChar{
+    0%{transform:translateY(.55em)} 14%{transform:none}
+    100%{transform:none}}
+  @media (prefers-reduced-motion:reduce){
+    .cv-touchgroup,.cv-cta span{animation:none}
+  }
 
   /* codepen.io/pshkll/pen/JjmYqdz 를 그대로. 원본은 흰 면 + 검정 선인데,
      여기서는 면을 빼고 선만 흰색으로 둔다. */
@@ -694,7 +725,11 @@
     position:absolute;top:5.394cqw;bottom:0;width:6cqw;z-index:7;
     border:none;background:transparent;cursor:pointer;padding:0;
   }
+  /* 표지에서는 좌측 300px(1920 기준 15.63%)만 뒤로, 나머지 전부가 다음 장이다.
+     제일 위까지 덮어야 표지 어디를 눌러도 넘어간다. */
   .book.is-cover .nav-zone{top:0}
+  .book.is-cover .nz-left{width:15.63%}
+  .book.is-cover .nz-right{width:84.37%}
   .nav-zone.nz-left{left:0}
   .nav-zone.nz-right{right:0}
 
@@ -944,6 +979,7 @@
         <div class="cv-scrim cv-bottom"></div>
         <p class="cv-eyebrow">PROCESS · DEVELOPMENT · ARCHIV</p>
         <p class="cv-title">Inside Newton</p>
+        <div class="cv-touchgroup">
         <!-- codepen.io/pshkll/pen/JjmYqdz — 면은 빼고 흰 아웃라인만 남겼다 -->
         <svg class="cv-touch" viewBox="0 0 640 640" fill="none" aria-hidden="true">
           <circle class="hand-touch-1" cx="299" cy="201" r="50"  stroke-width="14"/>
@@ -951,7 +987,8 @@
           <circle class="hand-touch-3" cx="299" cy="201" r="160" stroke-width="14"/>
           <path class="touchon-hand-stroke" d="M327.223 308.7C328.023 273.6 380.223 273.3 380.923 308.7V335M327.223 308.7V213.7C325.723 178.1 275.023 178.1 273.523 213.7V304.3V427.5C273.523 458.8 273.523 452.1 230.123 422.3C195.323 398.5 164.023 420.6 165.023 435.7C166.023 450.8 252.823 528.6 252.823 528.6C352.123 643.8 455.923 571 475.023 515.2C494.123 459.3 489 361.3 489 361.3C488 346.5 476.423 334.4 461.623 334.4C446.823 334.4 434.623 347.3 434.623 361.3M327.223 308.7V388.8M380.923 335C382.323 300 433.723 300.7 434.623 335.5V361.3M380.923 335V388.8M434.623 361.3V399.3"/>
         </svg>
-        <p class="cv-cta">Touch To read</p>
+        <p class="cv-cta">Touch To Read</p>
+        </div>
       </div>
     </div>
 
@@ -1933,5 +1970,66 @@ void main(){
   updateChrome();
   staggerIn(pages[0]);
 </script>
+  <!-- reactbits Lanyard (R3F + rapier). 크레딧 페이지에 들어갈 때만 붙인다. -->
+  <script src="assets/lanyard.bundle.js" defer></script>
+  <script>
+  // "Touch To read" 를 글자 단위로 쪼갠다(reactbits SplitText 와 같은 결).
+  // --i 로 글자마다 등장 시각을 어긋나게 준다.
+  (function(){
+    const cta = document.querySelector('.cv-cta');
+    if (!cta) return;
+    const text = cta.textContent;
+    cta.textContent = '';
+    [...text].forEach((ch, i) => {
+      const s = document.createElement('span');
+      s.textContent = ch;
+      s.style.setProperty('--i', i);
+      cta.appendChild(s);
+    });
+  })();
+  </script>
+  <script>
+  // 크레딧 페이지를 처음 펼칠 때 3D 목걸이를 붙인다. 무거우니 미리 만들지 않는다.
+  (function(){
+    const stage = document.getElementById('lanyStage');
+    if (!stage) return;
+    const page = stage.closest('.credits-page');
+    let handle = null;
+
+    function people(){
+      return [...stage.querySelectorAll('.lany')].map(el => ({
+        front: el.querySelector('.cc-photo') ? el.querySelector('.cc-photo').src : null,
+        back: null
+      }));
+    }
+
+    function boot(){
+      if (handle || !window.NewtonLanyard) return;
+      const list = people();
+      if (!list.length) return;
+      const host = document.createElement('div');
+      host.className = 'lany3d-host';
+      stage.appendChild(host);
+      stage.classList.add('is3d');
+      handle = window.NewtonLanyard.mount(host, {
+        people: list,
+        bandImage: 'assets/lanyard-band.png',
+        onZoom: i => page.classList.toggle('zoomed', i !== null)
+      });
+      const closeBtn = page.querySelector('.cc-close');
+      const dim = page.querySelector('.cc-dim');
+      const close = () => handle && handle.close();
+      if (closeBtn) closeBtn.addEventListener('click', close);
+      if (dim) dim.addEventListener('click', close);
+      addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    }
+
+    // 페이지가 실제로 보이는 순간에만 띄운다.
+    new IntersectionObserver(es => {
+      if (es.some(e => e.isIntersecting)) boot();
+    }, { threshold: 0.05 }).observe(page);
+    if (page.classList.contains('active')) boot();
+  })();
+  </script>
 </body>
 </html>

@@ -713,8 +713,8 @@ def credits_page():
   <div class="cc-dim"></div>
   <div class="lany-stage" id="lanyStage">{cards}
   </div>
+  <p class="cc-kicker">DESIGNED BY</p>
   <div class="credits-foot">
-    <p class="cc-kicker">DESIGNED BY</p>
     <div class="cr-wrap">{credit_rows()}</div>
   </div>
   <button class="lb-close cc-close" type="button" aria-label="닫기">
