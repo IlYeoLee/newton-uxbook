@@ -407,19 +407,9 @@
      원통감을 낸다. 위로 갈수록 살짝 좁아져 멀어지는 느낌을 준다. */
   .rp-ribbon{stroke:none}
   .rp-logos image{filter:brightness(0) invert(1);opacity:.95}
-  /* 실물 목걸이는 금속이 아니라 플라스틱 버클 + 후크다(레퍼런스 사진 기준).
-     무광 몸체에 위쪽 하이라이트만 얇게 넣어야 플라스틱으로 읽힌다. */
-  .lany-clip{position:absolute;left:0;top:0;width:1.5cqw;height:1.35cqw;border-radius:.16cqw;transform-origin:50% 0;
-    background:linear-gradient(180deg,#3A4048 0%,#20252B 38%,#171B20 100%);
-    box-shadow:inset 0 .06cqw 0 rgba(255,255,255,.28),0 .1cqw .24cqw rgba(0,0,0,.55);
-    pointer-events:none}
-  /* 후크: 아래로 이어지는 갈고리. 한쪽 테두리를 비운 원환으로 만든다 */
-  .lany-hook{position:absolute;left:50%;bottom:-0.82cqw;transform:translateX(-50%);
-    width:0.95cqw;height:0.95cqw;border-radius:50%;
-    border:.24cqw solid #262B31;border-top-color:transparent;border-right-color:transparent;
-    box-shadow:-.02cqw .04cqw .08cqw rgba(0,0,0,.6)}
-  .lany-hook::before{content:"";position:absolute;left:50%;top:-.62cqw;transform:translateX(-50%);
-    width:.24cqw;height:.7cqw;background:#262B31;border-radius:.06cqw}
+  /* 버클과 후크는 SVG 안에 둔다. CSS div 로 두면 로프와 좌표계가 달라 어긋난다. */
+  .rp-buckle{fill:#1B1F24;stroke:rgba(255,255,255,.22);stroke-width:.4}
+  .rp-hook{fill:none;stroke:#20252B;stroke-width:2.4;stroke-linecap:round}
 
   /* 카드 본체 — 앞/뒤를 3D 로 뒤집는다 */
   .cc{position:absolute;left:0;top:0;width:var(--cw);aspect-ratio:209/328;
@@ -431,7 +421,13 @@
   .cc.flipped .cc-inner{transform:rotateY(180deg)}
   .cc-face{position:absolute;inset:0;border-radius:10.05%/6.4%;   /* r21 / 209 · 328 */
     overflow:hidden;background:#fff;
-    backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    /* 아주 얕은 두께감 — 아래 모서리에 얇은 어두운 선, 위에 밝은 선 */
+    box-shadow:inset 0 .09cqw 0 rgba(255,255,255,.30),inset 0 -.09cqw 0 rgba(0,0,0,.18)}
+  /* 표면 빛: 카드가 기울면 스치듯 지나가는 아주 옅은 하이라이트 */
+  .cc-face::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:linear-gradient(115deg,rgba(255,255,255,0) 34%,rgba(255,255,255,.10) 47%,
+      rgba(255,255,255,0) 60%);opacity:var(--sheen,.5)}
   .cc-back{transform:rotateY(180deg)}
   /* 그라디언트는 레이어를 겹치지 않는다. 피그마가 라디얼 타원 하나에 큰 레이어 블러를
      먹인 형태라 그대로 재현한다(stops: #FA3030 2% → #FE6E3C 64% → #FEC389 83% → #D1FEFF 96%). */
@@ -495,7 +491,7 @@
     color:rgba(255,255,255,.4);font-size:calc(var(--cw)*.0406);font-weight:700;letter-spacing:-.05em}
 
   /* 확대 상태 — 딤과 닫기 버튼은 이미지 라이트박스와 같은 것을 쓴다 */
-  .credits-page.zoomed .lany-rope,.credits-page.zoomed .lany-clip{opacity:0}
+  .credits-page.zoomed .lany-rope{opacity:0}
   .credits-page.zoomed .lany:not(.on) .cc{filter:blur(6px) brightness(.45);pointer-events:none}
   /* .lany-stage 가 perspective 로 쌓임 맥락을 만들어 카드 z-index 가 그 안에 갇힌다.
      그래서 확대할 땐 스테이지째 딤 위로 올린다. 나머지 카드는 자체 blur/brightness 로
@@ -965,8 +961,11 @@
           </defs>
           <path class="rp-ribbon" fill="url(#bg0)"/>
           <g class="rp-logos"></g>
+          <g class="rp-hw">
+            <rect class="rp-buckle" rx="2"/>
+            <path class="rp-hook"/>
+          </g>
         </svg>
-        <div class="lany-clip"><i class="lany-hook"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Siheon Song 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
@@ -997,8 +996,11 @@
           </defs>
           <path class="rp-ribbon" fill="url(#bg1)"/>
           <g class="rp-logos"></g>
+          <g class="rp-hw">
+            <rect class="rp-buckle" rx="2"/>
+            <path class="rp-hook"/>
+          </g>
         </svg>
-        <div class="lany-clip"><i class="lany-hook"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Ilyeo Lee 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
@@ -1029,8 +1031,11 @@
           </defs>
           <path class="rp-ribbon" fill="url(#bg2)"/>
           <g class="rp-logos"></g>
+          <g class="rp-hw">
+            <rect class="rp-buckle" rx="2"/>
+            <path class="rp-hook"/>
+          </g>
         </svg>
-        <div class="lany-clip"><i class="lany-hook"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="SoJin Kim 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
@@ -1061,8 +1066,11 @@
           </defs>
           <path class="rp-ribbon" fill="url(#bg3)"/>
           <g class="rp-logos"></g>
+          <g class="rp-hw">
+            <rect class="rp-buckle" rx="2"/>
+            <path class="rp-hook"/>
+          </g>
         </svg>
-        <div class="lany-clip"><i class="lany-hook"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Juwon Park 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
@@ -1093,8 +1101,11 @@
           </defs>
           <path class="rp-ribbon" fill="url(#bg4)"/>
           <g class="rp-logos"></g>
+          <g class="rp-hw">
+            <rect class="rp-buckle" rx="2"/>
+            <path class="rp-hook"/>
+          </g>
         </svg>
-        <div class="lany-clip"><i class="lany-hook"></i></div>
         <div class="cc" tabindex="0" role="button" aria-label="Dabin Jeon 카드">
           <div class="cc-inner">
             <div class="cc-face cc-front">
@@ -1329,7 +1340,8 @@
       const card = el.querySelector('.cc');
       const ribbon = el.querySelector('.rp-ribbon');
       const grad = el.querySelector('linearGradient');
-      const clip = el.querySelector('.lany-clip');
+      const buckle = el.querySelector('.rp-buckle');
+      const hook = el.querySelector('.rp-hook');
       // 카드마다 바람 위상을 다르게 준다 — 같은 위상이면 다섯 장이 한 몸처럼 움직인다
       // 줄에 찍히는 워드마크 — 앱바와 같은 로고를 일정 간격으로 반복한다
       const logoG = el.querySelector('.rp-logos');
@@ -1341,7 +1353,7 @@
         logoG.appendChild(im);
         logos.push(im);
       }
-      const r = { el, card, ribbon, grad, clip, logos, pts: [], len: 0, anchor: {x:0,y:0},
+      const r = { el, card, ribbon, grad, buckle, hook, logos, pts: [], len: 0, anchor: {x:0,y:0},
                   drag: null, tilt: {x:0,y:0}, zoom: false, phase: ropes.length * 1.73 };
       ropes.push(r);
 
@@ -1443,7 +1455,7 @@
     // 줄 길이를 그 거리로 고정해야 카드가 제자리에 걸리고 옆 카드와 겹치지 않는다.
     // 카드마다 줄 길이가 다르다(피그마 49:1445 의 카드 상단 y 실측 / 753).
     // 1·3·4번은 157/180/212 로 잰 값이고, 2·5번은 조회 범위 밖이라 인접 값을 썼다.
-    const HANG = [0.208, 0.300, 0.239, 0.282, 0.295];
+    const HANG = [0.175, 0.262, 0.204, 0.246, 0.258];
     function layout(){
       const b = stage.getBoundingClientRect();
       ropes.forEach((r, i) => {
@@ -1508,6 +1520,16 @@
         r.card.style.transform = ropeTransform(r) +
           ` rotateX(${r.tilt.x}deg) rotateY(${r.tilt.y + r.spin}deg)`;
 
+        // 기울기에 따라 실시간으로 도는 그림자와 표면 빛. 아주 얕게만 준다 —
+        // 세게 넣으면 종이가 아니라 플라스틱 판처럼 보인다.
+        const yaw = r.tilt.y + r.spin, pitch = r.tilt.x;
+        const sw = r.card.offsetWidth;
+        const ox = -yaw / 90 * sw * 0.06, oy = (6 + pitch / 90 * 8) / 100 * sw;
+        const blur = sw * (0.07 + Math.abs(yaw) / 90 * 0.05);
+        r.card.style.filter =
+          `drop-shadow(${ox.toFixed(1)}px ${oy.toFixed(1)}px ${blur.toFixed(1)}px rgba(0,0,0,.42))`;
+        r.card.style.setProperty('--sheen', (0.35 + Math.min(1, Math.abs(yaw) / 55) * 0.5).toFixed(2));
+
         // 리본: 좌우 가장자리 점을 만들어 하나의 폴리곤으로 잇는다.
         // 폭은 위로 갈수록 좁아진다(멀어지는 느낌) — 선으로는 못 하는 부분이다.
         const W0 = r.card.offsetWidth * 0.060;          // 반폭 (띠 전체 폭 = 이 값의 2배)
@@ -1544,9 +1566,20 @@
           im.setAttribute('width', LW);  im.setAttribute('height', LH);
           im.setAttribute('transform', `translate(${pts[idx].x},${pts[idx].y}) rotate(${deg})`);
         });
-        // 버클은 줄 끝에서 시작해야 한다 — 중앙 정렬하면 줄과 사이가 벌어진다
+        // 버클 + 후크: 로프 끝에서 카드 상단까지를 잇는다. 같은 SVG 좌표계라 안 어긋난다.
         const bang = Math.atan2(end.x - pts[SEG-1].x, -(end.y - pts[SEG-1].y)) * 180 / Math.PI;
-        r.clip.style.transform = `translate(${end.x}px,${end.y}px) translate(-50%,0) rotate(${bang}deg)`;
+        const bw = W0 * 1.9, bh = W0 * 2.2;
+        const at = `translate(${end.x},${end.y}) rotate(${bang})`;
+        r.buckle.setAttribute('x', -bw / 2);
+        r.buckle.setAttribute('y', 0);
+        r.buckle.setAttribute('width', bw);
+        r.buckle.setAttribute('height', bh);
+        r.buckle.setAttribute('transform', at);
+        // 후크: 버클 아래에서 갈고리처럼 굽어 카드 상단으로 들어간다
+        const hr = W0 * 0.8;
+        r.hook.setAttribute('d',
+          `M 0 ${bh} v ${hr * 0.6} a ${hr} ${hr} 0 1 0 ${hr * 1.15} ${hr * 0.25}`);
+        r.hook.setAttribute('transform', at);
       }
       requestAnimationFrame(step);
     }
