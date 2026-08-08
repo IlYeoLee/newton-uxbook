@@ -30,3 +30,29 @@
 ## 되돌릴 지점
 - 태그 `css3d-credits` (9118a88) = CSS 3D 크레딧이 동작하던 마지막 지점.
   `git reset --hard css3d-credits`
+
+## 크레딧 페이지 캡쳐하는 법 (이걸 못 찾아서 계속 눈으로 못 보고 수치만 고쳤다)
+```bash
+CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"
+# index.html 끝에 이 스크립트를 넣은 사본을 만들고:
+#   setTimeout(()=>{let n=0;const iv=setInterval(()=>{
+#     const a=document.querySelector('.page.active');
+#     if(a&&a.getAttribute('data-page')==='credits'){clearInterval(iv);return;}
+#     const b=document.getElementById('nzRight'); if(b) b.click();
+#     if(++n>22) clearInterval(iv);},200);},600);
+"$CHROME" --headless=new --no-sandbox --hide-scrollbars \
+  --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist \
+  --window-size=1200,760 --virtual-time-budget=25000 \
+  --user-data-dir=/c/tmp/cap --screenshot=/c/tmp/out.png "http://127.0.0.1:8811/사본.html"
+```
+- WebGL 은 `--use-angle=swiftshader --enable-unsafe-swiftshader` 로 소프트웨어 렌더링해야 잡힌다.
+- **스크린샷 모드에서 `--timeout` 만 주면 setInterval 이 안 돈다.** `--virtual-time-budget` 을 써야
+  페이지 넘기기가 실제로 일어난다. 이걸 몰라서 계속 표지만 찍혔다.
+- 페이지는 21장이고 credits 가 마지막. 표지에서 `#nzRight` 20번.
+- 측정만 할 때는 `--dump-dom` + `--virtual-time-budget` 조합.
+
+## 지금 확인된 것 (위 방법으로 실제 캡쳐)
+- 크레딧 페이지에 **카드가 한 장도 안 보인다**. 캔버스가 비어 있다.
+  `boot()` 재시도 문제는 고쳤으니, 다음은 GLB/텍스처 로딩이나 Band 렌더 실패를 봐야 한다.
+- 그 전 로컬 화면에서는 카드 DOM 이 뒤집힌 채(글자 좌우 반전) 줄과 떨어져 가운데 뭉쳐 있었다.
+  <Html transform> 의 위치·방향이 RigidBody 를 못 따라가는 것으로 보인다.

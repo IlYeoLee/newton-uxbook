@@ -2415,11 +2415,27 @@ void main(){
       addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
     }
 
-    // 페이지가 실제로 보이는 순간에만 띄운다.
-    new IntersectionObserver(es => {
-      if (es.some(e => e.isIntersecting)) boot();
-    }, { threshold: 0.05 }).observe(page);
-    if (page.classList.contains('active')) boot();
+    // 이 책은 페이지를 전부 DOM 에 두고 .active 로만 바꾼다. 그래서
+    // IntersectionObserver 로는 '지금 보이는 장'을 알 수 없었다. 게다가 boot 은
+    // 번들(6.4MB, defer)이 아직 안 읽혔으면 그냥 빠져나가고 다시 시도하지 않아서,
+    // 두 번째 진입에서야 붙는 일이 있었다. .active 를 지켜보고, 번들이 준비될
+    // 때까지 기다린다.
+    let waiting = false;
+    function tryBoot(){
+      if (handle || !page.classList.contains('active')) return;
+      if (!window.NewtonLanyard) {
+        if (waiting) return;
+        waiting = true;
+        const t = setInterval(() => {
+          if (!window.NewtonLanyard) return;
+          clearInterval(t); waiting = false; tryBoot();
+        }, 120);
+        return;
+      }
+      boot();
+    }
+    new MutationObserver(tryBoot).observe(page, { attributes: true, attributeFilter: ['class'] });
+    tryBoot();
   })();
   </script>
 </body>
