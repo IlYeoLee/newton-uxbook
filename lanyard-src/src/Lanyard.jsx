@@ -63,7 +63,7 @@ export default function Lanyard({
         gl={{ alpha: transparent }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
-        <ambientLight intensity={Math.PI} />
+        <ambientLight intensity={Math.PI * 0.45} />
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
           {people.map((p, i) => (
             <Band
@@ -85,10 +85,10 @@ export default function Lanyard({
           ))}
         </Physics>
         <Environment blur={0.75}>
-          <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-          <Lightformer intensity={3} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-          <Lightformer intensity={3} color="white" position={[1, 1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-          <Lightformer intensity={10} color="white" position={[-10, 0, 14]} rotation={[0, Math.PI / 2, Math.PI / 3]} scale={[100, 10, 1]} />
+          <Lightformer intensity={0.9} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={1.2} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={1.2} color="white" position={[1, 1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
+          <Lightformer intensity={3.2} color="white" position={[-10, 0, 14]} rotation={[0, Math.PI / 2, Math.PI / 3]} scale={[100, 10, 1]} />
         </Environment>
       </Canvas>
     </div>
@@ -181,9 +181,9 @@ function Band({
   // 끌었는지 눌렀는지 구분한다. 끈 거리가 짧으면 "탭"으로 보고 확대한다.
   const moved = useRef(0);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.7]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.7]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.7]);
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1.14]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1.14]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1.14]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
     [0, 2.267, 0]
@@ -212,12 +212,12 @@ function Band({
 
     if (zoomed && card.current) {
       // 카메라 앞 8 만큼 되는 지점으로 부드럽게 끌어온다.
-      zoomTarget.set(0, 0, -8).applyQuaternion(camera.quaternion).add(camera.position);
+      zoomTarget.set(0, 0, -13).applyQuaternion(camera.quaternion).add(camera.position);
       const cur = card.current.translation();
       const k = 1 - Math.pow(0.001, delta);      // 프레임레이트와 무관한 감쇠
       card.current.setNextKinematicTranslation({
         x: cur.x + (zoomTarget.x - cur.x) * k,
-        y: cur.y + (zoomTarget.y + 1.2 - cur.y) * k,
+        y: cur.y + (zoomTarget.y - cur.y) * k,
         z: cur.z + (zoomTarget.z - cur.z) * k
       });
       zoomQuat.copy(camera.quaternion);
@@ -295,10 +295,10 @@ function Band({
               <meshPhysicalMaterial
                 map={cardMap}
                 map-anisotropy={16}
-                clearcoat={isMobile ? 0 : 1}
+                clearcoat={isMobile ? 0 : 0.35}
                 clearcoatRoughness={0.15}
-                roughness={0.9}
-                metalness={0.8}
+                roughness={0.62}
+                metalness={0.32}
                 transparent
                 opacity={dimmed ? 0.28 : 1}
               />
