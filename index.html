@@ -369,9 +369,12 @@
      --cw = 카드 폭. 내부 수치는 전부 카드 폭 대비 비율이라 확대·플립해도 안 깨진다. */
   /* 전면 페이지와 같은 프레임 규칙: 좌우 10 · 하 12 여백, 라운드 40 (1205 기준).
      .page 의 패딩이 inset:0 인 절대 배치 자식까지 밀어내므로 스테이지·딤이 함께 들어온다. */
-  .credits-page{padding:0.830cqw 0.830cqw 0.996cqw;overflow:hidden;background:transparent}
-  .credits-page .lany-stage{background:#050505;border-radius:3.320cqw;overflow:hidden}
-  .credits-page .cc-dim{border-radius:3.320cqw}
+  /* 패딩에 기대지 않고 inset 을 직접 준다 — 절대 배치 자식이 패딩 박스를 안 따라가는
+     경우가 있어 여백이 통째로 사라졌다. 값은 전면 영상 페이지와 같다(좌우 10 · 하 12, R40). */
+  .credits-page{padding:0;overflow:hidden;background:transparent}
+  .credits-page .lany-stage,.credits-page .cc-dim{
+    inset:0.830cqw 0.830cqw 0.996cqw;border-radius:3.320cqw;overflow:hidden}
+  .credits-page .lany-stage{background:#050505}
   .cc-kicker{position:absolute;top:11.6cqw;left:0;right:0;text-align:center;margin:0;z-index:2;
     font-size:1.16cqw;font-weight:700;letter-spacing:.02em;color:rgba(255,255,255,.55)}
   /* perspective 는 자식에게 걸리는 속성이다. 스테이지에 두어야 카드의 호버 기울기가
@@ -417,8 +420,13 @@
      먹인 형태라 그대로 재현한다(stops: #FA3030 2% → #FE6E3C 64% → #FEC389 83% → #D1FEFF 96%). */
   /* 피그마 49:2452 의 gradientHandlePositions 를 그대로 옮긴다.
      중심 (51%,44%), 반지름 가로 51% · 세로 58%. closest-side 로 중앙에 두면 다른 그림이 된다. */
+  /* 피그마 49:2452 그대로: 스톱 4개(레드→코럴→샌드→프리즘)와 핸들이 만든
+     중심 (51%,44%) · 반지름 가로 51% 세로 58%. 프리즘(#D1FEFF)이 바깥 테두리 색이라
+     투명으로 빼면 안 된다. 인물이 드러나는 건 타원 상단이 카드의 29.2% 에서 시작하고
+     그 가장자리가 큰 블러로 녹기 때문이다. */
   .cc-blob{position:absolute;border-radius:50%;pointer-events:none;
-    background:radial-gradient(51% 58% at 51% 44%,#FA3030 2%,#FE6E3C 64%,#FEC389 83%,#D1FEFF 96%)}
+    background:radial-gradient(51% 58% at 51% 44%,
+      #FA3030 2%,#FE6E3C 64%,#FEC389 83%,#D1FEFF 96%)}
   .cc-front .cc-blob{width:225.4%;height:138.1%;left:-61.4%;top:29.2%;filter:blur(calc(var(--cw)*.246))}
   .cc-back  .cc-blob{width:176.6%;height:145.1%;left:-41.4%;top:3.2%;filter:blur(calc(var(--cw)*.0744))}
   .cc-photo{position:absolute;left:0;top:-2.1%;width:100.3%;height:85.7%;
@@ -433,7 +441,9 @@
      — 결과 간격은 피그마의 lh 60/100 과 같다. */
   .cc-name{position:absolute;left:6%;width:88%;top:57%;text-align:center;
     font-size:calc(var(--cw)*.235);line-height:1;font-weight:700;letter-spacing:-.05em;
-    color:#fff;mix-blend-mode:overlay}
+    /* 흰색 + 웜톤 그라디언트. 글자 모양으로 잘라 쓴다. */
+    background:linear-gradient(180deg,#FFFFFF 0%,#FFF3DC 42%,#FFD5A8 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
   .cc-name span{display:block}
   .cc-name .n2{margin-top:-.4em}
   /* 피그마의 흰 판(323x65)은 글자(299x60)보다 커서 페이드가 글자 '바깥'에서 일어난다.
@@ -1402,9 +1412,11 @@
         const end = pts[SEG];
         // 흔들릴 때 Y축으로 비틀린다 → 실제로 뒷면이 드러난다(3D 카드처럼).
         // 가로 속도에 비례해 돌리고 서서히 되돌아오게 감쇠를 준다.
+        // 상한이 72도면 90도를 못 넘어 뒷면이 절대 안 나온다. 게인을 키우고 감쇠를
+        // 늦춰 흔들 때 실제로 한 바퀴 가까이 돌게 한다(±200도).
         const vx = end.x - end.px;
-        r.spin = (r.spin || 0) * 0.90 + vx * 3.4;
-        r.spin = Math.max(-72, Math.min(72, r.spin));
+        r.spin = (r.spin || 0) * 0.965 + vx * 9;
+        r.spin = Math.max(-200, Math.min(200, r.spin));
         r.card.style.transition = '';
         r.card.style.transform = ropeTransform(r) +
           ` rotateX(${r.tilt.x}deg) rotateY(${r.tilt.y + r.spin}deg)`;
