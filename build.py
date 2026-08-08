@@ -379,6 +379,7 @@ MARKERS = [
     "07 Projection Unit",
     "08 Scenario",
     "09 Extensibility",
+    "10 Verbal Branding", "11 Logo", "12 Color", "13 Type", "14 GUI", "15 Goods",
 ]
 
 def find_marker_idx(m):
@@ -501,6 +502,7 @@ CAROUSEL = {
     "05": (["img_18", "img_18-2", "img_18-3"], "m6"),            # 피그마 6, 6-1, 6-2
     "06": (["img_22", "img_22-2"], "m7"),                        # 피그마 7, 7-1  (스테이션)
     "07": (["img_23", "img_23-2"], "m8"),                        # 피그마 8, 8-1  (프로젝션 유닛)
+    "12": (["bx_color", "bx_color_dark"], "bx_color"),           # 라이트/다크 컬러 시스템
 }
 
 def render_page(marker, seg):
@@ -661,6 +663,7 @@ PAGE_ORDER = [
     "01 From Routine to Challenge", "02 Challenge Spark", "03 Target", "04 Solution",
     "05 Wearable Robotics", "07 Projection Unit", "06 Station",
     "08 Scenario", "09 Extensibility",
+    "10 Verbal Branding", "11 Logo", "12 Color", "13 Type", "14 GUI", "15 Goods",
 ]
 assert sorted(PAGE_ORDER) == sorted(MARKERS), "PAGE_ORDER 가 MARKERS 를 그대로 담고 있지 않다"
 FIRST_PRODUCT = "05 Wearable Robotics"
@@ -695,6 +698,7 @@ NAV_GROUPS = [
     ("Products", "products-lead", ["products-lead", "sec-05", "sec-07", "sec-06"]),
     ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
+    ("BX", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
 ]
 nav_html = "".join(
     f'<button type="button" class="pill" data-target="{target}" data-members="{",".join(members)}">{esc(label)}</button>'
