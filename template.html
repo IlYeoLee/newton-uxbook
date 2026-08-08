@@ -813,8 +813,8 @@
     border-radius:3.320cqw;background:#0F0F11;perspective:120cqw;
     touch-action:pan-y;cursor:grab}
   .ar-stage.dragging{cursor:grabbing}
-  .ar-track{position:absolute;left:0;right:0;top:0;bottom:7cqw;transform-style:preserve-3d}
-  .ar-item{position:absolute;left:50%;top:calc(55% - 1.660cqw);margin:0;
+  .ar-track{position:absolute;left:0;right:0;top:8cqw;bottom:8cqw;transform-style:preserve-3d}
+  .ar-item{position:absolute;left:50%;top:50%;margin:0;
     transform-style:preserve-3d;will-change:transform,opacity;
     transition:transform .5s cubic-bezier(.22,.7,.24,1),opacity .5s ease}
   /* 세로 사진이 스테이지를 넘지 않도록 가로·세로 둘 다 못 박는다. */
@@ -826,12 +826,14 @@
     background:#000;opacity:var(--dim,0);pointer-events:none;
     transition:opacity .5s ease}
   .ar-item.is-center{cursor:zoom-in}
+  .ar-head{position:absolute;left:0;right:0;top:3.320cqw;text-align:center;z-index:6;
+    pointer-events:none}
   .ar-foot{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
   /* 묶음 바로가기 — 탭 바처럼 보이지 않게. 번호를 단 얇은 목록이고,
      지금 묶음만 커지면서 빨간 점이 앞에 붙는다. 나머지는 뒤로 물러난다. */
   .ar-chips{display:flex;justify-content:center;align-items:baseline;flex-wrap:wrap;
-    gap:2.075cqw;margin:0 0 1.079cqw;pointer-events:auto}
+    gap:2.075cqw;margin:0;pointer-events:auto}
   .ar-chip{border:none;background:none;padding:0;cursor:pointer;font-family:inherit;
     display:inline-flex;align-items:baseline;gap:0.415cqw;
     font-size:0.913cqw;font-weight:500;letter-spacing:.04em;text-transform:uppercase;
@@ -843,7 +845,7 @@
   .ar-chip.on{color:#fff;font-size:1.245cqw;font-weight:700;letter-spacing:-.01em}
   .ar-chip.on::before{color:var(--red);opacity:1}
   .ar-title{margin:0;font-size:1.494cqw;font-weight:700;color:#fff;letter-spacing:-.02em}
-  .ar-count{margin:0.5cqw 0 0;font-size:0.996cqw;font-weight:400;color:rgba(255,255,255,.55)}
+  .ar-count{margin:0.332cqw 0 0;font-size:0.996cqw;font-weight:400;color:rgba(255,255,255,.55)}
   @media (max-width:640px){
     .archive-page{overflow:hidden}
     .ar-stage{inset:5vw 5vw 5vw;border-radius:5vw;perspective:160vw}
@@ -2239,9 +2241,11 @@ void main(){
         if (zoomEl){ zoomEl.remove(); zoomEl = null; }
         page.classList.remove('zoomed');
       }
-      function openZoom(i){
+      // 인덱스만 믿으면 어느 카드를 눌러도 첫 사람이 뜨는 일이 생긴다.
+      // 눌린 카드가 자기 DOM 을 직접 들고 오므로 그걸 그대로 쓴다.
+      function openZoom(i, el){
         closeZoom();
-        const src = list[i] && list[i].el;
+        const src = el || (list[i] && list[i].el);
         if (!src) return;
         zoomEl = document.createElement('div');
         zoomEl.className = 'cc-zoom';
@@ -2276,7 +2280,7 @@ void main(){
       handle = window.NewtonLanyard.mount(host, {
         people: list,
         bandImage: 'assets/lanyard-band.png',
-        onZoom: i => { if (i === null) closeZoom(); else openZoom(i); }
+        onZoom: (i, el) => { if (i === null) closeZoom(); else openZoom(i, el); }
       });
       page.__closeZoom = closeZoom;
       const closeBtn = page.querySelector('.cc-close');

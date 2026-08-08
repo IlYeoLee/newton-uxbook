@@ -10,11 +10,11 @@ function App({ people, onZoom, apiRef }) {
   const [flipped, setFlipped] = useState(false);
 
   // 카드를 누르면: 처음이면 확대, 확대 중 같은 카드면 앞뒤 뒤집기
-  const handleSelect = i => {
+  const handleSelect = (i, el) => {
     setSelected(prev => {
       if (prev === i) { setFlipped(f => !f); return prev; }
       setFlipped(false);
-      onZoom(i);
+      onZoom(i, el);
       return i;
     });
   };

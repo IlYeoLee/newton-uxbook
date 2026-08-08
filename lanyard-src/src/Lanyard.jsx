@@ -239,7 +239,7 @@ function Band({
             onPointerUp={e => {
               e.target.releasePointerCapture(e.pointerId);
               drag(false);
-              if (moved.current < 8) onSelect(index);   // 끌지 않았으면 탭
+              if (moved.current < 8) onSelect(index, cardEl);   // 끌지 않았으면 탭
             }}
             onPointerMove={e => {
               if (dragged) moved.current += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
