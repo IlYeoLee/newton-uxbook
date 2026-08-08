@@ -440,7 +440,9 @@
   .lany3d-host > div:not(canvas){pointer-events:none}
   .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;pointer-events:none}
   .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;
-    transform:none;transition:none;cursor:default;pointer-events:none;filter:none}
+    /* drei 의 CSS3D 행렬이 이 배치에서 X 를 뒤집는다. 여기서 되돌린다. */
+    transform:scaleX(-1);transition:none;cursor:default;pointer-events:none;
+    filter:drop-shadow(0 18px 26px rgba(0,0,0,.55))}
   /* 슬롯은 이미 3D 안에서 돌아가고 있다. 그 안에서 CSS 3D 플립을 또 쓰면
      backface-visibility 때문에 두 면 다 사라진다. 여기서는 3D 를 쓰지 않고
      앞뒷면을 투명도로 바꾼다. */
@@ -1675,13 +1677,15 @@
       screen.orientation.lock('portrait').catch(() => {});
   });
   let lastTap = 0;
-  const coverPage = document.querySelector('.page[data-page="cover"]');
-  coverPage.addEventListener('pointerup', () => {
+  // 표지 위는 좌·우 내비 영역이 100% 덮고 있어서, 표지 엘리먼트에 붙이면
+  // pointerup 이 거기까지 내려오지 않는다(전시용 전체화면이 이래서 죽었다).
+  // 문서에 캡처 단계로 붙여 무엇이 위에 있든 먼저 받는다.
+  document.addEventListener('pointerup', () => {
     if (ids[idx] !== 'cover') return;
     const now = Date.now();
     if (now - lastTap < 330){ goFullscreen(); lastTap = 0; }
     else lastTap = now;
-  });
+  }, true);
 
   // Mobile: guide the user with a snackbar hint on the cover; double-tap enters fullscreen.
   // (A page can't auto-fullscreen on load — browsers require a user gesture.)

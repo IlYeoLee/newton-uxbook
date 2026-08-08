@@ -311,15 +311,16 @@ function Band({
                 drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
             }}
           >
-            <mesh geometry={nodes.card.geometry} visible={false}>
+            <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
                 color="#101215"
+                depthWrite={false}
                 clearcoat={isMobile ? 0 : 0.35}
                 clearcoatRoughness={0.15}
                 roughness={0.62}
                 metalness={0.32}
                 transparent
-                opacity={dimmed ? 0.28 : 1}
+                opacity={0}
               />
             </mesh>
             <Html transform position={[0, 0.533, 0.0283]} rotation={[0, Math.PI, 0]} scale={0.09481} zIndexRange={[8, 0]}
