@@ -828,19 +828,20 @@
   .ar-item.is-center{cursor:zoom-in}
   .ar-foot{position:absolute;left:0;right:0;bottom:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
-  /* 묶음 바로가기 칩. 지금 묶음은 빨간 밑줄로 표시된다. */
-  .ar-chips{display:flex;justify-content:center;flex-wrap:wrap;gap:1.660cqw;
-    margin:0 0 1.245cqw;pointer-events:auto}
-  .ar-chip{border:none;background:none;padding:0 0 0.415cqw;cursor:pointer;
-    font-family:inherit;font-size:1.079cqw;font-weight:500;letter-spacing:-.01em;
-    color:rgba(255,255,255,.42);position:relative;overflow:hidden;
-    transition:color .25s ease}
-  .ar-chip:hover{color:rgba(255,255,255,.8)}
-  .ar-chip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0.166cqw;
-    background:var(--red);transform:scaleX(0);transform-origin:50% 50%;
-    transition:transform .32s cubic-bezier(.22,.7,.24,1)}
-  .ar-chip.on{color:#fff}
-  .ar-chip.on::after{transform:scaleX(1)}
+  /* 묶음 바로가기 — 탭 바처럼 보이지 않게. 번호를 단 얇은 목록이고,
+     지금 묶음만 커지면서 빨간 점이 앞에 붙는다. 나머지는 뒤로 물러난다. */
+  .ar-chips{display:flex;justify-content:center;align-items:baseline;flex-wrap:wrap;
+    gap:2.075cqw;margin:0 0 1.079cqw;pointer-events:auto}
+  .ar-chip{border:none;background:none;padding:0;cursor:pointer;font-family:inherit;
+    display:inline-flex;align-items:baseline;gap:0.415cqw;
+    font-size:0.913cqw;font-weight:500;letter-spacing:.04em;text-transform:uppercase;
+    color:rgba(255,255,255,.30);position:relative;overflow:visible;
+    transition:color .3s ease,font-size .3s cubic-bezier(.22,.7,.24,1),opacity .3s ease}
+  .ar-chip::before{content:attr(data-no);font-size:.72em;letter-spacing:0;
+    color:inherit;opacity:.55;font-variant-numeric:tabular-nums}
+  .ar-chip:hover{color:rgba(255,255,255,.72)}
+  .ar-chip.on{color:#fff;font-size:1.245cqw;font-weight:700;letter-spacing:-.01em}
+  .ar-chip.on::before{color:var(--red);opacity:1}
   .ar-title{margin:0;font-size:1.494cqw;font-weight:700;color:#fff;letter-spacing:-.02em}
   .ar-count{margin:0.5cqw 0 0;font-size:0.996cqw;font-weight:400;color:rgba(255,255,255,.55)}
   @media (max-width:640px){
@@ -851,7 +852,8 @@
     .ar-title{font-size:3.3vw}
     .ar-count{font-size:2.3vw}
     .ar-chips{gap:3.5vw;margin-bottom:3vw}
-    .ar-chip{font-size:2.6vw}
+    .ar-chip{font-size:2.2vw}
+    .ar-chip.on{font-size:3vw}
     .ar-foot{bottom:6vw}
   }
 
@@ -2112,8 +2114,13 @@ void main(){
 
     function layout(){
       const w = stage.clientWidth;
+      const L = items.length;
       items.forEach((el, i) => {
-        const d = i - cur;
+        // 고리 위의 최단 거리. 직선으로 재면 1번 장에서 왼쪽이 통째로 비어
+        // 무한 루프처럼 보이지 않는다.
+        let d = i - cur;
+        if (d > L / 2) d -= L;
+        if (d < -L / 2) d += L;
         const ad = Math.abs(d);
         // 5칸 밖은 아예 빼서 노드 수가 많아도 무겁지 않게 한다
         if (ad > 3){ el.style.visibility = 'hidden'; return; }

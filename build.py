@@ -669,8 +669,8 @@ def archive_page():
                       '<img src="assets/arch%02d.webp" alt="" loading="lazy" draggable="false">'
                       '</figure>') % (esc(ko), esc(en), n)
     chips, at = "", 0
-    for ko, en, cnt in ARCHIVE:
-        chips += ('<button class="ar-chip" type="button" data-at="%d">%s</button>' % (at, esc(en)))
+    for i, (ko, en, cnt) in enumerate(ARCHIVE):
+        chips += ('<button class="ar-chip" type="button" data-at="%d" data-no="%02d">%s</button>' % (at, i + 1, esc(en)))
         at += cnt
     return ('\n<div class="page archive-page" data-page="archive">\n'
             '  <div class="ar-stage" id="arStage"><div class="ar-track">' + items + '</div></div>\n'
