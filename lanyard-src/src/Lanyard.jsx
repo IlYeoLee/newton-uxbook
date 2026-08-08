@@ -251,7 +251,7 @@ function Band({
                 drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
             }}
           >
-            <mesh geometry={nodes.card.geometry}>
+            <mesh geometry={nodes.card.geometry} visible={false}>
               <meshPhysicalMaterial
                 color="#101215"
                 depthWrite={false}
@@ -262,6 +262,11 @@ function Band({
                 transparent
                 opacity={0}
               />
+            </mesh>
+            {/* 터치·드래그 판정면. 보이는 카드와 크기가 정확히 같다. */}
+            <mesh position={[0, 0.533, 0.03]}>
+              <planeGeometry args={[0.711, 1.0]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
             <Html transform position={[0, 0.533, 0.0283]} rotation={[0, Math.PI, 0]} scale={0.09481} zIndexRange={[8, 0]}
                   style={{ pointerEvents: "none" }}>
