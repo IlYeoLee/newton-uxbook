@@ -613,6 +613,33 @@ SNS_ICON = {
     "behance": '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-be"></use></svg>',
 }
 
+# 피그마 49:2014 pc_credit_tutor 실측. 라벨 / 역할 / 이름(한·영) 3열이다.
+CREDIT_BLOCKS = [
+    ("Tutor", [
+        ("Advisory Professor", "심유리", "Yuri Sim"),
+        ("ID Tutor", "주호영", "Hoyoung Joo"),
+        ("ID Tutor", "정수헌", "Soohun Jung"),
+        ("ID Tutor", "이문환", "Moonhwan Lee"),
+        ("VD Tutor", "워크스", "WORKS"),
+    ]),
+    ("Thanks to", [
+        ("Videographer", "양의열", "Euiyeol Yang"),
+        ("", "조수완", "Cho Suwan"),
+        ("", "이문환", "Moonhwan Lee"),
+    ]),
+]
+
+def credit_rows():
+    out = ""
+    for label, rows in CREDIT_BLOCKS:
+        items = "".join(
+            f'<div class="cr-row"><span class="cr-role">{esc(role)}</span>'
+            f'<span class="cr-name">{esc(ko)}</span>'
+            f'<span class="cr-en">{esc(en)}</span></div>'
+            for role, ko, en in rows)
+        out += f'<div class="cr-block"><p class="cr-label">{esc(label)}</p><div class="cr-list">{items}</div></div>'
+    return out
+
 def credits_page():
     cards = ""
     for i, p in enumerate(PEOPLE):
@@ -669,6 +696,7 @@ def credits_page():
   <div class="cc-dim"></div>
   <div class="lany-stage" id="lanyStage">{cards}
   </div>
+  <div class="cr-wrap">{credit_rows()}</div>
   <button class="lb-close cc-close" type="button" aria-label="닫기">
     <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>

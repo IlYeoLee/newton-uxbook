@@ -227,8 +227,14 @@
   /* 피그마 27:302 "텍스트+이미지 크게쓰고싶을 때" 실측.
      텍스트 좌우 여백 80(6.639cqw), 이미지 1185x449 · 좌우 10 · 하단 10 · 라운드 40. */
   .page.wide-page{flex-direction:column;padding:0}
-  /* 텍스트가 길어도 이미지를 밀어내지 않는다. 넘치면 텍스트 쪽이 줄어든다. */
-  .wide-text{flex:0 1 auto;min-height:0;overflow:hidden;padding:4.15cqw 6.639cqw 1.5cqw}
+  /* 피그마 27:302 실측(내비 65 제외, 본문 688 기준):
+     텍스트 블록 219(18.17cqw) · 이미지 영역 469 · 좌우 여백 80(6.639cqw),
+     kicker 는 블록 상단에서 50(4.15cqw), 타이틀/본문 행은 97(8.05cqw). */
+  .wide-text{flex:none;height:18.17cqw;padding:4.15cqw 6.639cqw 0;overflow:hidden}
+  /* BX 타이틀은 세로 페이지보다 길다. 264px 고정폭이면 두 줄이 부서진다. */
+  .wide-text .head-title{width:31cqw;font-size:2.24cqw;line-height:1.28}
+  .wide-text .head-body{font-size:1.16cqw;line-height:1.62}
+  .wide-text .head-block{margin:0}
   /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
      object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
   .wide-media{flex:none;aspect-ratio:1185/449;margin:0 0.830cqw 0.830cqw;
@@ -1176,6 +1182,7 @@
         </div>
       </div>
   </div>
+  <div class="cr-wrap"><div class="cr-block"><p class="cr-label">Tutor</p><div class="cr-list"><div class="cr-row"><span class="cr-role">Advisory Professor</span><span class="cr-name">심유리</span><span class="cr-en">Yuri Sim</span></div><div class="cr-row"><span class="cr-role">ID Tutor</span><span class="cr-name">주호영</span><span class="cr-en">Hoyoung Joo</span></div><div class="cr-row"><span class="cr-role">ID Tutor</span><span class="cr-name">정수헌</span><span class="cr-en">Soohun Jung</span></div><div class="cr-row"><span class="cr-role">ID Tutor</span><span class="cr-name">이문환</span><span class="cr-en">Moonhwan Lee</span></div><div class="cr-row"><span class="cr-role">VD Tutor</span><span class="cr-name">워크스</span><span class="cr-en">WORKS</span></div></div></div><div class="cr-block"><p class="cr-label">Thanks to</p><div class="cr-list"><div class="cr-row"><span class="cr-role">Videographer</span><span class="cr-name">양의열</span><span class="cr-en">Euiyeol Yang</span></div><div class="cr-row"><span class="cr-role"></span><span class="cr-name">조수완</span><span class="cr-en">Cho Suwan</span></div><div class="cr-row"><span class="cr-role"></span><span class="cr-name">이문환</span><span class="cr-en">Moonhwan Lee</span></div></div></div></div>
   <button class="lb-close cc-close" type="button" aria-label="닫기">
     <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
