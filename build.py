@@ -33,7 +33,7 @@ def en_attr(ko):
 # hero images have hi-res 16:9 mobile variants (desktop keeps its portrait crop)
 MOBILE_SRC = {
     "img_04": "m2", "img_06": "m4", "img_10": "m5", "img_18": "m6",
-    "img_22": "m7", "img_23": "m8", "img_37": "m11",
+    "img_22": "m7", "img_23": "m8", "img_14": "m9", "img_37": "m11",
 }
 
 def img_tag(name, cls="media"):
