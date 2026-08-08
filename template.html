@@ -228,7 +228,9 @@
      텍스트 좌우 여백 80(6.639cqw), 이미지 1185x449 · 좌우 10 · 하단 10 · 라운드 40. */
   .page.wide-page{flex-direction:column;padding:0}
   .wide-text{flex:none;padding:4.15cqw 6.639cqw 0}
-  .wide-media{flex:1 1 auto;min-height:0;margin:0 0.830cqw 0.830cqw;
+  /* 비율을 1185:449 로 고정한다. flex 로 늘리면 텍스트 길이에 따라 높이가 변해
+     object-fit:cover 가 이미지를 잘라낸다. 피그마도 이 비율로 작업하면 된다. */
+  .wide-media{flex:none;aspect-ratio:1185/449;margin:auto 0.830cqw 0.830cqw;
     border-radius:3.320cqw;overflow:hidden;position:relative}
   .wide-media img,.wide-media .fade-stack{width:100%;height:100%;object-fit:cover;
     border-radius:3.320cqw;display:block}
