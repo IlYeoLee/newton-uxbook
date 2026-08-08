@@ -472,12 +472,12 @@
   .cr-cols{display:grid;grid-template-columns:repeat(4,19.834cqw);column-gap:2.656cqw}
   .cr-col{display:flex;flex-direction:column;gap:0.830cqw}
   .cr-item{display:flex;align-items:flex-start}
-  .cr-role{flex:none;width:9.959cqw;margin:0;font-size:1.162cqw;font-weight:500;
-    line-height:1.5;color:rgba(255,255,255,.62)}
-  .cr-names{display:flex;flex-direction:column;gap:0.913cqw}
+  .cr-role{flex:none;width:9.959cqw;margin:0;font-size:1.162cqw;font-weight:400;
+    line-height:1.5;letter-spacing:.02em;color:rgba(255,255,255,.5)}
+  .cr-names{display:flex;flex-direction:column;gap:0.498cqw}
   .cr-name{display:flex;flex-direction:column;font-size:1.162cqw;line-height:1.5}
-  .cr-ko{font-weight:600;color:#fff}
-  .cr-en{font-weight:400;color:rgba(255,255,255,.62)}
+  .cr-ko{display:none}
+  .cr-en{font-weight:500;color:#fff;letter-spacing:.02em}
   /* perspective 는 자식에게 걸리는 속성이다. 스테이지에 두어야 카드의 호버 기울기가
      입체로 보이고, 카드/이너에 preserve-3d 를 이어줘야 앞뒤 플립이 산다. */
   .lany-stage{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;
@@ -1489,7 +1489,7 @@
   </div>
   <p class="cc-kicker">DESIGNED BY</p>
   <div class="credits-foot">
-    <div class="cr-wrap"><p class="cr-label">thanks to</p><div class="cr-cols"><div class="cr-col"><div class="cr-item"><p class="cr-role">Advisory<br>Professor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">심유리</span><span class="cr-en">Yuri Sim</span></div><div class="cr-name"><span class="cr-ko">이문환</span><span class="cr-en">Moonhwan Lee</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">ID Tutor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">주호영</span><span class="cr-en">Hoyoung Joo</span></div></div></div><div class="cr-item"><p class="cr-role">ID tutor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">정수헌</span><span class="cr-en">Soohun Jung</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">VD Tutor</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">워크스</span><span class="cr-en">WORKS</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">Videographer</p><div class="cr-names"><div class="cr-name"><span class="cr-ko">양의열</span><span class="cr-en">Euiyeol Yang</span></div><div class="cr-name"><span class="cr-ko">조수완</span><span class="cr-en">Cho Suwan</span></div><div class="cr-name"><span class="cr-ko">이문환</span><span class="cr-en">Moonhwan Lee</span></div></div></div></div></div></div>
+    <div class="cr-wrap"><p class="cr-label">THANKS TO</p><div class="cr-cols"><div class="cr-col"><div class="cr-item"><p class="cr-role">ADVISORY<br>PROFESSOR</p><div class="cr-names"><div class="cr-name"><span class="cr-en">YURI SIM</span></div><div class="cr-name"><span class="cr-en">MOONHWAN LEE</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">ID TUTOR</p><div class="cr-names"><div class="cr-name"><span class="cr-en">HOYOUNG JOO</span></div></div></div><div class="cr-item"><p class="cr-role">ID TUTOR</p><div class="cr-names"><div class="cr-name"><span class="cr-en">SOOHUN JUNG</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">VD TUTOR</p><div class="cr-names"><div class="cr-name"><span class="cr-en">WORKS</span></div></div></div></div><div class="cr-col"><div class="cr-item"><p class="cr-role">VIDEOGRAPHER</p><div class="cr-names"><div class="cr-name"><span class="cr-en">EUIYEOL YANG</span></div><div class="cr-name"><span class="cr-en">CHO SUWAN</span></div><div class="cr-name"><span class="cr-en">MOONHWAN LEE</span></div></div></div></div></div></div>
   </div>
   <button class="lb-close cc-close" type="button" aria-label="닫기">
     <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -1509,7 +1509,7 @@
     </div>
   </div>
 
-  <button class="fs-hint" id="fsHint" type="button" data-en="Double-tap for fullscreen">더블탭하면 전체화면으로 볼 수 있어요</button>
+  <button class="fs-hint" id="fsHint" type="button" data-en="Tap for fullscreen">화면을 누르면 전체화면으로 볼 수 있어요</button>
 
   <button class="nav-zone nz-left" id="nzLeft" aria-label="이전 페이지"></button>
   <button class="nav-zone nz-right" id="nzRight" aria-label="다음 페이지"></button>
@@ -2148,11 +2148,15 @@
   // 표지 위는 좌·우 내비 영역이 100% 덮고 있어서, 표지 엘리먼트에 붙이면
   // pointerup 이 거기까지 내려오지 않는다(전시용 전체화면이 이래서 죽었다).
   // 문서에 캡처 단계로 붙여 무엇이 위에 있든 먼저 받는다.
+  // 표지 전체가 페이지 넘김 영역이 된 뒤로 더블탭이 성립하지 않는다 — 첫 탭에
+  // 이미 다음 장으로 넘어가기 때문이다. 전시용이므로 표지에서 처음 누르는
+  // 그 한 번으로 바로 전체화면에 들어간다(브라우저가 요구하는 사용자 제스처를
+  // 그 탭이 만족한다). 이후에는 다시 시도하지 않는다.
+  let fsTried = false;
   document.addEventListener('pointerup', () => {
-    if (ids[idx] !== 'cover') return;
-    const now = Date.now();
-    if (now - lastTap < 330){ goFullscreen(); lastTap = 0; }
-    else lastTap = now;
+    if (ids[idx] !== 'cover' || fsTried) return;
+    fsTried = true;
+    goFullscreen();
   }, true);
 
   // Mobile: guide the user with a snackbar hint on the cover; double-tap enters fullscreen.

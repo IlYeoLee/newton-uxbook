@@ -1133,7 +1133,7 @@
     </div>
   </div>
 
-  <button class="fs-hint" id="fsHint" type="button" data-en="Double-tap for fullscreen">더블탭하면 전체화면으로 볼 수 있어요</button>
+  <button class="fs-hint" id="fsHint" type="button" data-en="Tap for fullscreen">화면을 누르면 전체화면으로 볼 수 있어요</button>
 
   <button class="nav-zone nz-left" id="nzLeft" aria-label="이전 페이지"></button>
   <button class="nav-zone nz-right" id="nzRight" aria-label="다음 페이지"></button>
@@ -1772,11 +1772,15 @@
   // 표지 위는 좌·우 내비 영역이 100% 덮고 있어서, 표지 엘리먼트에 붙이면
   // pointerup 이 거기까지 내려오지 않는다(전시용 전체화면이 이래서 죽었다).
   // 문서에 캡처 단계로 붙여 무엇이 위에 있든 먼저 받는다.
+  // 표지 전체가 페이지 넘김 영역이 된 뒤로 더블탭이 성립하지 않는다 — 첫 탭에
+  // 이미 다음 장으로 넘어가기 때문이다. 전시용이므로 표지에서 처음 누르는
+  // 그 한 번으로 바로 전체화면에 들어간다(브라우저가 요구하는 사용자 제스처를
+  // 그 탭이 만족한다). 이후에는 다시 시도하지 않는다.
+  let fsTried = false;
   document.addEventListener('pointerup', () => {
-    if (ids[idx] !== 'cover') return;
-    const now = Date.now();
-    if (now - lastTap < 330){ goFullscreen(); lastTap = 0; }
-    else lastTap = now;
+    if (ids[idx] !== 'cover' || fsTried) return;
+    fsTried = true;
+    goFullscreen();
   }, true);
 
   // Mobile: guide the user with a snackbar hint on the cover; double-tap enters fullscreen.
