@@ -2557,7 +2557,7 @@ void main(){
     // 끌지 않고 뗀 경우만 "탭"으로 보고 처리한다.
     // 포인터를 캡처하면 pointerup 의 target 이 스테이지로 바뀐다. 그래서 누른
     // 카드를 알 수 없어 확대가 안 열렸다. 누를 때의 대상을 기억해 둔다.
-    let sx = null, dragged = false, downTarget = null;
+    let sx = null, dragged = false, downTarget = null, lastStep = 0;
     stage.addEventListener('pointerdown', e => {
       sx = e.clientX; dragged = false;
       downTarget = e.target.closest && e.target.closest('.ar-item');
@@ -2567,11 +2567,19 @@ void main(){
     stage.addEventListener('pointermove', e => {
       if (sx === null) return;
       const d = e.clientX - sx;
-      // 끈 만큼 여러 칸이 한 번에 넘어간다. 한 칸당 6% 는 태블릿에서 너무 둔했다.
-      const step = stage.clientWidth * 0.035;
+      // 한 번에 여러 칸이 넘어가면 "다다다닥" 하고 지나쳐 원하는 장에 못 세운다.
+      // 한 제스처 이벤트당 한 칸만, 그리고 최소 간격을 둬서 연발을 막는다.
+      // 약하게 툭 하면 한 장, 세게 휘두르면 속도에 비례해 여러 장.
+      const step = stage.clientWidth * 0.05;
+      const now = Date.now();
       if (Math.abs(d) > step){
-        const k = Math.trunc(d / step);
-        go(cur - k); sx += k * step; dragged = true;
+        const dt = Math.max(1, now - (lastStep || now));
+        const v = Math.abs(d) / dt;                       // px/ms
+        const k = v > 1.6 ? Math.min(4, Math.round(v)) : 1;
+        if (now - lastStep > (k > 1 ? 60 : 120)){
+          go(cur - Math.sign(d) * k);
+          sx = e.clientX; lastStep = now; dragged = true;
+        }
       }
     });
     stage.addEventListener('pointerup', e => {
