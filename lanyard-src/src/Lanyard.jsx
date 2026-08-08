@@ -4,7 +4,7 @@
 //   1) Band 가 anchor 를 받아 한 Canvas 안에 다섯 장이 나란히 매달린다
 //   2) 카드를 누르면(끌지 않고) 확대 — 카메라 앞으로 kinematic 이동
 //   3) 확대 중 한 번 더 누르면 Y축 180° 회전으로 뒷면
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer, Html } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
@@ -64,6 +64,7 @@ export default function Lanyard({
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
         <ambientLight intensity={Math.PI} />
+        <Suspense fallback={null}>
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
           {people.map((p, i) => (
             <Band
@@ -85,6 +86,7 @@ export default function Lanyard({
             />
           ))}
         </Physics>
+        </Suspense>
         <Environment blur={0.75}>
           <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
           <Lightformer intensity={3} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
@@ -320,7 +322,7 @@ function Band({
                 opacity={dimmed ? 0.28 : 1}
               />
             </mesh>
-            <Html transform position={[0, 0.533, 0.0283]} scale={0.09481} zIndexRange={[8, 0]}
+            <Html transform position={[0, 0.533, 0.0283]} rotation={[0, Math.PI, 0]} scale={0.09481} zIndexRange={[8, 0]}
                   style={{ pointerEvents: "none" }}>
               <div className="cc3d-slot" ref={slot} />
             </Html>

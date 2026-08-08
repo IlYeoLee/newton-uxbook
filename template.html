@@ -435,7 +435,10 @@
   .lany3d-host canvas{display:block;touch-action:none}
   /* 3D 카드 위에 얹히는 DOM 판. 기존 .cc 를 그대로 복제해 넣으므로 지금 CSS 가
      그대로 먹는다 — 사진·블롭·이름 마스킹·칩·뒷면이 전부 코드로 남는다. */
-  .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px}
+  /* drei 가 Html 바깥에 만드는 래퍼들까지 포인터를 끊어야, 카드를 눌렀을 때
+     옆 카드가 대신 잡히지 않는다. 클릭은 캔버스(메시)가 받아야 한다. */
+  .lany3d-host > div:not(canvas){pointer-events:none}
+  .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;pointer-events:none}
   .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;
     transform:none;transition:none;cursor:default;pointer-events:none;filter:none}
   .cc3d-slot .cc-inner{transition:transform .55s cubic-bezier(.22,.7,.24,1)}
