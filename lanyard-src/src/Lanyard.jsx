@@ -311,7 +311,7 @@ function Band({
                 drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
             }}
           >
-            <mesh geometry={nodes.card.geometry}>
+            <mesh geometry={nodes.card.geometry} visible={false}>
               <meshPhysicalMaterial
                 color="#101215"
                 clearcoat={isMobile ? 0 : 0.35}
