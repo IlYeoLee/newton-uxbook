@@ -652,13 +652,16 @@
     border-left:1px solid #ececec;border-right:1px solid #ececec;
   }
   .lb-close{
-    width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;
+    /* 피그마 27:103 실측: 48x40 알약, 아이콘 16 (1205 기준). 고정 px 로 두면
+       책이 축소될수록 상대적으로 커진다 → cqw 로 비율 고정. */
+    width:3.98cqw;height:3.32cqw;min-width:34px;min-height:28px;
+    border-radius:999px;border:none;cursor:pointer;
     background:#fff;color:#000;display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 20px rgba(0,0,0,.25);
     position:relative;overflow:hidden;
   }
   .lb-close:hover{background:#f2f2f2}
-  .lb-close svg{width:20px;height:20px}
+  .lb-close svg{width:1.33cqw;height:1.33cqw;min-width:12px;min-height:12px}
 
   /* ---- mobile: book = full portrait viewport; flow (nav + arrows) kept, layout reflowed to one column.
      The book fills 100vw so 1cqw≈1vw (~2.5x smaller than tablet) → text bumped to vw. ---- */
