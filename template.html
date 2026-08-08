@@ -222,9 +222,28 @@
   .page-media .m-only{display:none}   /* mobile-only single image (sec-02); shown via the mobile media query */
   /* sec-02: seamless track slide (1→2→3→4→loop), no white gap between frames */
   .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
-  .fade-track{display:flex;width:500%;height:100%;animation:slideTrack 14s cubic-bezier(.7,0,.3,1) infinite}
-  .fade-track img{width:20%;height:100%;object-fit:cover;flex:none}
-  @keyframes slideTrack{
+  .fade-track{display:flex;height:100%}
+  .fade-track img{height:100%;object-fit:cover;flex:none}
+  /* data-n = 슬라이드 수(마지막 장 = 첫 장이라 이미지 수 + 1). 장당 2.1s 정지 + 0.7s 이동으로
+     장수가 달라도 넘어가는 속도는 같다: 3장 8.4s, 4장 11.2s, 5장 14s. */
+  .fade-track[data-n="3"]{width:300%;animation:slide3 8.4s cubic-bezier(.7,0,.3,1) infinite}
+  .fade-track[data-n="3"] img{width:33.3333%}
+  .fade-track[data-n="4"]{width:400%;animation:slide4 11.2s cubic-bezier(.7,0,.3,1) infinite}
+  .fade-track[data-n="4"] img{width:25%}
+  .fade-track[data-n="5"]{width:500%;animation:slide5 14s cubic-bezier(.7,0,.3,1) infinite}
+  .fade-track[data-n="5"] img{width:20%}
+  @keyframes slide3{
+    0%,25%{transform:translateX(0)}
+    33.333%,58.333%{transform:translateX(-33.3333%)}
+    66.667%,100%{transform:translateX(-66.6667%)}
+  }
+  @keyframes slide4{
+    0%,18.75%{transform:translateX(0)}
+    25%,43.75%{transform:translateX(-25%)}
+    50%,68.75%{transform:translateX(-50%)}
+    75%,100%{transform:translateX(-75%)}
+  }
+  @keyframes slide5{
     0%,15%{transform:translateX(0)}
     20%,35%{transform:translateX(-20%)}
     40%,55%{transform:translateX(-40%)}
@@ -315,6 +334,32 @@
 
   figure.figure{margin:1.660cqw 0;cursor:zoom-in;line-height:0}
   figure.figure img{width:100%;height:auto;display:block;border-radius:1.660cqw}
+
+  /* ---- 시나리오 영상 ----
+     재생은 스크롤이 정한다(영상 하단이 대지 하단에 닿는 순간). 소리는 기본 꺼짐이고
+     사운드 버튼을 눌러야 난다. 바는 평소 숨어 있다가 hover/focus 때만 나온다. */
+  figure.figure.v-figure{position:relative;cursor:default}
+  .v-figure video{width:100%;height:auto;display:block;border-radius:1.660cqw;background:#000}
+  .v-bar{
+    position:absolute;left:1.328cqw;right:1.328cqw;bottom:1.328cqw;
+    display:flex;align-items:center;gap:0.83cqw;padding:0.5cqw 0.83cqw;border-radius:999px;
+    background:rgba(9,18,18,.42);backdrop-filter:blur(16px) saturate(1.5);-webkit-backdrop-filter:blur(16px) saturate(1.5);
+    opacity:0;transform:translateY(0.5cqw);transition:opacity .22s ease,transform .22s ease;pointer-events:none;
+  }
+  .v-figure:hover .v-bar,.v-figure:focus-within .v-bar{opacity:1;transform:none;pointer-events:auto}
+  .v-bar button{
+    flex:none;width:2.2cqw;height:2.2cqw;min-width:28px;min-height:28px;display:grid;place-items:center;
+    border:0;padding:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;transition:background .15s ease
+  }
+  .v-bar button:hover{background:rgba(255,255,255,.18)}
+  .v-bar button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .v-bar svg{width:62%;height:62%;fill:currentColor;pointer-events:none}
+  .v-seek{position:relative;flex:1;height:0.33cqw;min-height:4px;border-radius:999px;background:rgba(255,255,255,.3);cursor:pointer}
+  .v-seek::after{content:"";position:absolute;left:0;right:0;top:-0.8cqw;bottom:-0.8cqw}  /* 클릭 판정만 넓힌다 */
+  .v-seek:focus-visible{outline:2px solid var(--red);outline-offset:4px}
+  .v-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:var(--red);display:block}
+  .v-time{flex:none;color:#fff;font-size:0.93cqw;font-variant-numeric:tabular-nums}
+  .v-sound[aria-pressed="true"]{color:var(--red)}
 
   blockquote.quote{
     font-size:1.826cqw;font-weight:700;color:var(--red);
@@ -562,6 +607,13 @@
 
     /* explicit bottom arrows now handle paging → drop side tap-strips so they can't hijack content taps */
     .nav-zone{display:none}
+
+    /* 터치에는 hover 가 없다 → 영상 바를 항상 띄운다 */
+    .v-bar{opacity:1;transform:none;pointer-events:auto;left:3vw;right:3vw;bottom:3vw;gap:3vw;padding:2vw 3vw}
+    .v-bar button{width:9vw;height:9vw}
+    .v-seek{height:1.2vw}
+    .v-time{font-size:3.2vw}
+    .page-content figure.figure.v-figure video{border-radius:5vw;aspect-ratio:16/9;object-fit:cover}
   }
 
   /* fullscreen hint snackbar (mobile cover only; toggled by JS) */
@@ -581,6 +633,16 @@
 </style>
 </head>
 <body>
+
+<!-- 시나리오 영상 컨트롤 아이콘 -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+  <symbol id="ic-play" viewBox="0 0 24 24"><path d="M8 5.2v13.6L19 12z"/></symbol>
+  <symbol id="ic-pause" viewBox="0 0 24 24"><path d="M7 5h3.1v14H7zm6.9 0H17v14h-3.1z"/></symbol>
+  <symbol id="ic-mute" viewBox="0 0 24 24"><path d="M4 9.3h3.6L12 5.4v13.2L7.6 14.7H4z"/>
+    <path d="M16.4 9.6l4.2 4.8m0-4.8l-4.2 4.8" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="ic-sound" viewBox="0 0 24 24"><path d="M4 9.3h3.6L12 5.4v13.2L7.6 14.7H4z"/>
+    <path d="M15.6 9.4a3.8 3.8 0 010 5.2M18.2 7.1a7.4 7.4 0 010 9.8" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></symbol>
+</defs></svg>
 
 <div class="cursor" id="cursor" aria-hidden="true"></div>
 
@@ -714,6 +776,82 @@
     updateChrome();
     staggerIn(pages[i]);   // slide-in plays going forward AND backward
   }
+
+  // ---- 시나리오 영상: 스크롤 자동재생 + 재생바/사운드 ----
+  (function scenarioVideo(){
+    const figs = [...document.querySelectorAll('.v-figure')];
+    if (!figs.length) return;
+    const fmt = s => { s = Math.max(0, s | 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+    const setIcon = (btn, id) => btn.querySelector('use').setAttribute('href', '#' + id);
+
+    figs.forEach(fig => {
+      const v = fig.querySelector('video');
+      const play = fig.querySelector('.v-play');
+      const seek = fig.querySelector('.v-seek');
+      const fill = fig.querySelector('.v-fill');
+      const time = fig.querySelector('.v-time');
+      const snd  = fig.querySelector('.v-sound');
+
+      const sync = () => {
+        setIcon(play, v.paused ? 'ic-play' : 'ic-pause');
+        play.setAttribute('aria-pressed', String(!v.paused));
+        play.setAttribute('aria-label', v.paused ? '재생' : '일시정지');
+      };
+      v.addEventListener('play', sync);
+      v.addEventListener('pause', sync);
+      // 사용자가 직접 멈춘 영상은 다시 스크롤해도 자동으로 재생하지 않는다
+      play.addEventListener('click', () => {
+        if (v.paused) { v.dataset.userPaused = '0'; v.play().catch(() => {}); }
+        else { v.dataset.userPaused = '1'; v.pause(); }
+      });
+
+      v.addEventListener('timeupdate', () => {
+        const p = v.duration ? v.currentTime / v.duration : 0;
+        fill.style.width = (p * 100) + '%';
+        seek.setAttribute('aria-valuenow', Math.round(p * 100));
+        time.textContent = fmt(v.currentTime);
+      });
+
+      const scrub = e => {
+        const r = seek.getBoundingClientRect();
+        if (v.duration) v.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * v.duration;
+      };
+      seek.addEventListener('pointerdown', e => { seek.setPointerCapture(e.pointerId); scrub(e); });
+      seek.addEventListener('pointermove', e => { if (seek.hasPointerCapture(e.pointerId)) scrub(e); });
+      seek.addEventListener('keydown', e => {
+        if (!v.duration) return;
+        if (e.key === 'ArrowRight') v.currentTime = Math.min(v.duration, v.currentTime + 5);
+        else if (e.key === 'ArrowLeft') v.currentTime = Math.max(0, v.currentTime - 5);
+        else return;
+        e.preventDefault();
+      });
+
+      if (snd) snd.addEventListener('click', () => {
+        v.muted = !v.muted;
+        snd.setAttribute('aria-pressed', String(!v.muted));
+        snd.setAttribute('aria-label', v.muted ? '소리 켜기' : '소리 끄기');
+        setIcon(snd, v.muted ? 'ic-mute' : 'ic-sound');
+      });
+      sync();
+    });
+
+    // 자동재생 시점 = 영상 하단이 대지(스크롤 영역) 하단에 닿는 순간.
+    // 영상이 대지보다 크면 그 순간이 오지 않으므로 60% 들어왔을 때로 대신한다.
+    const root = figs[0].closest('.page-scroll') || null;
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        const v = e.target.querySelector('video');
+        if (!v) continue;
+        const rb = e.rootBounds, b = e.boundingClientRect;
+        if (!e.isIntersecting) { v.pause(); continue; }
+        if (v.dataset.userPaused === '1') continue;
+        const reached = rb && (b.bottom <= rb.bottom + 1 ||
+                               (b.height > rb.height && e.intersectionRatio >= 0.6));
+        if (reached) v.play().catch(() => {});
+      }
+    }, { root, threshold: [0, 0.2, 0.4, 0.6, 0.8, 0.95, 1] });
+    figs.forEach(f => io.observe(f));
+  })();
 
   // ripple on the round chevron buttons
   function addRipple(e){

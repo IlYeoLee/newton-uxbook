@@ -154,6 +154,64 @@ def render_callout(node):
 def render_table_node():
     return render_table()
 
+# ---- 시나리오 페이지 미디어 ----
+# 번호는 위에서부터 "타이틀+본문" 그룹을 센 순번이다(페이지 헤더가 1번). 한 그룹에
+# 영상/이미지가 둘 이상 올 수 있어 리스트로 둔다. 원본 구조의 이미지는 그룹째 갈린다.
+SCENARIO_MEDIA = {
+    1: ["sc1.mp4", "sc1-2.png"],   # 마음이 먼저 움직이는 순간
+    2: ["sc2.mp4"],                # 처음의 한 걸음은 집에서도 충분하니까
+    3: ["sc3.mp4"],                # 한번 움직인 마음은 바깥으로 이어진다
+    4: ["sc4.mp4"],                # 혼자 익힌 리듬이 함께 움직일 자신감으로
+    5: ["sc5.mp4"],                # 혼자 익힌 설렘이 함께 하는 재미가 되어
+    6: ["sc6.mp4"],                # 오늘의 두근거림을 다음 도전으로
+}
+SILENT = {"sc5.mp4"}   # 오디오 트랙이 없는 영상 → 사운드 버튼을 달지 않는다
+
+def video_tag(src):
+    """자동재생은 스크롤 위치가 정하고(스크립트), 소리는 사용자가 켤 때만 난다."""
+    stem = src.rsplit(".", 1)[0]
+    sound = "" if src in SILENT else (
+        '<button class="v-sound" type="button" aria-pressed="false" aria-label="소리 켜기">'
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-mute"></use></svg></button>')
+    return (
+        f'<figure class="figure v-figure">'
+        f'<video src="assets/{src}" poster="assets/{stem}-poster.jpg" '
+        f'playsinline muted loop preload="metadata"></video>'
+        f'<div class="v-bar">'
+        f'<button class="v-play" type="button" aria-pressed="false" aria-label="재생">'
+        f'<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-play"></use></svg></button>'
+        f'<div class="v-seek" role="slider" tabindex="0" aria-label="재생 위치" '
+        f'aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i class="v-fill"></i></div>'
+        f'<span class="v-time">0:00</span>{sound}'
+        f'</div></figure>')
+
+def render_media(files):
+    out = []
+    for f in files:
+        if f.endswith(".mp4"):
+            out.append(video_tag(f))
+        else:
+            out.append(f'<figure class="figure"><img src="assets/{f}" alt="" loading="lazy"></figure>')
+    return "".join(out)
+
+def apply_scenario_media(items, media):
+    """타이틀(H4/H3)로 그룹을 끊고, 각 그룹의 원본 이미지를 매핑된 미디어로 갈아끼운다.
+    미디어는 그 그룹의 첫 이미지 자리에 들어가고, 같은 그룹의 나머지 이미지는 버린다."""
+    out, group, placed = [], 1, set()
+    for n in items:
+        if n["t"] in ("H4", "H3"):
+            group += 1
+        if n["t"] == "IMG" and group in media:
+            if group not in placed:
+                placed.add(group)
+                out.append({"t": "MEDIA", "files": media[group]})
+            continue
+        out.append(n)
+    missing = set(media) - placed - {1}
+    if missing:
+        raise ValueError(f"시나리오 그룹 {sorted(missing)} 에 이미지 자리가 없다")
+    return out
+
 def render_node(n):
     t = n["t"]
     if t == "P":
@@ -164,6 +222,8 @@ def render_node(n):
         return render_h4(n.get("x", ""))
     if t == "IMG":
         return f'<figure class="figure">{img_tag(n["src"])}</figure>'
+    if t == "MEDIA":
+        return render_media(n["files"])
     if t == "TOGGLE":
         return render_toggle(n)
     if t == "CALLOUT":
@@ -433,6 +493,16 @@ def render_vertical(page_id, kicker, title_text, body_items, hero, scroll_hint=F
 
 KICKER_OVERRIDE = {"03": "For Those Who Turn Trends Into Play", "08": "(1) A Spark to Move"}
 
+# 다중 이미지 페이지 → 데스크톱은 슬라이딩 캐러셀, 모바일은 16:9 합성 한 장.
+# 피그마 "웹" 섹션의 프레임 이름이 그대로 페이지 번호이고, N-1/N-2 가 추가 컷이다.
+# (섹션 번호, [이미지들], 모바일 합성본) — 첫 장은 그 섹션의 원래 히어로다.
+CAROUSEL = {
+    "02": (["fade1", "fade2", "fade3", "fade4"], "m3"),          # 피그마 3-1..3-4
+    "05": (["img_18", "img_18-2", "img_18-3"], "m6"),            # 피그마 6, 6-1, 6-2
+    "06": (["img_22", "img_22-2"], "m7"),                        # 피그마 7, 7-1  (스테이션)
+    "07": (["img_23", "img_23-2"], "m8"),                        # 피그마 8, 8-1  (프로젝션 유닛)
+}
+
 def render_page(marker, seg):
     num, kicker = marker.split(" ", 1)
     kicker = KICKER_OVERRIDE.get(num, kicker)
@@ -446,17 +516,18 @@ def render_page(marker, seg):
         ci = next((i for i, n in enumerate(rest2) if n.get("t") == "CALLOUT"), None)
         if hero is not None:
             rest2.insert(ci + 1 if ci is not None else 0, hero)
+        rest2 = apply_scenario_media(rest2, SCENARIO_MEDIA)
         return render_vertical(f"sec-{num}", kicker, h4["x"] if h4 else "", rest2, None, scroll_hint=True)
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
-    if num == "02":
-        # sec-02: 4-image cross-fade loop (2s each), 3-1..3-4
-        seq = [1, 2, 3, 4, 1]  # last = first, for a seamless loop with no white gap
-        # desktop: carousel; mobile: single hi-res 16:9 composite (m3)
-        media_html = ('<div class="fade-stack"><div class="fade-track">'
-                      + "".join(f'<img src="assets/fade{i}.png" alt="" loading="lazy">' for i in seq)
-                      + '</div></div>'
-                      + '<img class="media m-only" src="assets/m3.png" alt="" loading="lazy">')
+    car = CAROUSEL.get(num)
+    if car:
+        names, mobile = car
+        seq = names + names[:1]   # last = first, for a seamless loop with no white gap
+        # desktop: sliding carousel; mobile: single hi-res 16:9 composite
+        slides = "".join(f'<img src="assets/{n}{EXT.get(n, ".png")}" alt="" loading="lazy">' for n in seq)
+        media_html = (f'<div class="fade-stack"><div class="fade-track" data-n="{len(seq)}">{slides}</div></div>'
+                      f'<img class="media m-only" src="assets/{mobile}.png" alt="" loading="lazy">')
     else:
         media_html = img_tag(hero["src"]) if hero else ""
     content_html = render_children(rest)
