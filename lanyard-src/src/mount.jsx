@@ -21,11 +21,12 @@ function App({ people, onZoom, apiRef }) {
   const close = () => { setSelected(null); setFlipped(false); onZoom(null); };
   apiRef.close = close;
 
+  // 중력은 Lanyard 의 기본값(-40)을 그대로 쓴다. 여기서 -18 로 덮고 있던 탓에
+  // 날린 카드가 물속처럼 내려왔고, 기본값만 고쳐서는 아무것도 안 바뀌었다.
   return (
     <Lanyard
       people={people}
       position={[0, 0, 24]}
-      gravity={[0, -18, 0]}
       imageFit="cover"
       lanyardImage={people.bandImage}
       lanyardWidth={1}

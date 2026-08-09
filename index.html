@@ -536,8 +536,11 @@
   /* 터치를 받는 건 이 호스트다. touch-action 이 없으면 태블릿이 손 닿는 순간
      기본 제스처를 시작해 pointercancel 을 쏘고, 가벼운 탭이 드래그로 처리된다
      (캔버스에만 걸어둬서 소용이 없었다). */
-  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto;touch-action:none;
+  /* 호스트는 이벤트를 받지 않는다. 캔버스가 직접 받아 3D 판정면으로 내려보낸다 —
+     그래야 보이는 카드 그대로 맞는다. touch-action 은 캔버스에 걸어야 한다. */
+  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:none;
     opacity:0;transition:opacity .45s ease}
+  .lany3d-host canvas{pointer-events:auto;touch-action:none}
   .lany3d-host.ready{opacity:1}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
   .lany3d-host .lanyard-wrapper{height:100%}
@@ -2926,7 +2929,6 @@ void main(){
       function openZoom(i, el){
         closeZoom();
         lastOpen = Date.now();
-        dbg('OPEN  확대 열림');
         const src = el || (list[i] && list[i].el);
         if (!src) return;
         zoomEl = document.createElement('div');
@@ -2962,157 +2964,16 @@ void main(){
         }));
       }
 
-      // 3D 레이캐스트는 보이는 판과 계속 어긋났다(어느 카드를 눌러도 첫 사람만
-      // 열리고 첫 카드만 움직였다). 그래서 판정을 눈에 보이는 DOM 판으로 옮긴다.
-      // 판이 곧 카드이므로 어긋날 수가 없다.
-      // 캔버스는 React 가 마운트한 뒤에 생긴다. 여기서 미리 잡으면 null 이고,
-      // ndc() 가 그 자리에서 터져 드래그가 시작조차 못 했다. 쓸 때 찾는다.
-      const getCanvas = () => host.querySelector('canvas');
-      let downSlot = null, moved = 0, sx = 0, sy = 0, ox = 0, oy = 0, downAt = 0, isTouch = false;
-
-      // 끌기: 캔버스로 이벤트를 흘려보내면 결국 레이캐스트를 타서 첫 카드로
-      // 몰린다. 판마다 자기 카드의 물리를 직접 미는 API(__band)를 들고 있으므로
-      // 그걸 부른다. 좌표는 캔버스 기준 NDC(-1~1)로 바꿔 넘긴다.
-      const ndc = e => {
-        const cv = getCanvas();
-        if (!cv) return [0, 0];
-        const r = cv.getBoundingClientRect();
-        return [((e.clientX - r.left) / r.width) * 2 - 1,
-                -((e.clientY - r.top) / r.height) * 2 + 1];
-      };
-      const band = slot => slot && slot.__band;
-
-      // 판의 히트박스가 보이는 카드와 어긋나 모서리만 먹었다. 호스트가 전부 받고
-      // 화면상 사각형으로 어느 카드인지 직접 고른다. 겹치면 앞쪽(뒤에 그린 것)을
-      // 고른다 — 그게 눈에 보이는 카드다.
-      const pick = e => {
-        // drei 가 Html 을 어디에 붙이든 찾도록 문서 전체에서 고른다.
-        // 재는 것은 판(.cc3d-slot)이 아니라 그 안의 카드(.cc)다. 판은 줄이 매달린
-        // 자리에 붙어 있고 카드는 거기서 아래로 늘어져 있어서, 판을 재면 카드
-        // 위쪽만 눌린다 — 태블릿에서 카드 한복판을 눌러도 안 먹던 게 이것이다.
-        // 손가락은 마우스만큼 정확하지 않으니 가장자리를 조금 넓혀 잡는다.
-        const pad = 10;
-        const slots = [...document.querySelectorAll('.cc3d-slot')];
-        const boxes = slots.map(s => (s.querySelector('.cc') || s).getBoundingClientRect())
-                           .map((r, i) => ({ r, s: slots[i] }))
-                           .filter(o => o.r.width);
-        for (let i = boxes.length - 1; i >= 0; i--) {
-          const r = boxes[i].r;
-          if (e.clientX >= r.left - pad && e.clientX <= r.right + pad &&
-              e.clientY >= r.top - pad && e.clientY <= r.bottom + pad) return boxes[i].s;
-        }
-        // 사각형에 안 걸리면 가로로 가장 가까운 카드를 연다.
-        // 판(drei 의 Html)은 보이는 카드보다 짧게 잡힌다 — 기기에서 재보니 판은
-        // 세로 218~497 인데 카드 한복판을 누르면 662 가 찍혔다. 카드가 줄에 매달려
-        // 흔들리고 원근까지 걸려 있어 사각형을 맞추려 들면 계속 어긋난다.
-        // 다섯 장이 한 줄로 서 있으니 가로 위치로 고르는 게 사람이 기대하는 대로다.
-        let best = null, bestD = Infinity;
-        for (const { r, s } of boxes) {
-          const d = Math.abs(e.clientX - (r.left + r.right) / 2);
-          if (d < bestD) { bestD = d; best = s; }
-        }
-        return best;
-      };
-
-      // 직전에 잡았던 카드를 반드시 놓고 시작한다. 확대 중이라고 그냥 빠져나가면
-      // downSlot 이 남아 있어서, 다음 마우스 움직임이 전부 그 카드로 가 마우스에
-      // 달라붙는다.
-      // 마지막 카드만 놓으면, 앞서 잡힌 채로 남은 카드가 영영 마우스를 따라온다
-      // (두 장이 동시에 붙는 증상). 놓을 때는 전부 놓는다 — 여러 번 불러도 안전하다.
-      const release = () => {
-        document.querySelectorAll('.cc3d-slot').forEach(s => {
-          if (s.__band) s.__band.end();
-        });
-        downSlot = null; moved = 0;
-      };
-      // 진단판. ?dbg=1 로 열면 기기에서 어떤 이벤트가 오는지 화면에 찍힌다.
-      // 태블릿은 개발자도구를 붙이기 번거로워서, 눈으로 볼 수 있게 남겨 둔다.
-      const DBG = location.search.includes('dbg=1');
-      let dbgBox = null;
-      const dbg = msg => {
-        if (!DBG) return;
-        if (!dbgBox) {
-          dbgBox = document.createElement('pre');
-          dbgBox.style.cssText = 'position:fixed;left:0;right:0;bottom:0;max-height:38vh;'
-            + 'overflow:auto;z-index:99999;margin:0;padding:8px;background:rgba(0,0,0,.86);'
-            + 'color:#0f0;font:11px/1.35 monospace;white-space:pre-wrap;pointer-events:none';
-          document.body.appendChild(dbgBox);
-        }
-        dbgBox.textContent = (msg + '\n' + dbgBox.textContent).slice(0, 1400);
-      };
-
-      host.addEventListener('pointerdown', e => {
-        release();
-        if (DBG) {
-          const hit = pick(e);
-          let s = 'down ' + e.pointerType + ' (' + Math.round(e.clientX) + ',' + Math.round(e.clientY)
-                + ') zoomed=' + page.classList.contains('zoomed') + ' pick=' + (hit ? 'O' : 'X');
-          if (!hit) s += '\n  판: ' + [...document.querySelectorAll('.cc3d-slot')].map(el => {
-            const r = el.getBoundingClientRect();
-            return Math.round(r.left) + '~' + Math.round(r.right) + ' / '
-                 + Math.round(r.top) + '~' + Math.round(r.bottom);
-          }).join('  ');
-          dbg(s);
-        }
-        if (page.classList.contains('zoomed')) return;
-        downSlot = pick(e);
-        moved = 0; sx = ox = e.clientX; sy = oy = e.clientY;
-        downAt = Date.now(); isTouch = e.pointerType !== 'mouse';
-        if (!downSlot) return;
-        host.setPointerCapture && host.setPointerCapture(e.pointerId);
-        const b = band(downSlot);
-        if (b) b.start(...ndc(e));
-      });
-      host.addEventListener('pointermove', e => {
-        if (!downSlot) return;
-        if (page.classList.contains('zoomed')) { release(); return; }
-        // 마우스만 버튼 상태로 판단한다. 터치·펜은 손가락이 닿아 있어도 buttons 를
-        // 0 으로 흘리는 기기가 있어서, 여기서 놓아 버리면 뒤이은 pointerup 이
-        // downSlot 을 잃고 탭이 통째로 사라진다.
-        if (!isTouch && e.buttons === 0) { release(); return; }
-        moved += Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
-        sx = e.clientX; sy = e.clientY;
-        const b = band(downSlot);
-        if (b) b.move(...ndc(e));
-      });
-      const endDrag = e => {
-        if (!downSlot) return;
-        const slot = downSlot;
-        // 누른 자리에서 얼마나 벗어나 뗐는지로 본다. 지금까지는 움직인 거리를
-        // 전부 더해서(경로 길이) 판단했는데, 손가락이 제자리에서 떨리기만 해도
-        // 그 합이 금세 커진다 — 태블릿에서 탭이 자꾸 드래그로 넘어가 여러 번
-        // 눌러야 열리던 게 이것 때문이다. 제자리로 돌아와 뗐으면 탭이다.
-        const dx = (e && e.clientX != null ? e.clientX : sx) - ox;
-        const dy = (e && e.clientY != null ? e.clientY : sy) - oy;
-        const disp = Math.hypot(dx, dy);
-        release();                     // 잡힌 카드는 전부 놓는다
-        const slop = isTouch ? 30 : 8;
-        const quick = Date.now() - downAt < 500;
-        dbg('end   ' + (e && e.type) + ' disp=' + Math.round(disp) + ' slop=' + slop
-            + ' quick=' + quick + ' → ' + (disp > slop && !(quick && disp < slop * 2) ? '드래그(무시)' : '탭'));
-        if (disp > slop && !(quick && disp < slop * 2)) return;
-        // 눌린 판이 품고 있는 카드가 곧 그 사람이다. 인덱스를 거치지 않는다.
-        const cc = slot.querySelector('.cc');
-        if (cc) openZoom(-1, cc);
-      };
-      // 마지막 안전망. 터치에서는 pointer 흐름이 기기마다 다르게 끊긴다 —
-      // 캡처를 잃거나, buttons 를 0 으로 흘리거나, pointercancel 로 끝난다.
-      // 하지만 탭이면 click 은 반드시 온다. pointer 쪽에서 이미 열었으면
-      // (400ms 안이면) 그냥 둔다.
-      host.addEventListener('click', e => {
-        dbg('click zoomed=' + page.classList.contains('zoomed')
-            + ' since=' + (Date.now() - lastOpen) + ' pick=' + (pick(e) ? 'O' : 'X'));
-        if (page.classList.contains('zoomed')) return;
-        if (Date.now() - lastOpen < 400) return;
-        const slot = pick(e);
-        const cc = slot && slot.querySelector('.cc');
-        if (cc) openZoom(-1, cc);
-      });
-      host.addEventListener('pointerup', endDrag);
-      host.addEventListener('pointercancel', e => { dbg('cancel'); endDrag(e); });
-      // 호스트에서 pointerup 을 한 번이라도 놓치면 카드가 영영 마우스를 따라다닌다.
-      // 창 전체에서도 받아 반드시 놓는다.
-      addEventListener('pointerup', endDrag, true);
+      // 판정은 3D 쪽 판정면이 한다. 카드마다 보이는 크기와 똑같은 투명 평면이
+      // 이미 붙어 있고(Lanyard.jsx, planeGeometry 0.711x1.0 — 콜라이더와 같은 크기)
+      // 탭·드래그 핸들러도 거기 달려 있다. 카드가 흔들리든 원근이 걸리든 브라우저와
+      // three 가 알아서 맞히므로 우리가 사각형을 흉내 낼 이유가 없다.
+      //
+      // 그런데 이 호스트가 위를 덮고 setPointerCapture 로 포인터를 채가는 바람에
+      // 캔버스까지 이벤트가 내려가질 못했다. 그래서 3D 판정면이 한 번도 안 불렸고,
+      // 대신 여기서 getBoundingClientRect 로 사각형을 재고 있었다. 그 사각형은
+      // 보이는 카드보다 짧아서(기기 실측: 판 218~497, 카드 한복판 662) 태블릿에서
+      // 한복판을 눌러도 빗나갔다. 호스트는 이제 이벤트를 받지 않는다.
       addEventListener('pointercancel', endDrag, true);
       addEventListener('blur', () => release());
       addEventListener('mouseleave', () => release());
