@@ -2,3 +2,5 @@ node_modules/
 desktop.ini
 missing.json
 _*.html
+assets/_orig/
+probe/report.json
