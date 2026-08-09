@@ -1197,8 +1197,10 @@
   // 소리 없이 도는 배경 영상이라 컨트롤은 달지 않는다. muted·playsinline 은 속성으로도
   // 넣어야 모바일에서 자동재생이 막히지 않는다.
   if (matchMedia('(max-width:640px)').matches)
-    document.querySelectorAll('img[data-msrc]').forEach(im => {
+    document.querySelectorAll('[data-msrc]').forEach(im => {
       const src = im.dataset.msrc;
+      // 이미 영상인 자리는 소스만 갈면 된다(세로 영상 → 16:9 모바일본)
+      if (im.tagName === 'VIDEO') { im.src = src; return; }
       if (!/\.mp4$/i.test(src)) { im.src = src; return; }
       const v = document.createElement('video');
       v.className = im.className;
