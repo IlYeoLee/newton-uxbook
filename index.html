@@ -426,6 +426,13 @@
   .credits-page .lany-stage,.credits-page .cc-dim{
     inset:0.830cqw 0.830cqw 0.996cqw;border-radius:3.320cqw;overflow:hidden}
   .credits-page .lany-stage{background:#050505}
+  /* 번들을 받는 동안 검은 화면만 있으면 멈춘 것처럼 보인다. */
+  .credits-page .lany-stage::after{content:"";position:absolute;left:50%;top:50%;
+    width:2.5cqw;height:2.5cqw;margin:-1.25cqw 0 0 -1.25cqw;border-radius:50%;
+    border:0.25cqw solid rgba(255,255,255,.16);border-top-color:var(--red);
+    animation:ccSpin .9s linear infinite;z-index:4;pointer-events:none}
+  .credits-page .lany-stage.is3d::after{display:none}
+  @keyframes ccSpin{to{transform:rotate(360deg)}}
   /* 상단 공간감 — 줄이 어둠에서 내려오는 것처럼 위쪽을 살짝 띄운다 */
   .credits-page .lany-stage::before{content:"";position:absolute;left:0;right:0;top:0;
     height:34%;pointer-events:none;z-index:6;
@@ -826,7 +833,7 @@
   .ar-track{position:absolute;left:0;right:0;top:8cqw;bottom:8cqw;transform-style:preserve-3d}
   .ar-item{position:absolute;left:50%;top:50%;margin:0;
     transform-style:preserve-3d;will-change:transform,opacity;
-    transition:transform .34s cubic-bezier(.22,.7,.24,1),opacity .34s ease}
+    transition:transform .26s cubic-bezier(.22,.7,.24,1),opacity .26s ease}
   /* 세로 사진이 스테이지를 넘지 않도록 가로·세로 둘 다 못 박는다. */
   .ar-item img{display:block;width:auto;height:auto;max-width:38cqw;max-height:40cqw;
     border-radius:1.245cqw;box-shadow:0 2cqw 4cqw rgba(0,0,0,.55)}
@@ -2580,7 +2587,7 @@ void main(){
       // 넘어가는 장 수는 오직 "끈 거리"로만 정한다. 속도로 계산하면 가볍게 툭
       // 쳐도 두세 장씩 후루룩 넘어가 원하는 장에 못 세운다.
       // 한 칸(화면 폭 5.5%)을 끌 때마다 정확히 한 장씩.
-      const step = stage.clientWidth * 0.055;
+      const step = stage.clientWidth * 0.042;
       let rest = e.clientX - sx;
       while (Math.abs(rest) > step){
         go(cur - Math.sign(rest));
@@ -2837,6 +2844,16 @@ void main(){
       }
       try { boot(); } catch (e) { console.error('lanyard 3D 실패', e); stage.classList.add('no3d'); }
     }
+    // 마지막 장으로 건너뛰면 6MB 번들을 그 자리에서 받느라 검은 화면이 오래
+    // 머문다. 책이 한가해진 뒤 미리 받아 두면 도착했을 때 바로 뜬다.
+    const idle = window.requestIdleCallback || (f => setTimeout(f, 2500));
+    idle(() => {
+      if (window.NewtonLanyard) return;
+      const l = document.createElement('link');
+      l.rel = 'prefetch'; l.as = 'script'; l.href = 'assets/lanyard.bundle.js';
+      document.head.appendChild(l);
+    });
+
     new MutationObserver(tryBoot).observe(page, { attributes: true, attributeFilter: ['class'] });
     tryBoot();
   })();
