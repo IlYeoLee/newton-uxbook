@@ -2620,9 +2620,17 @@ void main(){
 
       host.addEventListener('pointerdown', e => {
         release();
-        dbg('down  type=' + e.pointerType + ' btn=' + e.buttons
-            + ' zoomed=' + page.classList.contains('zoomed')
-            + ' pick=' + (pick(e) ? 'O' : 'X'));
+        if (DBG) {
+          const hit = pick(e);
+          let s = 'down ' + e.pointerType + ' (' + Math.round(e.clientX) + ',' + Math.round(e.clientY)
+                + ') zoomed=' + page.classList.contains('zoomed') + ' pick=' + (hit ? 'O' : 'X');
+          if (!hit) s += '\n  판: ' + [...document.querySelectorAll('.cc3d-slot')].map(el => {
+            const r = el.getBoundingClientRect();
+            return Math.round(r.left) + '~' + Math.round(r.right) + ' / '
+                 + Math.round(r.top) + '~' + Math.round(r.bottom);
+          }).join('  ');
+          dbg(s);
+        }
         if (page.classList.contains('zoomed')) return;
         downSlot = pick(e);
         moved = 0; sx = ox = e.clientX; sy = oy = e.clientY;
