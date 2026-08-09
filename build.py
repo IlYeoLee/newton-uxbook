@@ -810,6 +810,8 @@ NAV_GROUPS = [
     ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
     ("Branding", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
+    # 과정 사진과 만든 사람들은 성격이 같다 — 제품 설명이 끝난 뒤의 기록이다.
+    ("Archive", "archive", ["archive", "credits"]),
 ]
 nav_html = "".join(
     f'<button type="button" class="pill" data-target="{target}" data-members="{",".join(members)}">{esc(label)}</button>'
