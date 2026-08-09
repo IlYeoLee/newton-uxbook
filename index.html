@@ -2029,6 +2029,7 @@
       // 매 프레임 넣던 인라인 drop-shadow 를 비운다. 인라인이 남아 있으면
       // 확대 시 흐리게 하는 CSS 규칙(filter:blur)을 덮어써서 딤/블러가 안 걸린다.
       ropes.forEach(o => { o.tilt.x = o.tilt.y = 0; o.drag = null; o.card.style.filter = ''; });
+      if (on3d()) return;
       page.classList.add('zoomed');
       r.el.classList.add('on');
       r.zoom = true;
@@ -2036,7 +2037,13 @@
       r.card.style.transition = `transform ${ZOOM_MS}ms cubic-bezier(.22,.7,.24,1)`;
       r.card.style.transform = centerTransform(r);
     }
+    // 3D 가 붙으면 이 모듈은 화면에서 물러난다(.lany 는 숨는다). 그런데 딤과 닫기
+    // 버튼은 두 모듈이 같은 것을 쓴다. 그대로 두면 3D 가 연 확대를 이쪽 close 가
+    // 가로채 zoomed 만 벗겨서, 카드는 떠 있는데 딤·잠금·닫기버튼이 다 꺼진 상태가
+    // 된다(태블릿에서 확대가 망가져 보이던 것). 3D 중에는 아무것도 하지 않는다.
+    const on3d = () => stage.classList.contains('is3d');
     function close(){
+      if (on3d()) return;
       if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
       const r = ropes.find(o => o.zoom);
       page.classList.remove('zoomed');
