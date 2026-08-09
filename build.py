@@ -45,6 +45,8 @@ def en_attr(ko):
 MOBILE_SRC = {
     "img_04": "m2", "img_06": "m4", "img_10": "m5.mp4", "img_18": "m6",
     "img_22": "m7", "img_23": "m8", "img_14": "m9", "img_37": "m11",
+    # 피그마 "나우유어턴"(93:492) — 세로본(93:486)이 웹·태블릿, 16:9(93:445)가 모바일.
+    "nowyourturn": "m_nowyourturn.jpg",
 }
 
 def img_tag(name, cls="media"):
@@ -729,7 +731,7 @@ products_page = f'''
 SHOW_WIREFRAME = False
 playwith_toggles = [t for t in (touch_toggle, flow_toggle,
                                 wire_toggle if SHOW_WIREFRAME else None) if t]
-playwith_media = img_tag(img14["src"]) if img14 else ""
+playwith_media = img_tag("nowyourturn")
 playwith_page = f'''
 <div class="page" data-page="playwith">
   <div class="page-media">{playwith_media}</div>
