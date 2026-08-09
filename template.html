@@ -608,12 +608,16 @@
     color:#fff;font-size:calc(var(--cw)*.058);line-height:1.25;font-weight:700;
     letter-spacing:-.03em;mix-blend-mode:overlay}
   .cc-desc span{display:block}
-  .cc-links{position:absolute;left:0;right:0;top:73%;display:flex;justify-content:center;
-    gap:calc(var(--cw)*.0102)}
+  /* 버튼과 이름 캡션은 %로 놓으면 카드가 작아질수록 서로 붙는다(73% 로 내렸더니
+     캡션 자리와 겹쳤다). 카드 아래에서부터 쌓아 올려 최소 8px 씩 띄운다. */
+  .cc-links{position:absolute;left:0;right:0;top:auto;
+    bottom:calc(8px + var(--cw)*.0528 + 8px);
+    display:flex;justify-content:center;gap:calc(var(--cw)*.0102)}
   .cc-sns{width:calc(var(--cw)*.254);height:calc(var(--cw)*.254);border-radius:50%;
     background:rgba(255,255,255,.2);display:grid;place-items:center;color:#fff;text-decoration:none}
   .cc-sns svg{width:24%;height:24%;fill:currentColor}
-  .cc-sig{position:absolute;left:0;right:0;top:90.1%;margin:0;text-align:center;
+  .cc-sig{position:absolute;left:0;right:0;top:auto;bottom:8px;margin:0;text-align:center;
+    line-height:1.3;
     color:rgba(255,255,255,.4);font-size:calc(var(--cw)*.0406);font-weight:700;letter-spacing:-.05em}
 
   /* 확대 상태 — 딤과 닫기 버튼은 이미지 라이트박스와 같은 것을 쓴다 */
