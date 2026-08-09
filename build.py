@@ -1,4 +1,4 @@
-import json, os, re, copy, html as ihtml
+import json, os, re, copy, hashlib, html as ihtml
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 data = json.load(open(os.path.join(ROOT, "structure_full.json"), encoding="utf-8"))
@@ -1037,6 +1037,23 @@ out = (TEMPLATE.replace("{{NAV}}", nav_html)
        .replace("{{INTRO_PAGE}}", intro_page_html)
        .replace("{{SECTIONS}}", sections_html)
        .replace("{{APPENDIX}}", ""))
+# ---- 에셋 주소에 버전 도장 ----
+# 문서는 캐시하지 않게 해뒀지만 에셋은 이름이 그대로다. 번들이나 사진 내용을
+# 바꿔도 파일명이 같으니 브라우저는 예전 것을 계속 쓴다 — 태블릿에서 고친 게
+# 반영이 안 되던 이유가 이것이다. 파일이 바뀌면 주소가 바뀌게 만든다.
+ASSET_RE = re.compile(r'assets/[\w./-]+\.(?:png|jpg|jpeg|webp|mp4|svg|glb|js)')
+
+def stamp(m):
+    rel = m.group(0)
+    f = os.path.join(ROOT, rel)
+    if not os.path.exists(f):
+        return rel
+    st = os.stat(f)
+    tag = hashlib.md5(f"{st.st_mtime_ns}-{st.st_size}".encode()).hexdigest()[:8]
+    return f"{rel}?v={tag}"
+
+out = ASSET_RE.sub(stamp, out)
+
 open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8", newline="\n").write(out)
 print("done", len(sections_html), len(intro_page_html))
 if _missing:
