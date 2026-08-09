@@ -176,8 +176,8 @@ function Band({
   );
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
-  // 끌었는지 눌렀는지 구분한다. 누른 자리에서 조금밖에 안 벗어났으면 탭이다.
-  const down = useRef({ x: 0, y: 0 });
+  // 끌었는지 눌렀는지 구분한다. 끈 거리가 짧으면 "탭"으로 보고 확대한다.
+  const moved = useRef(0);
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.7]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.7]);
@@ -262,14 +262,14 @@ function Band({
             onPointerUp={e => {
               e.target.releasePointerCapture(e.pointerId);
               drag(false);
-              // 누른 자리에서 얼마나 벗어나 뗐는지로 본다. 손가락은 마우스보다
-              // 흔들리므로 여유를 더 준다.
-              const d = Math.hypot(e.clientX - down.current.x, e.clientY - down.current.y);
-              if (d < (e.pointerType === 'mouse' ? 8 : 26)) onSelect(index, cardEl);
+              if (moved.current < 8) onSelect(index, cardEl);   // 끌지 않았으면 탭
+            }}
+            onPointerMove={e => {
+              if (dragged) moved.current += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
             }}
             onPointerDown={e => {
               e.target.setPointerCapture(e.pointerId);
-              down.current = { x: e.clientX, y: e.clientY };
+              moved.current = 0;
               if (!zoomed)
                 drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
             }}
