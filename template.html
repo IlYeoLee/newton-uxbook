@@ -536,7 +536,9 @@
   /* 터치를 받는 건 이 호스트다. touch-action 이 없으면 태블릿이 손 닿는 순간
      기본 제스처를 시작해 pointercancel 을 쏘고, 가벼운 탭이 드래그로 처리된다
      (캔버스에만 걸어둬서 소용이 없었다). */
-  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto;touch-action:none;
+  /* 페이지 넘김 영역(.nav-zone)이 z-index 7 이라 3D 위에 얹혀 양 끝 카드를
+     가로챘다. 이 장에서는 카드가 위에 있어야 한다. */
+  .lany3d-host{position:absolute;inset:0;z-index:8;pointer-events:auto;touch-action:none;
     opacity:0;transition:opacity .45s ease}
   .lany3d-host.ready{opacity:1}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
@@ -552,7 +554,11 @@
      한복판을 눌러도 안 먹던 이유). 카드 속 내용(.cc)은 그대로 통과시켜서
      SNS 링크 같은 게 손가락을 가로채지 않게 둔다. */
   .lany3d-host .cc3d-slot{pointer-events:auto}
-  .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px}
+  /* 판이 손가락을 받으므로 touch-action 도 여기 있어야 한다. 호스트에만 걸어두면
+     터치가 판 위에 떨어지는 순간 안드로이드 크롬이 그 제스처를 스크롤로 가져간다
+     — 태블릿에서만 안 먹던 이유. */
+  .cc3d-slot{width:300px;height:422px;position:relative;--cw:300px;perspective:900px;
+    touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none}
   .cc3d-slot .cc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
     /* drei 의 CSS3D 행렬이 이 배치에서 X 를 뒤집는다. 여기서 되돌린다. */
     transform:scaleX(-1);transition:none;cursor:default;pointer-events:none;
