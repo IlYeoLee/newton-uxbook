@@ -951,6 +951,9 @@ sections_html = "".join(pages_out)
 
 # intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
 intro_hero, intro_rest = extract_hero(hero_items)
+# 이 장의 사진은 피그마 "나우유어턴" 섹션(93:492)에 있다. 히어로 자리는 데스크톱·
+# 모바일 모두 가로 크롭(object-fit:cover)이라 16:9 프레임(93:445)을 쓴다.
+intro_hero = {"t": "IMG", "src": "nowyourturn"}
 intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
 # credit sits under the NEWTON title (left column) instead of its own row below the header,
 # so the header stays compact and the hero image grows upward (face visible)
