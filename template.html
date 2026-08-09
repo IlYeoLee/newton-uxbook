@@ -2549,6 +2549,12 @@ void main(){
         zoomEl.appendChild(clone);
         page.appendChild(zoomEl);
         page.classList.add('zoomed');
+        // 열리게 한 그 탭의 합성 click 이 방금 얹힌 이 판 위로 떨어진다. 그 자리에
+        // SNS 버튼이 있으면 누르지도 않은 인스타그램이 열렸다. 잠깐 아무것도
+        // 받지 않게 두고, 손가락이 떨어진 뒤부터 받는다.
+        const armed = zoomEl;
+        armed.style.pointerEvents = 'none';
+        setTimeout(() => { if (armed.isConnected) armed.style.pointerEvents = ''; }, 450);
         requestAnimationFrame(() => requestAnimationFrame(() => {
           zoomEl && zoomEl.classList.remove('no-anim');
         }));
@@ -2585,14 +2591,26 @@ void main(){
         // 손가락은 마우스만큼 정확하지 않으니 가장자리를 조금 넓혀 잡는다.
         const pad = 10;
         const slots = [...document.querySelectorAll('.cc3d-slot')];
-        for (let i = slots.length - 1; i >= 0; i--) {
-          const box = slots[i].querySelector('.cc') || slots[i];
-          const r = box.getBoundingClientRect();
-          if (!r.width) continue;
+        const boxes = slots.map(s => (s.querySelector('.cc') || s).getBoundingClientRect())
+                           .map((r, i) => ({ r, s: slots[i] }))
+                           .filter(o => o.r.width);
+        for (let i = boxes.length - 1; i >= 0; i--) {
+          const r = boxes[i].r;
           if (e.clientX >= r.left - pad && e.clientX <= r.right + pad &&
-              e.clientY >= r.top - pad && e.clientY <= r.bottom + pad) return slots[i];
+              e.clientY >= r.top - pad && e.clientY <= r.bottom + pad) return boxes[i].s;
         }
-        return null;
+        // 사각형 안에 안 들어가도 가장 가까운 카드를 연다. 카드는 줄에 매달려
+        // 흔들리고 원근까지 걸려 있어, 손가락이 눈에 보이는 카드를 눌러도 계산된
+        // 사각형에서 조금씩 벗어난다. 눌렀는데 아무 일도 안 나는 것보다, 눈에
+        // 제일 가까운 카드를 여는 편이 낫다. 한 장 폭 넘게 떨어지면 무시한다.
+        let best = null, bestD = Infinity;
+        for (const { r, s } of boxes) {
+          const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+          const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+          const d = Math.hypot(dx, dy);
+          if (d < bestD) { bestD = d; best = s; }
+        }
+        return bestD <= (boxes[0] ? boxes[0].r.width : 300) ? best : null;
       };
 
       // 직전에 잡았던 카드를 반드시 놓고 시작한다. 확대 중이라고 그냥 빠져나가면
