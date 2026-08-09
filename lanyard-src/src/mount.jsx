@@ -25,7 +25,6 @@ function App({ people, onZoom, apiRef }) {
     <Lanyard
       people={people}
       position={[0, 0, 24]}
-      gravity={[0, -18, 0]}
       imageFit="cover"
       lanyardImage={people.bandImage}
       lanyardWidth={1}
