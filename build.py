@@ -940,8 +940,9 @@ seg_of = dict(sections)
 pages_out = []
 for m in PAGE_ORDER:
     if m == FIRST_PRODUCT:
+        # 원고의 "Products 05" 개요 장이 탭의 맨 앞이고, 전면 영상은 그 뒤다.
+        pages_out.append(products_page)
         pages_out.append(lead_page("products-lead", "lead_products.mp4"))
-        pages_out.append(products_page)   # 원고의 "Products 05" 개요 장
     pages_out.append(render_page(m, seg_of[m]))
     if m == "04 Solution":
         # Solution 바로 뒤: 앱 홈 영상 한 장. 탭의 첫 장(products-lead)과 같은 판이다.
@@ -955,9 +956,6 @@ sections_html = "".join(pages_out)
 
 # intro page (827 layout): kicker "Now, your turn!", big title "NEWTON"
 intro_hero, intro_rest = extract_hero(hero_items)
-# 이 장의 사진은 피그마 "나우유어턴" 섹션(93:492)에 있다. 히어로 자리는 데스크톱·
-# 모바일 모두 가로 크롭(object-fit:cover)이라 16:9 프레임(93:445)을 쓴다.
-intro_hero = {"t": "IMG", "src": "nowyourturn"}
 intro_body = [n for n in intro_rest if n.get("x") != "Now, your turn!"]
 # credit sits under the NEWTON title (left column) instead of its own row below the header,
 # so the header stays compact and the hero image grows upward (face visible)
@@ -970,7 +968,7 @@ NAV_GROUPS = [
     ("Background", "sec-01", ["sec-01", "sec-02", "sec-03"]),
     ("Solution", "sec-04", ["sec-04", "home-lead"]),
     # 탭을 누르면 전면 영상부터 나온다 → target 이 lead 페이지다
-    ("Products", "products-lead", ["products-lead", "products-intro", "sec-05", "sec-07", "sec-06"]),
+    ("Products", "products-intro", ["products-intro", "products-lead", "sec-05", "sec-07", "sec-06"]),
     ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
     ("Branding", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
