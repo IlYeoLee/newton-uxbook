@@ -835,6 +835,7 @@
   .ar-item::after{content:"";position:absolute;inset:0;border-radius:1.245cqw;
     background:#000;opacity:var(--dim,0);pointer-events:none;
     transition:opacity .34s ease}
+  .ar-item{cursor:pointer}
   .ar-item.is-center{cursor:zoom-in}
   .ar-head{position:absolute;left:0;right:0;top:3.320cqw;text-align:center;z-index:6;
     pointer-events:none}
@@ -2562,9 +2563,11 @@ void main(){
     // 끌지 않고 뗀 경우만 "탭"으로 보고 처리한다.
     // 포인터를 캡처하면 pointerup 의 target 이 스테이지로 바뀐다. 그래서 누른
     // 카드를 알 수 없어 확대가 안 열렸다. 누를 때의 대상을 기억해 둔다.
-    let sx = null, dragged = false, downTarget = null, lastStep = 0;
+    let sx = null, dragged = false, downTarget = null;
+    let vel = 0, lastX = 0, lastT = 0, glide = 0;   // 플릭 관성
     stage.addEventListener('pointerdown', e => {
-      sx = e.clientX; dragged = false;
+      sx = e.clientX; dragged = false; vel = 0; lastX = e.clientX; lastT = Date.now();
+      glide = 0;                                   // 손을 대면 미끄러짐을 멈춘다
       downTarget = e.target.closest && e.target.closest('.ar-item');
       stage.setPointerCapture && stage.setPointerCapture(e.pointerId);
       stage.classList.add('dragging');
@@ -2585,11 +2588,27 @@ void main(){
         rest = e.clientX - sx;
         dragged = true;
       }
+      // 손을 뗀 뒤 미끄러질 양을 재둔다(마지막 순간의 속도)
+      const t = Date.now();
+      if (lastT) vel = (e.clientX - lastX) / Math.max(1, t - lastT);
+      lastX = e.clientX; lastT = t;
     });
     stage.addEventListener('pointerup', e => {
       const wasDrag = dragged;
       sx = null; dragged = false; stage.classList.remove('dragging');
       const it = downTarget; downTarget = null;
+      // 빠르게 튕겼으면 뗀 뒤에도 몇 장 더 미끄러진다. 끌 때는 거리대로
+      // 한 장씩이므로 정밀 조작은 그대로다.
+      if (wasDrag && Math.abs(vel) > 0.55){
+        glide = Math.max(-6, Math.min(6, Math.round(-vel * 3)));
+        const tick = () => {
+          if (!glide) return;
+          go(cur + Math.sign(glide));
+          glide -= Math.sign(glide);
+          setTimeout(tick, 90 + (6 - Math.abs(glide)) * 22);   // 점점 느려진다
+        };
+        setTimeout(tick, 90);
+      }
       if (wasDrag || !it) return;
       const i = items.indexOf(it);
       if (i !== cur){ go(i); return; }          // 옆 장을 누르면 그 장이 가운데로
