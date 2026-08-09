@@ -143,22 +143,6 @@ def render_toggle(node):
     body = render_toggle_body(node.get("c") or [])
     return f'<details class="toggle"><summary{en_attr(node["x"])}>{esc(node["x"])}</summary><div class="toggle-body">{body}</div></details>'
 
-def evidence_group(kids, i):
-    """줄지어 선 증거 카드를 한 겹으로 묶는다.
-
-    Evidence 토글을 카드로 바꾸면서 층이 하나 사라져, 본문과 증거가 같은 높이에
-    나란히 쌓여 벽이 됐다. 근거 자체는 여전히 카드 안(주장 바로 밑)에 있고,
-    여기서 접히는 건 증거 목록이다."""
-    ev = []
-    while i < len(kids) and kids[i].get("evidence"):
-        ev.append(render_callout(kids[i]))
-        i += 1
-    label = f"근거 {len(ev)}건"
-    TRANS.setdefault(label, f"Evidence ({len(ev)})")
-    return (f'<div class="group"><details class="toggle evidence">'
-            f'<summary{en_attr(label)}>{esc(label)}</summary>'
-            f'<div class="toggle-body">{"".join(ev)}</div></details></div>'), i
-
 def render_toggle_body(kids):
     """토글 안은 어느 깊이에서나 두 가지뿐이다 — 카드, 아니면 중첩 토글.
     원본에서 맨 문단·그림이 카드 밖으로 흘러다니던 것을 한 장의 카드로 묶는다.
@@ -176,10 +160,6 @@ def render_toggle_body(kids):
         t = n["t"]
         if t == "HR":            # 카드로 나누고 나면 구분선이 할 일이 없다
             i += 1
-        elif t == "CALLOUT" and n.get("evidence"):
-            flush()
-            html, i = evidence_group(kids, i)
-            out.append(html)
         elif t == "CALLOUT":
             flush()
             out.append(render_callout(n))
@@ -343,10 +323,6 @@ def render_children(items, group_toggles=True):
             lis = "".join(f"<li{en_attr(g.get('x',''))}>{esc(g.get('x',''))}</li>" for g in group)
             out.append(f"<ul class='list'>{lis}</ul>")
             continue
-        if n["t"] == "CALLOUT" and n.get("evidence"):
-            html, i = evidence_group(items, i)   # 카드 안에 든 증거도 같은 규칙으로 묶는다
-            out.append(html)
-            continue
         if n["t"] == "TOGGLE" and group_toggles:
             # consecutive toggles share one grey container (skipped inside a finding box)
             tg = []
@@ -366,7 +342,6 @@ items = copy.deepcopy(data)
 # 출처)로 정리돼 있는데, Evidence 항목은 맨 문단으로 풀려 있고 출처는 그 안에 또
 # "근거" 토글로 접혀 있었다. 근거는 접어둘 것이 아니라 그 주장 바로 밑에 붙어 있어야
 # 읽힌다. 데스크리서치 쪽을 기준으로 삼아 Evidence 를 같은 카드로 바꾼다.
-EVIDENCE_RE = re.compile(r'^\s*Evidence\s*0*(\d+)\s*[:：]\s*(.+)$', re.S)
 
 def unify_toggles(nodes):
     out = []
@@ -392,18 +367,11 @@ def unify_toggles(nodes):
                         cites.append({"t": "P", "x": t})
                 out += cites
                 continue
-            m = EVIDENCE_RE.match(x)
-            if m:
-                claim = m.group(2).strip()
-                # 영문판은 요약문 하나("Evidence 02 : …")로만 있다. 라벨과 주장으로
-                # 쪼개 넣지 않으면 토글을 카드로 바꾸는 순간 영문이 통째로 사라진다.
-                en = TRANS.get(x) or TRANS.get(x.replace("\n", " "))
-                if en and " : " in en:
-                    TRANS.setdefault(claim, en.split(" : ", 1)[1].strip())
-                head = {"t": "P", "x": f"Evidence {int(m.group(1)):02d}\n{claim}"}
-                out.append({"t": "CALLOUT", "x": "", "card": True, "evidence": True,
-                            "c": [head] + n["c"]})
-                continue
+            # Evidence 항목은 자기 제목을 단 토글 그대로 둔다. 카드로 펴 버렸더니
+            # 주장이 전부 밖으로 쏟아져 부모 토글이 벽이 됐고, 한 겹으로 묶으려니
+            # "근거 4건" 같은 이름밖에 못 붙였다. 제목이 이미 주장 한 문장이라
+            # 그게 가장 좋은 라벨이다. 안쪽은 render_toggle_body 가 카드 한 장으로
+            # 감싸므로 생김새는 다른 곳과 같다.
         out.append(n)
     return out
 
