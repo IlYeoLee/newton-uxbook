@@ -2534,6 +2534,7 @@ void main(){
       // 잘리고, 카드 판이 pointer-events:none 이라 SNS 버튼도 못 누른다.
       let zoomEl = null;
       function closeZoom(){
+        if (zoomEl) say('[닫힘] 확대');
         if (zoomEl){ zoomEl.remove(); zoomEl = null; }
         page.classList.remove('zoomed');
       }
@@ -2817,8 +2818,13 @@ void main(){
       const dim = page.querySelector('.cc-dim');
       const close = () => { closeZoom(); if (handle) handle.close(); };
       page.__reset = close;   // 나갔다 들어오면 확대는 닫힌 처음 상태로
-      if (closeBtn) closeBtn.addEventListener('click', close);
-      if (dim) dim.addEventListener('click', close);
+      // 확대를 연 그 탭이 만든 click 은 뒤늦게 그 자리를 다시 짚는다. 그 자리에
+      // 방금 얹힌 딤이 있으니 곧바로 닫혔다 — 카드를 눌러도 아무 일도 안 일어나는
+      // 것처럼 보였다. 마우스는 click 대상이 원래 카드라 이 일이 안 생긴다.
+      // 그래서 컴퓨터에서만 멀쩡했다. 연 직후의 click 은 무시한다.
+      const closeByUser = () => { if (Date.now() - lastOpen > 450) close(); };
+      if (closeBtn) closeBtn.addEventListener('click', closeByUser);
+      if (dim) dim.addEventListener('click', closeByUser);
       addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
     }
 
