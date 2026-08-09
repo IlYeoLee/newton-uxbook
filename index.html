@@ -3258,7 +3258,7 @@ void main(){
         if (loading) return;
         loading = true;
         const s = document.createElement('script');
-        s.src = 'assets/lanyard.bundle.js?v=5a22d412';
+        s.src = 'assets/lanyard.bundle.js?v=a8bff2ec';
         s.onload = () => { loading = false; tryBoot(); };
         // 번들을 못 받으면 예전 CSS 카드로 되돌린다(그때만 보인다).
         s.onerror = () => { loading = false; stage.classList.add('no3d'); };
@@ -3277,7 +3277,7 @@ void main(){
       if (window.NewtonLanyard || loading) return;
       loading = true;
       const s = document.createElement('script');
-      s.src = 'assets/lanyard.bundle.js?v=5a22d412';
+      s.src = 'assets/lanyard.bundle.js?v=a8bff2ec';
       s.onload = () => { loading = false; tryBoot(); };   // 이미 도착해 있으면 바로 붙는다
       s.onerror = () => { loading = false; };             // 실패해도 도착할 때 다시 받는다
       document.body.appendChild(s);

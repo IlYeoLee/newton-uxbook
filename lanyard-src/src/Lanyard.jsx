@@ -227,11 +227,17 @@ function Band({
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
 
       // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
-      // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
+      // 바람. 주기가 다른 세 파를 겹쳐 규칙적으로 왕복하지 않게 한다 — 한 파만
+      // 쓰면 메트로놈처럼 보인다. 카드마다 위상을 달리해 다섯 장이 한 몸처럼
+      // 움직이지도 않게 한다. 줄 중간(j2)과 카드를 따로 밀어 줄이 먼저 휘고
+      // 카드가 뒤따르는 결을 만든다.
       if (!dragged && !zoomed) {
         const t = state.clock.elapsedTime;
-        const w = Math.sin(t * 0.55 + index * 1.73) * 0.004 + Math.sin(t * 1.31 + index * 2.4) * 0.0015;
+        const w = Math.sin(t * 0.37 + index * 1.73) * 0.012
+                + Math.sin(t * 0.91 + index * 2.40) * 0.005
+                + Math.sin(t * 1.83 + index * 0.70) * 0.002;
         j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
+        card.current.applyImpulse({ x: w * 0.5, y: 0, z: w * 0.2 }, true);
       }
     }
   });
