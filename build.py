@@ -708,6 +708,20 @@ def render_page(marker, seg):
   </div>
 </div>'''
 
+# Products 개요 — 원고에 있는데 책에 없던 장이다. 브랜딩 쪽 가로형 판(27:302,
+# 텍스트 위 / 이미지 아래)을 그대로 쓴다. 사진이 16:9 라 모바일에서 2.6:1 로
+# 깎이지 않게 wide-16x9 를 단다.
+PRODUCTS_TITLE = "언제 어디서든 새로운\n움직임에 도전할 수 있게"
+PRODUCTS_BODY = ("웨어러블 로봇 Newton을 중심으로 구성된 하드웨어 시스템은 반복되는 일상을 새로운 "
+                 "도전의 즐거움으로 채워주는 운동 파트너입니다. 내 움직임을 실시간으로 이해하고 "
+                 "분석하여 최적화된 물리적 보조를 제공하며, 언제 어디서든 멋진 움직임에 도전할 수 "
+                 "있는 필드를 펼쳐내어 누구나 쉽게 운동을 시작할 수 있도록 이끕니다.")
+products_page = f'''
+<div class="page wide-page" data-page="products-intro">
+  <div class="wide-text">{head_block("Products", PRODUCTS_TITLE, PRODUCTS_BODY)}</div>
+  <div class="wide-media wide-16x9">{img_tag("products_hero")}</div>
+</div>'''
+
 # "Play with Newton!" — new first Scenario page: two-column (left image + right text/toggles)
 playwith_toggles = [t for t in (touch_toggle, flow_toggle, wire_toggle) if t]
 playwith_media = img_tag(img14["src"]) if img14 else ""
@@ -922,6 +936,8 @@ pages_out = []
 for m in PAGE_ORDER:
     if m == FIRST_PRODUCT:
         pages_out.append(lead_page("products-lead", "lead_products.mp4"))
+        pages_out.append(products_page)   # 원고의 "Products 05" 개요 장
+        pages_out.append(products_page)   # 원고의 "Products 05" 개요 장
     pages_out.append(render_page(m, seg_of[m]))
     if m == "04 Solution":
         # Solution 바로 뒤: 앱 홈 영상 한 장. 탭의 첫 장(products-lead)과 같은 판이다.
@@ -947,7 +963,7 @@ NAV_GROUPS = [
     ("Background", "sec-01", ["sec-01", "sec-02", "sec-03"]),
     ("Solution", "sec-04", ["sec-04", "home-lead"]),
     # 탭을 누르면 전면 영상부터 나온다 → target 이 lead 페이지다
-    ("Products", "products-lead", ["products-lead", "sec-05", "sec-07", "sec-06"]),
+    ("Products", "products-lead", ["products-lead", "products-intro", "sec-05", "sec-07", "sec-06"]),
     ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
     ("Branding", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),

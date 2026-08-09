@@ -268,6 +268,7 @@
     .wide-text{padding:6vw 5vw 0}
     .wide-media{margin:0 5vw 5vw;border-radius:5vw}
     .wide-media img,.wide-media video{aspect-ratio:1185/449}
+    .wide-media.wide-16x9 img{aspect-ratio:16/9}   /* 사진 원본 비율을 쓰는 장 */
   }
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
@@ -662,6 +663,13 @@
   .cc-zoom .cc.flipped .cc-back{opacity:1}
   .cc-zoom.no-anim .cc-face{transition:none}
   .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer}
+  /* 확대된 뒷면은 카드 모서리에서 최소 40px 을 비운다. 피그마 비율(%)만 쓰면
+     칩·글·버튼이 모서리에 붙는다. 작은 3D 카드는 비율 그대로 둔다 — 거기서
+     40px 은 카드를 통째로 먹는다. */
+  .cc-zoom .cc-chips-top{top:max(15%,40px)}
+  .cc-zoom .cc-desc{left:max(8%,40px);right:max(8%,40px);bottom:36%}
+  .cc-zoom .cc-sig{bottom:40px}
+  .cc-zoom .cc-links{bottom:calc(40px + var(--cw)*.0528 + 8px)}
   @media (max-width:640px){ .cc-zoom{width:70vw;height:98vw;--cw:70vw} }
   .cc-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;
     -webkit-backdrop-filter:blur(0.9cqw);backdrop-filter:blur(0.9cqw);
