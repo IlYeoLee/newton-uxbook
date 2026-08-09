@@ -277,13 +277,19 @@
      특정도에서 이겨 목업을 카드 밖으로 늘려버린다. */
   .try-pair .try-mock{position:absolute;left:10.884%;top:3.786%;width:78.231%;
     height:auto;display:block;border-radius:0}
+  /* 테두리는 왼쪽 목업의 폰 프레임과 같은 값이다 — 피그마 stroke #383838, 3px. */
   .try-pair .try-shot{position:absolute;left:15.986%;top:12.472%;width:68.197%;
-    height:52.339%;object-fit:cover;border-radius:1cqw;display:block}
+    height:52.339%;object-fit:cover;border-radius:1cqw;display:block;
+    box-sizing:border-box;border:0.249cqw solid #383838}
   /* 목업 아래를 카드 색으로 덮어 글이 얹힐 바닥을 만든다(Rectangle 1954132191).
      카드보다 넓어서 좌우로 조금 삐져나온 채로 그려진다 — 그것도 실측 그대로다. */
   .try-scrim{position:absolute;left:-1.701%;width:101.701%;top:46.102%;height:56.793%}
-  .try-app .try-scrim{background:linear-gradient(180deg,rgba(250,48,48,0) 0%,rgba(250,48,48,1) 80%)}
-  .try-sim .try-scrim{background:linear-gradient(180deg,rgba(9,18,18,0) 0%,rgba(9,18,18,1) 80%)}
+  /* 피그마는 0→1 을 80% 에서 채우는데, 목업 아래가 덜 눌려 글이 겹쳐 보인다.
+     중간을 한 번 더 눌러 조금 강하게 깐다. */
+  .try-app .try-scrim{background:linear-gradient(180deg,
+    rgba(250,48,48,0) 0%,rgba(250,48,48,.62) 42%,rgba(250,48,48,1) 68%)}
+  .try-sim .try-scrim{background:linear-gradient(180deg,
+    rgba(9,18,18,0) 0%,rgba(9,18,18,.62) 42%,rgba(9,18,18,1) 68%)}
   /* 제목·크레딧은 352 짜리 정보 프레임 안에 있지만 글줄이 그보다 넓어 좌우로
      넘쳐 나온다(제목 380). 카드 전폭을 주고 가운데 정렬해 한 줄로 세운다. */
   .try-card>.try-title,.try-card>.try-by{
@@ -1375,7 +1381,7 @@
   </div>
 </div>
 <div class="page wide-page" data-page="try">
-  <div class="wide-text"><div class="head-block"><p class="kicker">Try It Yourself</p><div class="head-row"><h2 class="head-title" data-en="See it with your own hands">Newton을 직접<br>만져볼 수 있게</h2><p class="head-body" data-en="From the UX structure to the GUI and its graphic interactions, we vibe-coded with Claude and checked every decision on a prototype you could actually touch. The mobile app holds the flow of choosing today&#x27;s play, setting intensity and mode, and coming back to the record; the projector simulator shows the movement guide unfolding on the ground, with no hardware needed. Press the button below to try it yourself.">UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바이브 코딩하며 곧바로 만져지는 프로토타입으로 확인했습니다. 모바일 앱은 오늘의 플레이를 고르고 강도와 모드를 정한 뒤 기록으로 돌아오는 흐름을 담고, 프로젝터 시뮬레이터는 하드웨어 없이도 지면 위에 펼쳐지는 움직임 가이드를 그대로 보여줍니다.<br>아래 버튼을 눌러 직접 만져볼 수 있습니다.</p></div></div></div>
+  <div class="wide-text"><div class="head-block"><p class="kicker">Try It Yourself</p><div class="head-row"><h2 class="head-title" data-en="See it with your own hands">Newton을 직접<br>만져볼 수 있게</h2><p class="head-body" data-en="From UX to GUI and its interactions, we vibe-coded with Claude on a prototype you could touch. The app picks today&#x27;s play and sets mode and intensity; the simulator shows the ground guide with no hardware. Press the button to try it.">UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바이브 코딩하며 곧바로 만져지는 프로토타입으로 확인했습니다. 모바일 앱은 오늘의 플레이를 고르고 강도와 모드를 정한 뒤 기록으로 돌아오는 흐름을 담고, 프로젝터 시뮬레이터는 하드웨어 없이도 지면 위에 펼쳐지는 움직임 가이드를 그대로 보여줍니다.<br>아래 버튼을 눌러 직접 만져볼 수 있습니다.</p></div></div></div>
   <div class="wide-media try-pair">
     <div class="try-card try-app">
       <img class="try-mock" src="assets/try_app.png" alt="" loading="lazy">
@@ -2693,8 +2699,27 @@ void main(){
     const chips = [...page.querySelectorAll('.ar-chip')];
     let cur = 0;
 
-    // 칩을 누르면 그 묶음의 첫 장으로. 한 칸씩 굴리지 않고 바로 옮긴다.
-    chips.forEach(c => c.addEventListener('click', () => go(+c.dataset.at)));
+    // 칩을 누르면 그 묶음의 첫 장으로 — 텔레포트가 아니라 고리를 굴려서 간다.
+    // 여러 칸을 한 번에 건너뛰면 layout() 이 그걸 순간이동으로 보고 전환을 통째로
+    // 꺼버려서 턱 하고 바뀐다. 한 칸씩 이어 넘기면 .26s 전환이 연달아 물려
+    // 촤라라락 굴러간다. 먼 거리일수록 간격을 좁혀 총 시간은 비슷하게 맞춘다.
+    let rolling = 0;
+    function rollTo(n){
+      clearInterval(rolling);
+      const L = items.length;
+      let d = ((n - cur) % L + L) % L;
+      if (d > L / 2) d -= L;          // 뒤로 도는 게 가까우면 그쪽으로
+      const steps = Math.abs(d);
+      if (!steps) return;
+      const dir = Math.sign(d);
+      const gap = Math.max(34, Math.round(560 / steps));
+      let left = steps;
+      rolling = setInterval(() => {
+        go(cur + dir);
+        if (--left <= 0) clearInterval(rolling);
+      }, gap);
+    }
+    chips.forEach(c => c.addEventListener('click', () => rollTo(+c.dataset.at)));
 
     const STEP = 22;     // 이웃 한 칸당 돌아가는 각도
     const R = 46;        // 원통 반지름(cqw 대신 %로 환산해 쓰기 좋은 값)
@@ -2756,7 +2781,7 @@ void main(){
     }
     // 끝에 닿으면 처음으로 돌아온다(무한 루프)
     function go(n){ const L = items.length; cur = ((n % L) + L) % L; layout(); }
-    page.__reset = () => go(0);   // 나갔다 들어오면 첫 장부터
+    page.__reset = () => { clearInterval(rolling); go(0); };   // 나갔다 들어오면 첫 장부터
 
     // 드래그 / 탭. 마우스 click 만 쓰면 터치에서 드래그 판정에 먹혀 안 열린다.
     // 끌지 않고 뗀 경우만 "탭"으로 보고 처리한다.
