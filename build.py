@@ -948,8 +948,9 @@ for m in PAGE_ORDER:
         # Solution 바로 뒤: 앱 홈 영상 한 장. 탭의 첫 장(products-lead)과 같은 판이다.
         pages_out.append(lead_page("home-lead", "home_full.mp4"))
     if m == LAST_PRODUCT:
-        pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
+        # Products 와 같은 결로 — 개요 장(Play with Newton!)이 탭의 맨 앞, 전면 영상이 뒤.
         pages_out.append(playwith_page)
+        pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
 pages_out.append(archive_page())      # 인물 소개 앞
 pages_out.append(credits_page())      # 마지막 장
 sections_html = "".join(pages_out)
@@ -969,7 +970,7 @@ NAV_GROUPS = [
     ("Solution", "sec-04", ["sec-04", "home-lead"]),
     # 탭을 누르면 전면 영상부터 나온다 → target 이 lead 페이지다
     ("Products", "products-intro", ["products-intro", "products-lead", "sec-05", "sec-07", "sec-06"]),
-    ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
+    ("Scenario", "playwith", ["playwith", "scenario-lead", "sec-08"]),
     ("Extensibility", "sec-09", ["sec-09"]),
     ("Branding", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
     # 과정 사진과 만든 사람들은 성격이 같다 — 제품 설명이 끝난 뒤의 기록이다.
