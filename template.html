@@ -266,7 +266,8 @@
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
   }
-  .page-media img{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
+  /* 모바일에서 사진이 영상으로 갈리는 자리가 있다(data-msrc=*.mp4) — 같은 상자로 둔다 */
+  .page-media img,.page-media video{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
   .page-media .m-only{display:none}   /* mobile-only single image (sec-02); shown via the mobile media query */
   /* sec-02: seamless track slide (1→2→3→4→loop), no white gap between frames */
   .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
@@ -340,6 +341,12 @@
   .page[data-page="sec-08"] .page-content{padding-left:13.278cqw;padding-right:13.278cqw} /* toggles/steps base inset */
   .page[data-page="sec-08"] .head-block.step{padding-left:0;padding-right:0}               /* steps: inset already from page-content */
   .page[data-page="sec-08"] .page-content figure.figure{margin-left:calc(0.830cqw - 13.278cqw);margin-right:calc(0.830cqw - 13.278cqw)}  /* keep symmetric full-bleed */
+  /* 전면(full-bleed) 음수 여백은 최상위 본문 그림용이다. 토글·카드 안 그림에까지
+     걸리면 카드를 좌우로 삐져나오고(카드 535px 에 그림 685px), 오른쪽은 책 밖으로
+     나가 잘린다. 안쪽 그림은 카드 폭에 맞춘다. 위 두 규칙과 특정도가 같으므로
+     반드시 뒤에 온다. */
+  .page .page-content .toggle-body figure.figure,
+  .page .page-content .finding figure.figure{margin-left:0;margin-right:0}
   /* scroll hint: white mouse (wheel) + cascading chevrons */
   .scroll-hint{
     position:absolute;left:50%;bottom:1.4cqw;transform:translateX(-50%);
@@ -442,7 +449,10 @@
      이름·역할 정보를 여기서 읽어 텍스처로 굽기 때문이다. */
   .lany-stage .lany{display:none}
   .lany-stage.no3d .lany{display:block}
-  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto;
+  /* 터치를 받는 건 이 호스트다. touch-action 이 없으면 태블릿이 손 닿는 순간
+     기본 제스처를 시작해 pointercancel 을 쏘고, 가벼운 탭이 드래그로 처리된다
+     (캔버스에만 걸어둬서 소용이 없었다). */
+  .lany3d-host{position:absolute;inset:0;z-index:5;pointer-events:auto;touch-action:none;
     opacity:0;transition:opacity .45s ease}
   .lany3d-host.ready{opacity:1}
   /* 원본 Lanyard.css 는 100vh 다. 이 책은 페이지 안에 들어가므로 100% 로 덮는다. */
@@ -612,10 +622,18 @@
     transition:transform .62s cubic-bezier(.4,.05,.2,1)}
   .cc-zoom.no-anim .cc-inner{transition:none !important}
   .cc-zoom .cc.flipped .cc-inner{transform:rotateY(180deg) !important}
+  /* 뒷면을 backface-visibility 로만 걷어내면 안 된다 — 바로 위 .cc 에 걸린
+     drop-shadow(filter)가 3D 컨텍스트를 평평하게 만들어, 엔진에 따라 두 면이
+     겹쳐 그려진다(태블릿에서 앞뒤가 섞여 보이던 것). 그래서 안 보일 면은
+     opacity 로 확실히 끈다. 절반(.31s) 지점에서 바뀌어 도는 중에도 한 면만 보인다.
+     평평해진 엔진에서도 inner+face 회전이 합쳐져 0°/360° 라 글자가 뒤집히지 않는다. */
   .cc-zoom .cc-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;
-    opacity:1 !important;transition:none}
-  .cc-zoom .cc-front{transform:rotateY(0deg) !important}
-  .cc-zoom .cc-back{transform:rotateY(180deg) !important}
+    transition:opacity 0s linear .31s}
+  .cc-zoom .cc-front{transform:rotateY(0deg) !important;opacity:1}
+  .cc-zoom .cc-back{transform:rotateY(180deg) !important;opacity:0}
+  .cc-zoom .cc.flipped .cc-front{opacity:0}
+  .cc-zoom .cc.flipped .cc-back{opacity:1}
+  .cc-zoom.no-anim .cc-face{transition:none}
   .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer}
   @media (max-width:640px){ .cc-zoom{width:70vw;height:98vw;--cw:70vw} }
   .cc-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;
@@ -957,7 +975,7 @@
        children absolutely fill so the 16:9 box wins (img height can't dictate it) */
     .page-media{width:auto;height:auto;aspect-ratio:16/9;flex:none;margin:4.5vw 5vw 0;position:relative;border-radius:5vw;overflow:hidden}
     /* radius on the images themselves — parent overflow-clip can miss position:absolute children */
-    .page-media img,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:5vw}
+    .page-media img,.page-media video,.page-media .fade-stack{position:absolute;inset:0;width:100%;height:100%;border-radius:5vw}
     .page-media .fade-stack{display:none}   /* sec-02: swap the carousel for the single mobile composite */
     .page-media .m-only{display:block}
     .page-text{flex:none;height:auto;overflow:visible;padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
@@ -1174,8 +1192,20 @@
   let idx = 0;
 
   // mobile: swap hero cards to their hi-res 16:9 variants (desktop keeps the portrait crop)
+  // 모바일 소스가 영상이면 <img> 를 통째로 <video> 로 바꾼다(솔루션 파트 사진의 영상 버전).
+  // 소리 없이 도는 배경 영상이라 컨트롤은 달지 않는다. muted·playsinline 은 속성으로도
+  // 넣어야 모바일에서 자동재생이 막히지 않는다.
   if (matchMedia('(max-width:640px)').matches)
-    document.querySelectorAll('img[data-msrc]').forEach(im => { im.src = im.dataset.msrc; });
+    document.querySelectorAll('img[data-msrc]').forEach(im => {
+      const src = im.dataset.msrc;
+      if (!/\.mp4$/i.test(src)) { im.src = src; return; }
+      const v = document.createElement('video');
+      v.className = im.className;
+      v.src = src;
+      v.muted = v.loop = v.autoplay = v.playsInline = true;
+      ['muted', 'loop', 'autoplay', 'playsinline'].forEach(a => v.setAttribute(a, ''));
+      im.replaceWith(v);
+    });
 
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');
@@ -1619,7 +1649,8 @@
   // 첫 프레임부터 다시 튼다. 떠날 때는 멈춰서 안 보이는 영상이 계속 돌지 않게 한다.
   function pageMedia(page, on){
     if (!page) return;
-    page.querySelectorAll('.cover-video, .lead-page video').forEach(v => {
+    // video.media = 모바일에서 사진 자리에 들어간 배경 영상. 떠난 장에서는 멈춰야 한다.
+    page.querySelectorAll('.cover-video, .lead-page video, video.media').forEach(v => {
       if (!on) { v.pause(); return; }
       v.currentTime = 0;
       v.dataset.userPaused = '0';
@@ -2147,15 +2178,14 @@ void main(){
         if (d < -L / 2) d += L;
         const ad = Math.abs(d);
         // 5칸 밖은 아예 빼서 노드 수가 많아도 무겁지 않게 한다
-        // 고리를 한 바퀴 넘길 때 d 의 부호가 확 뒤집힌다. 그대로 두면 그 장이
-        // 화면 한가운데를 가로질러 미끄러져 오면서 밝게 스쳐 지나간다.
-        // 그런 프레임에서는 전환을 꺼서 제자리에 순간이동시킨다.
+        // 제자리에서 다시 시작해야 하는 두 경우:
+        //  · 고리를 한 바퀴 넘겨 d 의 부호가 확 뒤집힌 장
+        //  · 숨어 있는 동안(ad>3) transform 을 못 받아 자리가 낡은 장
+        // 둘 다 그냥 두면 화면 한가운데를 가로질러 밝게 미끄러져 온다.
         const prev = el._d;
         el._d = d;
-        if (prev !== undefined && Math.abs(prev - d) > L / 2) {
-          el.style.transition = 'none';
-          requestAnimationFrame(() => { el.style.transition = ''; });
-        }
+        const jumped = (prev !== undefined && Math.abs(prev - d) > L / 2)
+                    || el.style.visibility === 'hidden';
         // 가까워진 장만 실제로 받는다. 42장을 한꺼번에 받으면 태블릿이 버벅인다.
         if (ad <= 5){
           const im = el.querySelector('img[data-src]');
@@ -2167,11 +2197,16 @@ void main(){
         const rad = ang * Math.PI / 180;
         const x = Math.sin(rad) * R * w / 100;
         const z = (Math.cos(rad) - 1) * R * w / 100;
+        // 순간이동시킬 장은 전환을 끄고 새 자리를 준 뒤, 그 자리를 브라우저에
+        // 확정시키고(offsetWidth) 나서 전환을 되살린다. rAF 로 되돌리면 스타일
+        // 계산이 콜백 뒤에 와서, 살아난 전환을 타고 그대로 미끄러진다.
+        if (jumped) el.style.transition = 'none';
         // 이미지는 항상 불투명. 물러난 정도는 위에 덮는 검정 레이어로만 준다.
         el.style.setProperty('--dim', ad === 0 ? 0 : ad === 1 ? 0.62 : ad === 2 ? 0.80 : 0.90);
         el.style.zIndex = String(50 - ad);
         el.style.transform =
           `translate(-50%,-50%) translate3d(${x}px,0,${z}px) rotateY(${-ang}deg) scale(${ad === 0 ? 1 : 0.78})`;
+        if (jumped){ void el.offsetWidth; el.style.transition = ''; }
         el.classList.toggle('is-center', ad === 0);
       });
       const c = items[cur];
@@ -2472,12 +2507,18 @@ void main(){
     }
     // 마지막 장으로 건너뛰면 6MB 번들을 그 자리에서 받느라 검은 화면이 오래
     // 머문다. 책이 한가해진 뒤 미리 받아 두면 도착했을 때 바로 뜬다.
+    // rel=prefetch 는 힌트일 뿐이라 모바일 크롬이 자주 버린다. 게다가 받아만 두면
+    // 도착해서 6MB 를 파싱하는 시간이 그대로 남는다. 그래서 진짜로 실행해 둔다 —
+    // mount 는 이 장에 왔을 때만 부르므로 미리 실행해도 3D 는 안 뜬다.
     const idle = window.requestIdleCallback || (f => setTimeout(f, 2500));
     idle(() => {
-      if (window.NewtonLanyard) return;
-      const l = document.createElement('link');
-      l.rel = 'prefetch'; l.as = 'script'; l.href = 'assets/lanyard.bundle.js';
-      document.head.appendChild(l);
+      if (window.NewtonLanyard || loading) return;
+      loading = true;
+      const s = document.createElement('script');
+      s.src = 'assets/lanyard.bundle.js';
+      s.onload = () => { loading = false; tryBoot(); };   // 이미 도착해 있으면 바로 붙는다
+      s.onerror = () => { loading = false; };             // 실패해도 도착할 때 다시 받는다
+      document.body.appendChild(s);
     });
 
     new MutationObserver(tryBoot).observe(page, { attributes: true, attributeFilter: ['class'] });
