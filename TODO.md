@@ -1,58 +1,62 @@
 # 남은 작업
 
-## 영상 3편 붙이기 (인코딩만 끝난 상태)
-`assets/` 에 들어와 있고 아직 어느 페이지에도 안 붙었다.
+## 1. 마지막 두 장 전수 검수 (다음 세션 최우선)
+사용자가 하나씩 발견해 알려주는 구조를 끝내는 게 목적이다. 한 번 돌려 표로 받는
+스크립트를 짤 것. 아래 "검수하는 법" 방식으로 실제 브라우저에서 값을 받는다.
 
-| 파일 | 해상도 | 갈 자리 |
-|---|---|---|
-| `bx_logo_sym.mp4` | 1186×450 | Logo 페이지(sec-11). 지금 이미지와 **같은 프레임 안**에서 이미지 → 영상 → 이미지 로 페이드 인아웃 루프. 타이밍은 기존 캐러셀과 동일하게. |
-| `sol_pack.mp4` | 1580×2664 | Solution(sec-04) 좌측 이미지 자리. **데스크톱만** 교체하고 모바일은 기존 이미지 유지. |
-| `lead_home.mp4` | 1920×1080 | Solution 다음 장에 새 풀페이지(패딩 + 라운드만). Products 첫 장(`products-lead`)과 같은 형식, 재생 컨트롤바도 그대로. |
+**아카이빙(archive)**
+- 42장 로드 상태 — 즉시 5장 / 지연 37장이 다가올 때 실제로 붙는지
+- 스테이지 밖으로 넘치는 장이 있는지
+- 칩 6개와 현재 묶음 표시가 어긋나지 않는지
+- 무한 고리에서 어느 위치든 양옆이 채워지는지
+- 탭 확대가 42장 전부에서 열리는지
 
-## 크레딧 페이지 모바일
-3D 캔버스에 모바일 규칙이 없다. 폰 폭에 카드 5장이 가로로 늘어서서 손톱만 해진다.
+**크레딧(credits)**
+- 슬롯 5개 전부에 __band 가 붙는지
+- 카드별로 자기 사람이 열리는지(5장 각각)
+- 드래그 후 반드시 놓이는지(마우스에 안 붙는지)
+- 확대 시 뒷면이 먼저 뜨는지 · 플립이 도는지 · SNS 버튼이 눌리는지
+- 콘솔 에러 0
 
-- 카드 5장을 가로 스크롤 한 줄로. 캔버스는 두고 카메라만 당겨 한 번에 2장쯤 보이게, 스와이프로 넘긴다.
-- 탭 확대·딤·닫기·플립은 데스크톱과 동일하게.
-- `thanks to` 4열 → 2열 (규칙은 이미 넣어둠).
-- WebGL 없거나 `prefers-reduced-motion` 이면 기존 CSS 카드로 폴백. 마크업이 DOM 에 남아 있어 `display` 만 바꾸면 된다.
+## 2. 영상 용량 (사용자 결정 대기)
+C:\Users\user\Downloads\화질비교 에 sc3 네 가지를 뽑아뒀다.
+원본 2560/CRF18 57MB · 1920/CRF18 43MB · 1920/CRF20 33MB · 1920/CRF22 25MB.
+고르면 sc1~sc6, lead_* 전체를 같은 설정으로 교체한다.
+현재 assets 338MB 중 시나리오 영상이 150MB 가량.
 
-## 카드 면을 굽지 말고 편집 가능한 레이어로
-지금은 인물 사진만 캔버스에 구워 텍스처로 넣는다. drei 의 `<Html transform>` 으로
-카드 앞/뒷면에 실제 DOM 을 붙이면 사진·이름·역할 칩·그라디언트가 전부 HTML/CSS 로
-남아 코드에서 실시간 수정이 된다.
+## 3. 미뤄둔 것
+- card.glb(2.3MB) 유지하기로 결정(B안). 3D 번들 6.2MB 그대로.
+- 김소진·박주원 역할 문구 없음.
+- 카드 면이 <Html transform> DOM 이라 drei 의 CSS3D 히트박스가 보이는 카드와
+  어긋난다. 그래서 판정을 getBoundingClientRect() 로 직접 한다.
 
-## 확인 못 한 것
-- 리드 페이지 모바일 블러 필러는 CSS 만 넣고 실제 화면으로는 아직 못 봤다.
-  헤드리스에서 탭 이동이 안 잡혀서다. 로컬에서 눈으로 볼 것.
-- 김소진·박주원 역할 문구가 아직 없다.
+## 검수하는 법 (헤드리스로는 3D 가 안 뜬다 — 실제 크롬 + 서버 로그)
+1. 로그 남는 서버: python -m http.server 8833 --bind 127.0.0.1 > /c/tmp/srv.log 2>&1 &
+2. index.html 사본 끝에 스크립트를 넣고 fetch("/REPORT?"+encodeURIComponent(값))
+   으로 결과를 보낸다. 페이지 이동은 #nzRight 클릭 반복(표지에서 credits 까지 20회).
+3. 실제 크롬으로 연다:
+   "/c/Program Files/Google/Chrome/Application/chrome.exe" --new-window "http://127.0.0.1:8833/사본.html"
+4. 로그에서 읽는다: grep -o 'REPORT?[^ ]*' /c/tmp/srv.log | tail -1
+
+주의
+- 헤드리스 스크린샷은 --use-angle=swiftshader --enable-unsafe-swiftshader 로 WebGL 이
+  뜨지만 GLB 가 안 끝나 3D 는 비어 나온다. 2D 페이지 확인용으로만 쓸 것.
+- 스크린샷 모드에서 --timeout 만 주면 setInterval 이 안 돈다. --virtual-time-budget 필요.
+- 단, 가상시간에서는 CSS 트랜지션이 진행되지 않는다(전환 중 화면으로 오판하기 쉽다).
 
 ## 되돌릴 지점
-- 태그 `css3d-credits` (9118a88) = CSS 3D 크레딧이 동작하던 마지막 지점.
-  `git reset --hard css3d-credits`
+- 태그 css3d-credits (9118a88) = 3D 이전, CSS 카드가 돌던 마지막 지점.
+  git reset --hard css3d-credits
+- main 과 lanyard-3d 는 같은 지점을 가리키게 유지 중(따로 두면 번들에서 충돌).
 
-## 크레딧 페이지 캡쳐하는 법 (이걸 못 찾아서 계속 눈으로 못 보고 수치만 고쳤다)
-```bash
-CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"
-# index.html 끝에 이 스크립트를 넣은 사본을 만들고:
-#   setTimeout(()=>{let n=0;const iv=setInterval(()=>{
-#     const a=document.querySelector('.page.active');
-#     if(a&&a.getAttribute('data-page')==='credits'){clearInterval(iv);return;}
-#     const b=document.getElementById('nzRight'); if(b) b.click();
-#     if(++n>22) clearInterval(iv);},200);},600);
-"$CHROME" --headless=new --no-sandbox --hide-scrollbars \
-  --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist \
-  --window-size=1200,760 --virtual-time-budget=25000 \
-  --user-data-dir=/c/tmp/cap --screenshot=/c/tmp/out.png "http://127.0.0.1:8811/사본.html"
-```
-- WebGL 은 `--use-angle=swiftshader --enable-unsafe-swiftshader` 로 소프트웨어 렌더링해야 잡힌다.
-- **스크린샷 모드에서 `--timeout` 만 주면 setInterval 이 안 돈다.** `--virtual-time-budget` 을 써야
-  페이지 넘기기가 실제로 일어난다. 이걸 몰라서 계속 표지만 찍혔다.
-- 페이지는 21장이고 credits 가 마지막. 표지에서 `#nzRight` 20번.
-- 측정만 할 때는 `--dump-dom` + `--virtual-time-budget` 조합.
-
-## 지금 확인된 것 (위 방법으로 실제 캡쳐)
-- 크레딧 페이지에 **카드가 한 장도 안 보인다**. 캔버스가 비어 있다.
-  `boot()` 재시도 문제는 고쳤으니, 다음은 GLB/텍스처 로딩이나 Band 렌더 실패를 봐야 한다.
-- 그 전 로컬 화면에서는 카드 DOM 이 뒤집힌 채(글자 좌우 반전) 줄과 떨어져 가운데 뭉쳐 있었다.
-  <Html transform> 의 위치·방향이 RigidBody 를 못 따라가는 것으로 보인다.
+## 이번 세션에서 끝낸 것
+- Archive 탭 신설 — 과정 사진 + Designed By 를 하나로
+- 아카이빙 페이지 신설 — 원형 갤러리 · 무한 고리 · 묶음 칩 6개 · 탭 확대 ·
+  거리 기반 스와이프 + 플릭 관성
+- 아카이빙 이미지 249MB → 4.5MB (WebP 1100px), 첫 진입 5장만
+- 3D 카드 — 판정을 보이는 판 기준으로, 카드별 물리 드래그, 확대는 3D 밖 DOM
+  오버레이(딤·블러·SNS 버튼·진짜 3D 플립, 뒷면 우선)
+- 3D 번들 유휴 프리페치 + 로딩 표시, 실패해도 책은 안 죽음
+- 구형 태블릿 대응 — 픽셀비 1.5, 터치 판정 34px/500ms, 물리 중력 -18·감쇠 20
+- 표지 — 한 번 눌러 전체화면, 코드펜 터치 애니메이션, 상하 딤 완화
+- 크레딧 THANKS TO 영문 대문자
