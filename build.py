@@ -728,7 +728,7 @@ products_page = f'''
 # 가로형 판인데 이미지 자리가 카드 두 장으로 갈린다. 원본의 설명 문구는 임시라
 # 책의 실제 내용(모바일 GUI 장 · 시뮬레이터)에 맞춰 다시 썼다.
 # 버튼 링크는 아직 없다. 주소가 정해지면 이 한 줄만 채우면 된다.
-TRY_CTA_URL = ""
+TRY_CTA = {"app": "", "sim": ""}   # 주소가 정해지면 여기만 채우면 링크가 붙는다
 TRY_KICKER = "Try It Yourself"
 TRY_TITLE = "Newton을 직접\n만져볼 수 있게"
 TRY_BODY = ("UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바이브 코딩하며 곧바로 "
@@ -737,24 +737,33 @@ TRY_BODY = ("UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바�
             "하드웨어 없이도 지면 위에 펼쳐지는 움직임 가이드를 그대로 보여줍니다.\n"
             "아래 버튼을 눌러 직접 만져볼 수 있습니다.")
 
+ARROW_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>'
+
+def try_card(key, cls, media, title, by):
+    """두 카드는 짜임새가 같다 — 목업 / 스크림 / 제목·크레딧·버튼 (피그마 실측)."""
+    url = TRY_CTA[key]
+    href = f' href="{url}" target="_blank" rel="noopener"' if url else ' aria-disabled="true"'
+    return f'''<div class="try-card {cls}">
+      {media}
+      <div class="try-scrim"></div>
+      <p class="try-title">{title}</p>
+      <p class="try-by"><span>{by}</span><span>Designed &amp; Dev By</span></p>
+      <a class="try-cta"{href}>View Now {ARROW_SVG}</a>
+    </div>'''
+
 def try_page():
-    href = f' href="{TRY_CTA_URL}" target="_blank" rel="noopener"' if TRY_CTA_URL else ' aria-disabled="true"'
-    arrow = ('<svg viewBox="0 0 24 24" aria-hidden="true">'
-             '<path d="M5 12h13M13 6l6 6-6 6"/></svg>')
+    app = try_card("app", "try-app",
+                   '<img class="try-mock" src="assets/try_app.png" alt="" loading="lazy">',
+                   "Newton’s Mobile App", "Dabin Jeon")
+    sim = try_card("sim", "try-sim",
+                   '<img class="try-shot" src="assets/try_sim.jpg" alt="" loading="lazy">',
+                   "Newton’s Projector Simulator", "Ilyeo Lee")
     return f'''
 <div class="page wide-page" data-page="try">
   <div class="wide-text">{head_block(TRY_KICKER, TRY_TITLE, TRY_BODY)}</div>
   <div class="wide-media try-pair">
-    <div class="try-card try-app"><img src="assets/try_app.png" alt="" loading="lazy"></div>
-    <div class="try-card try-sim">
-      <img class="try-shot" src="assets/try_sim.jpg" alt="" loading="lazy">
-      <div class="try-scrim"></div>
-      <div class="try-info">
-        <p class="try-title">Newton’s Projector Simulator</p>
-        <p class="try-by">Designed &amp; Dev By Ilyeo Lee</p>
-        <a class="try-cta"{href}>View Now {arrow}</a>
-      </div>
-    </div>
+    {app}
+    {sim}
   </div>
 </div>'''
 

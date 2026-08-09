@@ -271,25 +271,31 @@
     #D1FEFF 0%, #FEC389 6.49%, #FE6E3C 16.83%, #FA3030 41.68%)}
   .try-sim{background:linear-gradient(180deg,
     #FA3030 0%, #910F0F 6.34%, #511815 16.64%, #091212 41.27%)}
-  /* 세 대의 목업은 카드 위쪽에 걸쳐 놓인다(피그마 460/588 폭) */
-  .try-app img{position:absolute;left:10.9%;top:3.8%;width:78.2%;height:auto;display:block}
-  .try-shot{position:absolute;left:16%;top:12.5%;width:68.2%;height:52.3%;
-    object-fit:cover;border-radius:1cqw;display:block}
-  /* 스크린샷 아래를 어둠으로 덮어 글이 얹힐 바닥을 만든다(피그마 Rectangle 1954132191) */
-  .try-scrim{position:absolute;left:-2%;right:-2%;top:46.1%;height:56.8%;
-    background:linear-gradient(180deg,rgba(9,18,18,0) 0%,rgba(9,18,18,1) 80%)}
-  .try-info{position:absolute;left:20.2%;right:20.2%;top:66.8%;text-align:center;color:#fff}
-  .try-title{margin:0;font-size:2.561cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
-  .try-by{margin:0.5cqw 0 0;font-size:1.189cqw;font-weight:400;color:#FAFAFA;
-    display:flex;justify-content:center;gap:0.5cqw}
-  /* 흰 알약 버튼. 링크는 나중에 붙는다 — 그때까지는 눌러도 아무 데도 안 간다. */
-  .try-cta{display:inline-flex;align-items:center;gap:0.6cqw;margin-top:1.4cqw;
-    padding:0.9cqw 2.2cqw;border-radius:999px;background:#fff;color:#091212;
+  /* 아래 %는 전부 피그마 카드(588x449) 실측을 나눈 값이다. 두 카드는 짜임새가
+     같고 스크림 색만 다르다 — 왼쪽은 레드로, 오른쪽은 딥다크로 빠진다. */
+  .try-mock{position:absolute;left:10.884%;top:3.786%;width:78.231%;height:auto;display:block}
+  .try-shot{position:absolute;left:15.986%;top:12.472%;width:68.197%;height:52.339%;
+    object-fit:cover;border-radius:2.041%;display:block}
+  /* 목업 아래를 카드 색으로 덮어 글이 얹힐 바닥을 만든다(Rectangle 1954132191).
+     카드보다 넓어서 좌우로 조금 삐져나온 채로 그려진다 — 그것도 실측 그대로다. */
+  .try-scrim{position:absolute;left:-1.701%;width:101.701%;top:46.102%;height:56.793%}
+  .try-app .try-scrim{background:linear-gradient(180deg,rgba(250,48,48,0) 0%,rgba(250,48,48,1) 80%)}
+  .try-sim .try-scrim{background:linear-gradient(180deg,rgba(9,18,18,0) 0%,rgba(9,18,18,1) 80%)}
+  .try-card>.try-title,.try-card>.try-by,.try-card>.try-cta{
+    position:absolute;left:20.068%;width:59.864%;margin:0;text-align:center;color:#fff}
+  .try-title{top:66.815%;font-size:2.561cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .try-by{top:75.056%;font-size:1.189cqw;font-weight:400;color:#FAFAFA;line-height:1.2;
+    display:flex;justify-content:center;gap:0.747cqw}
+  /* 알약 버튼은 카드 위에 얹힌 흰색 20% 다(양쪽 카드 같은 값). 링크는 나중에
+     붙는다 — 그때까지는 눌러도 아무 데도 안 간다. */
+  .try-cta{top:82.851%;left:50%;transform:translateX(-50%);width:40.306%;height:13.140%;
+    display:flex;align-items:center;justify-content:center;gap:0.6cqw;
+    border-radius:999px;background:rgba(255,255,255,.20);color:#fff;
     font-size:1.646cqw;font-weight:700;text-decoration:none;letter-spacing:-.02em;
-    transition:transform .18s ease, box-shadow .18s ease}
-  .try-cta:hover{transform:translateY(-0.15cqw);box-shadow:0 0.6cqw 1.6cqw rgba(0,0,0,.35)}
+    transition:background .18s ease, transform .18s ease}
+  .try-cta:hover{background:rgba(255,255,255,.30);transform:translateX(-50%) translateY(-0.15cqw)}
   .try-cta svg{width:1.5cqw;height:1.5cqw;fill:none;stroke:currentColor;stroke-width:2.2;
-    stroke-linecap:round;stroke-linejoin:round}
+    stroke-linecap:round;stroke-linejoin:round;flex:none}
   .try-cta[aria-disabled="true"]{cursor:default}
   @media (max-width:640px){
     /* 폰에서는 두 장을 위아래로 쌓는다 — 나란히 두면 목업이 손톱만 해진다 */
@@ -297,7 +303,7 @@
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
     .try-by{font-size:3vw;gap:2vw}
-    .try-cta{font-size:4vw;padding:2.6vw 6vw;gap:2vw;margin-top:3.5vw}
+    .try-cta{font-size:4vw;gap:2vw}
     .try-cta svg{width:4vw;height:4vw}
   }
 
