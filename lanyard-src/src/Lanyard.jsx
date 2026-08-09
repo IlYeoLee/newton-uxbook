@@ -24,10 +24,8 @@ export default function Lanyard({
   // 원본(reactbits)이 -40 이다. 구형 태블릿을 잡겠다고 -18 까지 낮춰뒀는데,
   // 떨림을 잡는 건 각감쇠지 중력이 아니었다. 낮은 중력 + 높은 선감쇠가 겹쳐
   // 카드가 물속처럼 내려왔다. 원본 값으로 되돌린다(종단속도 40/4 = 초당 10).
-  // 전시는 태블릿으로 한다. 카드가 계속 흔들리면 손가락이 닿는 순간 이미 자리를
-  // 떠서 눌리지 않는다(기기 로그에서 판정이 X 로 찍힌 순간들이 그것이다).
-  // 움직이는 과녁을 없애는 쪽이 먼저다 — 가라앉는 중력으로 되돌린다.
-  gravity = [0, -18, 0],
+  // 원본(reactbits)이 -40 이다. 낮추면 카드가 물속처럼 느리게 오간다.
+  gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
   imageFit = 'cover',
@@ -128,7 +126,7 @@ function Band({
   // 두 감쇠는 하는 일이 다르다. 각감쇠 20 은 구형 태블릿에서 줄이 떨리는 걸 잡아준다.
   // 선감쇠는 낙하 속도를 정한다(종단속도 ≈ 중력/선감쇠). 20 이면 0.9/초라, 카드를
   // 공중으로 날린 뒤 제자리로 오는 데 몇 초가 걸려 물속처럼 보였다. 4 면 4.5/초.
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 20, linearDamping: 8 };   // 8 = 빨리 가라앉되 물속처럼 늦지는 않게
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 20, linearDamping: 4 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
   const { camera } = useThree();
@@ -229,13 +227,11 @@ function Band({
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
 
       // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
-      // 아주 미세한 흔들림만 남긴다. 예전 값(0.004)은 카드가 눈에 띄게 미끄러져
-      // 손가락이 닿을 때쯤 자리를 떠 있었다. 1/8 로 줄이면 살아 있는 느낌은
-      // 남으면서 과녁은 사실상 제자리다.
+      // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
       if (!dragged && !zoomed) {
         const t = state.clock.elapsedTime;
-        const w = Math.sin(t * 0.4 + index * 1.73) * 0.0005;
-        j2.current.applyImpulse({ x: w, y: 0, z: w * 0.3 }, true);
+        const w = Math.sin(t * 0.55 + index * 1.73) * 0.004 + Math.sin(t * 1.31 + index * 2.4) * 0.0015;
+        j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
       }
     }
   });
