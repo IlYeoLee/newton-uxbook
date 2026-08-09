@@ -656,7 +656,15 @@
             mask-image:linear-gradient(180deg,#000 0%,#000 52%,rgba(0,0,0,.12) 100%)}
   .cc-chips{position:absolute;left:0;right:0;top:87.8%;display:flex;
     gap:calc(var(--cw)*.0152);justify-content:center}
-  .cc-chips-top{top:15%}
+  /* 뒷면은 흐름 배치다. %로 못 박아 두면 줄 수가 사람마다 달라(2~6줄) 어떤
+     카드는 버튼이 글에 겹치고 어떤 카드는 아래가 휑하게 빈다. 위아래 여백만
+     정해 두고 칩·역할·버튼·이름을 한 덩이로 가운데 세운다. */
+  .cc-back{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:calc(var(--cw)*.05);padding:calc(var(--cw)*.12) calc(var(--cw)*.08);
+    box-sizing:border-box}
+  .cc-back>.cc-chips-top,.cc-back>.cc-desc,.cc-back>.cc-links,.cc-back>.cc-sig{
+    position:static;left:auto;right:auto;top:auto;bottom:auto;margin:0;
+    width:auto;max-width:100%}
   .cc-chip{min-width:calc(var(--cw)*.152);height:calc(var(--cw)*.094);border-radius:999px;
     background:rgba(255,255,255,.2);color:#fff;font-family:'OffBit','Supreme',sans-serif;font-size:calc(var(--cw)*.068);font-weight:700;
     letter-spacing:-.04em;display:grid;place-items:center;padding:0 calc(var(--cw)*.036)}
@@ -726,13 +734,9 @@
   .cc-zoom .cc.flipped .cc-back{opacity:1}
   .cc-zoom.no-anim .cc-face{transition:none}
   .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer}
-  /* 확대된 뒷면은 카드 모서리에서 최소 40px 을 비운다. 피그마 비율(%)만 쓰면
-     칩·글·버튼이 모서리에 붙는다. 작은 3D 카드는 비율 그대로 둔다 — 거기서
-     40px 은 카드를 통째로 먹는다. */
-  .cc-zoom .cc-chips-top{top:max(15%,40px)}
-  .cc-zoom .cc-desc{left:max(8%,40px);right:max(8%,40px);bottom:36%}
-  .cc-zoom .cc-sig{bottom:40px}
-  .cc-zoom .cc-links{bottom:calc(40px + var(--cw)*.0528 + 8px)}
+  /* 확대된 뒷면은 카드 모서리에서 최소 40px 을 비운다. 작은 3D 카드에는 걸지
+     않는다 — 거기서 40px 은 카드를 통째로 먹는다. */
+  .cc-zoom .cc-back{padding:max(calc(var(--cw)*.12),40px) max(calc(var(--cw)*.08),40px)}
   @media (max-width:640px){ .cc-zoom{width:70vw;height:98vw;--cw:70vw} }
   .cc-dim{position:absolute;inset:0;background:rgba(0,0,0,.72);opacity:0;pointer-events:none;
     -webkit-backdrop-filter:blur(0.9cqw);backdrop-filter:blur(0.9cqw);
