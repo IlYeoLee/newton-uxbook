@@ -12,7 +12,9 @@ def brand(s):
     """원고(피그마 영한검수)의 표기는 Newton 하나다. 옛 원고의 대문자 NEWTON 이
     본문·토글·영문 번역에 뒤섞여 남아 있어서, 내보내는 자리에서 한 번에 맞춘다.
     로고와 크레딧 라벨은 이 길을 타지 않으므로 대문자 그대로 남는다."""
-    return re.sub(r'\bNEWTON\b', 'Newton', s or "")
+    # \b 로는 "NEWTON은" 처럼 한글 조사가 바로 붙은 경우를 못 잡는다(한글도 단어
+    # 문자라 경계가 안 생긴다). 앞뒤로 라틴 글자·숫자만 아니면 된다.
+    return re.sub(r'(?<![A-Za-z0-9])NEWTON(?![A-Za-z0-9])', 'Newton', s or "")
 
 def esc(s):
     return ihtml.escape(brand(s), quote=False)
@@ -192,9 +194,17 @@ def render_callout(node):
     if body_children and body_children[0]["t"] == "P":
         first = body_children[0].get("x", "")
         if "\n" in first:
-            label, headline = first.split("\n", 1)
-            head_html = (f'<p class="finding-label"{en_attr(label.strip())}>{esc(strip_lead_emoji(label.strip()))}</p>'
-                         f'<p class="finding-headline"{en_attr(headline.strip())}>{esc(strip_lead_emoji(headline.strip()))}</p>')
+            label, headline = (s.strip() for s in first.split("\n", 1))
+            # 원본에서 첫 문단은 두 가지 뜻으로 쓰인다.
+            #   "신체활동 부족 근거⏎전 세계 성인의 약 31%…"  → 분류 라벨 + 주장
+            #   "…경험의 차별화⏎기존 제품은 각각 바닥에 …"    → 제목 + 본문 한 덩이
+            # 뒷줄 길이로 갈린다 — 실제 데이터가 45자 이하와 141자 이상으로 뚝 끊긴다.
+            if len(headline) > 80:
+                head_html = (f'<p class="finding-title"{en_attr(label)}>{esc(strip_lead_emoji(label))}</p>'
+                             + render_p(headline))
+            else:
+                head_html = (f'<p class="finding-label"{en_attr(label)}>{esc(strip_lead_emoji(label))}</p>'
+                             f'<p class="finding-headline"{en_attr(headline)}>{esc(strip_lead_emoji(headline))}</p>')
         else:
             head_html = f'<p class="finding-title"{en_attr(first)}>{esc(strip_lead_emoji(first))}</p>'
         body_children = body_children[1:]
