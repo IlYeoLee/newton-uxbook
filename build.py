@@ -28,6 +28,9 @@ def en_attr(ko):
     if not e:
         _missing.add(ko)
         return ""
+    e = strip_lead_emoji(e)   # 한글에서 뗀 이모지가 영문에는 남아 있었다
+    if not e:
+        return ""
     return ' data-en="' + ihtml.escape(e, quote=True).replace("\n", " ") + '"'
 
 # hero images have hi-res 16:9 mobile variants (desktop keeps its portrait crop)
@@ -89,7 +92,12 @@ def render_p(text):
     text = text.strip()
     if not text:
         return ""
-    a = en_attr(text)
+    a = en_attr(text)   # 번역 키는 이모지가 붙은 원문이다 — 먼저 뽑아둔다
+    # 외부 이모지는 쓰지 않는다. 아이콘 자리는 뉴턴 심볼 하나뿐이고, 문장 앞
+    # 이모지(🦵 ⚡ 🫂 …)는 원본 노션의 흔적이라 전부 걷어낸다.
+    text = strip_lead_emoji(text)
+    if not text:
+        return ""
     if is_citation(text):
         return f'<p class="cite"{a}>{linkify(esc(text))}</p>'
     # numbered sub-title "01 …" → bold heading (+ body when it carries a description line)
@@ -120,16 +128,53 @@ def render_quote(node):
     return f'<blockquote class="quote"{en_attr(node["x"])}>{esc(node["x"])}</blockquote>{inner}'
 
 def render_toggle(node):
-    body = render_children(node.get("c", []))
+    body = render_toggle_body(node.get("c") or [])
     return f'<details class="toggle"><summary{en_attr(node["x"])}>{esc(node["x"])}</summary><div class="toggle-body">{body}</div></details>'
 
+def render_toggle_body(kids):
+    """토글 안은 어느 깊이에서나 두 가지뿐이다 — 카드, 아니면 중첩 토글.
+    원본에서 맨 문단·그림이 카드 밖으로 흘러다니던 것을 한 장의 카드로 묶는다.
+    같은 토글 안에서 어떤 덩어리는 카드고 어떤 덩어리는 맨 텍스트이던 게 이 자리다."""
+    out, run = [], []
+
+    def flush():
+        if run:
+            out.append(render_callout({"t": "CALLOUT", "x": "", "card": True, "c": list(run)}))
+            run.clear()
+
+    i = 0
+    while i < len(kids):
+        n = kids[i]
+        t = n["t"]
+        if t == "HR":            # 카드로 나누고 나면 구분선이 할 일이 없다
+            i += 1
+        elif t == "CALLOUT":
+            flush()
+            out.append(render_callout(n))
+            i += 1
+        elif t == "TOGGLE":
+            flush()
+            tg = []
+            while i < len(kids) and kids[i]["t"] == "TOGGLE":
+                tg.append(render_toggle(kids[i]))
+                i += 1
+            out.append(f'<div class="group">{"".join(tg)}</div>')
+        else:
+            run.append(n)
+            i += 1
+    flush()
+    return "".join(out)
+
 def strip_lead_emoji(s):
-    return re.sub(r'^[\U0001F000-\U0001FAFF☀-➿←-⇿️\s]+', '', s or "")
+    s = re.sub(r'^[\U0001F000-\U0001FAFF☀-➿←-⇿️\s]+', '', s or "")
+    # 문장 가운데 쓰인 딩뱃 화살표는 뜻이 있어 남기되, 보통 화살표로 바꾼다
+    # (외부 이모지 폰트에 기대지 않는다).
+    return s.replace("➔", "→").replace("➜", "→").replace("➡", "→")
 
 def render_callout(node):
     x = node.get("x", "")
     children = node.get("c", [])
-    if not x:
+    if not x and not node.get("card"):
         return render_children(children)   # toggles inside get grouped by render_children
     body_children = list(children)
     head_html = ""
@@ -269,6 +314,53 @@ def render_children(items, group_toggles=True):
     return "".join(out)
 
 items = copy.deepcopy(data)
+
+# ---- 토글 안을 한 벌로 맞춘다 ----
+# 원본 노션은 토글마다 짜임새가 다르다. 데스크리서치는 콜아웃 카드(라벨·주장·본문·
+# 출처)로 정리돼 있는데, Evidence 항목은 맨 문단으로 풀려 있고 출처는 그 안에 또
+# "근거" 토글로 접혀 있었다. 근거는 접어둘 것이 아니라 그 주장 바로 밑에 붙어 있어야
+# 읽힌다. 데스크리서치 쪽을 기준으로 삼아 Evidence 를 같은 카드로 바꾼다.
+EVIDENCE_RE = re.compile(r'^\s*Evidence\s*0*(\d+)\s*[:：]\s*(.+)$', re.S)
+
+def unify_toggles(nodes):
+    out = []
+    for n in nodes:
+        n = dict(n)
+        if n.get("c"):
+            n["c"] = unify_toggles(n["c"])
+        if n["t"] == "TOGGLE":
+            x = (n.get("x") or "").strip()
+            if x == "근거":
+                # 토글을 벗겨 출처 줄만 남긴다. 자식이 먼저 처리되므로 이 시점엔
+                # 부모(Evidence) 카드의 맨 끝에 그대로 얹힌다.
+                cites = []
+                for c in n["c"]:
+                    t = (c.get("x") or "").strip()
+                    if c["t"] != "P" or not t:
+                        continue
+                    # URL 만 있는 줄은 바로 앞 참고문헌에 이어 붙인다. 따로 두면
+                    # 출처 하나가 두 줄로 갈려 각주 번호와 링크가 따로 논다.
+                    if cites and re.fullmatch(r'https?://\S+', t):
+                        cites[-1]["x"] = cites[-1]["x"].rstrip() + " " + t
+                    else:
+                        cites.append({"t": "P", "x": t})
+                out += cites
+                continue
+            m = EVIDENCE_RE.match(x)
+            if m:
+                claim = m.group(2).strip()
+                # 영문판은 요약문 하나("Evidence 02 : …")로만 있다. 라벨과 주장으로
+                # 쪼개 넣지 않으면 토글을 카드로 바꾸는 순간 영문이 통째로 사라진다.
+                en = TRANS.get(x) or TRANS.get(x.replace("\n", " "))
+                if en and " : " in en:
+                    TRANS.setdefault(claim, en.split(" : ", 1)[1].strip())
+                head = {"t": "P", "x": f"Evidence {int(m.group(1)):02d}\n{claim}"}
+                out.append({"t": "CALLOUT", "x": "", "card": True, "c": [head] + n["c"]})
+                continue
+        out.append(n)
+    return out
+
+items = unify_toggles(items)
 
 # ---- latest text (patches applied to node .x by exact match) ----
 TEXT_PATCHES = {
@@ -507,6 +599,11 @@ WIDE_PAGES = {"10", "11", "12", "13"}
 # (심볼 1186×450 ≈ 로고 사진 1185×449).
 WIDE_VIDEO = {"11": "logo_symbol.mp4"}
 
+# 좌우 2단 페이지에서 왼쪽 사진 자리를 통째로 채우는 세로형 영상.
+# 모바일은 원래 쓰던 16:9 합성본(MOBILE_SRC)으로 갈린다 — 세로 영상을 16:9 자리에
+# 넣으면 cover 로 잘려서 화면이 거의 안 보인다.
+PAGE_VIDEO = {"04": ("pack_proto.mp4", "m5.mp4")}
+
 KICKER_OVERRIDE = {"03": "For Those Who Turn Trends Into Play", "08": "(1) A Spark to Move"}
 
 # 다중 이미지 페이지 → 데스크톱은 슬라이딩 캐러셀, 모바일은 16:9 합성 한 장.
@@ -569,7 +666,12 @@ def render_page(marker, seg):
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
     car = CAROUSEL.get(num)
-    if car:
+    pv = PAGE_VIDEO.get(num)
+    if pv:
+        src, msrc = pv
+        media_html = (f'<video class="media" src="assets/{src}" data-msrc="assets/{msrc}" '
+                      f'muted loop autoplay playsinline preload="metadata"></video>')
+    elif car:
         names, mobile = car
         seq = names + names[:1]   # last = first, for a seamless loop with no white gap
         # desktop: sliding carousel; mobile: single hi-res 16:9 composite
@@ -622,9 +724,11 @@ PEOPLE = [
      "sns": {"instagram": "https://www.instagram.com/leeilyeoo",
              "behance": "https://www.behance.net/leeilyeoo"}},
     {"ko": "김소진", "en": "SoJin Kim", "img": "person3", "roles": ["ID"],
+     "desc": ["Product Design", "Prototyping", "3D Modeling", "3D Rendering"],
      "sns": {"instagram": "https://www.instagram.com/o3_so_j",
              "behance": "https://www.behance.net/sojin_"}},
     {"ko": "박주원", "en": "Juwon Park", "img": "person4", "roles": ["ID"],
+     "desc": ["Product Design", "Prototyping", "3D Modeling", "3D Rendering"],
      "sns": {"instagram": "https://www.instagram.com/juparki_03"}},     # 비핸스 없음
     {"ko": "전다빈", "en": "Dabin Jeon", "img": "person5", "roles": ["VD"],
      "desc": ["Logo & Graphic Design", "Mobile GUI Design & Development",
@@ -802,6 +906,9 @@ for m in PAGE_ORDER:
     if m == FIRST_PRODUCT:
         pages_out.append(lead_page("products-lead", "lead_products.mp4"))
     pages_out.append(render_page(m, seg_of[m]))
+    if m == "04 Solution":
+        # Solution 바로 뒤: 앱 홈 영상 한 장. 탭의 첫 장(products-lead)과 같은 판이다.
+        pages_out.append(lead_page("home-lead", "home_full.mp4"))
     if m == LAST_PRODUCT:
         pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
         pages_out.append(playwith_page)
@@ -821,7 +928,7 @@ intro_page_html = render_vertical("intro", "Now, Your Turn!",
 # label, first page, member pages
 NAV_GROUPS = [
     ("Background", "sec-01", ["sec-01", "sec-02", "sec-03"]),
-    ("Solution", "sec-04", ["sec-04"]),
+    ("Solution", "sec-04", ["sec-04", "home-lead"]),
     # 탭을 누르면 전면 영상부터 나온다 → target 이 lead 페이지다
     ("Products", "products-lead", ["products-lead", "sec-05", "sec-07", "sec-06"]),
     ("Scenario", "scenario-lead", ["scenario-lead", "playwith", "sec-08"]),
