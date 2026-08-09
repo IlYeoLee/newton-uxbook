@@ -2981,11 +2981,15 @@ void main(){
       // 고른다 — 그게 눈에 보이는 카드다.
       const pick = e => {
         // drei 가 Html 을 어디에 붙이든 찾도록 문서 전체에서 고른다.
-        // 손가락은 마우스만큼 정확하지 않다 — 가장자리를 조금 넓혀 잡는다.
+        // 재는 것은 판(.cc3d-slot)이 아니라 그 안의 카드(.cc)다. 판은 줄이 매달린
+        // 자리에 붙어 있고 카드는 거기서 아래로 늘어져 있어서, 판을 재면 카드
+        // 위쪽만 눌린다 — 태블릿에서 카드 한복판을 눌러도 안 먹던 게 이것이다.
+        // 손가락은 마우스만큼 정확하지 않으니 가장자리를 조금 넓혀 잡는다.
         const pad = 10;
         const slots = [...document.querySelectorAll('.cc3d-slot')];
         for (let i = slots.length - 1; i >= 0; i--) {
-          const r = slots[i].getBoundingClientRect();
+          const box = slots[i].querySelector('.cc') || slots[i];
+          const r = box.getBoundingClientRect();
           if (!r.width) continue;
           if (e.clientX >= r.left - pad && e.clientX <= r.right + pad &&
               e.clientY >= r.top - pad && e.clientY <= r.bottom + pad) return slots[i];
