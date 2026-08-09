@@ -661,13 +661,16 @@ ARCHIVE = [
 ]
 
 def archive_page():
+    # 42장을 한꺼번에 받으면 태블릿에서 첫 진입이 오래 걸린다. 처음엔 앞의
+    # 다섯 장만 실제로 받고, 나머지는 가까워질 때 스크립트가 붙인다.
     items, n = "", 0
     for ko, en, cnt in ARCHIVE:
         for _ in range(cnt):
             n += 1
+            attr = "src" if n <= 5 else "data-src"
             items += ('<figure class="ar-item" data-ko="%s" data-en="%s">'
-                      '<img src="assets/arch%02d.webp" alt="" loading="lazy" draggable="false">'
-                      '</figure>') % (esc(ko), esc(en), n)
+                      '<img %s="assets/arch%02d.webp" alt="" decoding="async" draggable="false">'
+                      '</figure>') % (esc(ko), esc(en), attr, n)
     chips, at = "", 0
     for i, (ko, en, cnt) in enumerate(ARCHIVE):
         chips += ('<button class="ar-chip" type="button" data-at="%d" data-no="%02d">%s</button>' % (at, i + 1, esc(en)))

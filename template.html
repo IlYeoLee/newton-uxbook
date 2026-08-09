@@ -2148,6 +2148,11 @@ void main(){
           el.style.transition = 'none';
           requestAnimationFrame(() => { el.style.transition = ''; });
         }
+        // 가까워진 장만 실제로 받는다. 42장을 한꺼번에 받으면 태블릿이 버벅인다.
+        if (ad <= 5){
+          const im = el.querySelector('img[data-src]');
+          if (im){ im.src = im.dataset.src; im.removeAttribute('data-src'); }
+        }
         if (ad > 3){ el.style.visibility = 'hidden'; return; }
         el.style.visibility = 'visible';
         const ang = d * STEP;
