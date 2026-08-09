@@ -2574,17 +2574,16 @@ void main(){
       const d = e.clientX - sx;
       // 한 번에 여러 칸이 넘어가면 "다다다닥" 하고 지나쳐 원하는 장에 못 세운다.
       // 한 제스처 이벤트당 한 칸만, 그리고 최소 간격을 둬서 연발을 막는다.
-      // 약하게 툭 하면 한 장, 세게 휘두르면 속도에 비례해 여러 장.
-      const step = stage.clientWidth * 0.05;
-      const now = Date.now();
-      if (Math.abs(d) > step){
-        const dt = Math.max(1, now - (lastStep || now));
-        const v = Math.abs(d) / dt;                       // px/ms
-        const k = v > 1.6 ? Math.min(4, Math.round(v)) : 1;
-        if (now - lastStep > (k > 1 ? 60 : 120)){
-          go(cur - Math.sign(d) * k);
-          sx = e.clientX; lastStep = now; dragged = true;
-        }
+      // 넘어가는 장 수는 오직 "끈 거리"로만 정한다. 속도로 계산하면 가볍게 툭
+      // 쳐도 두세 장씩 후루룩 넘어가 원하는 장에 못 세운다.
+      // 한 칸(화면 폭 5.5%)을 끌 때마다 정확히 한 장씩.
+      const step = stage.clientWidth * 0.055;
+      let rest = e.clientX - sx;
+      while (Math.abs(rest) > step){
+        go(cur - Math.sign(rest));
+        sx += Math.sign(rest) * step;
+        rest = e.clientX - sx;
+        dragged = true;
       }
     });
     stage.addEventListener('pointerup', e => {
