@@ -21,7 +21,10 @@ extend({ MeshLineGeometry, MeshLineMaterial });
 export default function Lanyard({
   people = [],
   position = [0, 0, 20],
-  gravity = [0, -18, 0],
+  // 원본(reactbits)이 -40 이다. 구형 태블릿을 잡겠다고 -18 까지 낮춰뒀는데,
+  // 떨림을 잡는 건 각감쇠지 중력이 아니었다. 낮은 중력 + 높은 선감쇠가 겹쳐
+  // 카드가 물속처럼 내려왔다. 원본 값으로 되돌린다(종단속도 40/4 = 초당 10).
+  gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
   imageFit = 'cover',

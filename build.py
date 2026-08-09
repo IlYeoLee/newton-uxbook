@@ -67,10 +67,12 @@ MODE_TABLE = [
 ]
 
 def render_table():
-    head = "".join(f"<th>{h}</th>" for h in ["Mode", "제품 의미", "개입 타이밍", "기구적 개입", "사용자 체감"])
+    # 표만 영문이 통째로 비어 있었다 — 칸마다 data-en 을 단다
+    head = "".join(f"<th{en_attr(h)}>{h}</th>"
+                   for h in ["Mode", "제품 의미", "개입 타이밍", "기구적 개입", "사용자 체감"])
     rows = ""
     for r in MODE_TABLE:
-        rows += "<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>"
+        rows += "<tr>" + "".join(f"<td{en_attr(c)}>{esc(c)}</td>" for c in r) + "</tr>"
     return f'<div class="table-wrap"><table><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>'
 
 def is_subhead(text):
@@ -543,7 +545,7 @@ def head_block(kicker, title, body, step=False, sub=""):
     tt = "<br>".join(esc(l.strip()) for l in title.split("\n"))
     t = f'<h2 class="head-title"{en_attr(title)}>{tt}</h2>'
     if sub:
-        t = f'<div class="head-titlecol">{t}<p class="head-credit">{esc(sub)}</p></div>'
+        t = f'<div class="head-titlecol">{t}<p class="head-credit"{en_attr(sub)}>{esc(sub)}</p></div>'
     b = ""
     if body:
         bb = "<br>".join(linkify(esc(l)) for l in body.split("\n"))
@@ -649,10 +651,13 @@ def render_page(marker, seg):
         hero, rest2 = extract_hero(rest)
         car = CAROUSEL.get(num)
         if num in WIDE_VIDEO:
-            # 사진 대신 영상. 소리도 조작할 것도 없으니 v-figure 의 재생 막대는 안 단다.
-            # 루프 이음매는 스크립트가 앞뒤를 페이드로 물린다(.loop-fade).
-            media = (f'<video class="loop-fade" src="assets/{WIDE_VIDEO[num]}" '
-                     f'muted loop autoplay playsinline preload="auto"></video>')
+            # 가이드 사진을 먼저 2초 보여준 뒤 심볼 모션으로 넘어간다. 넘어가는
+            # 순간은 영상 앞머리 페이드가 만들고(loop-fade), 사진은 같은 길이로
+            # 지워지기만 한다. 소리도 조작할 것도 없어 재생 막대는 안 단다.
+            still = img_tag(hero["src"], cls="media lf-still") if hero else ""
+            media = (still +
+                     f'<video class="loop-fade" src="assets/{WIDE_VIDEO[num]}" '
+                     f'muted loop playsinline preload="auto"></video>')
         elif car:
             names, _ = car
             seq = names + names[:1]
