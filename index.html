@@ -2985,6 +2985,38 @@ void main(){
       // 판의 히트박스가 보이는 카드와 어긋나 모서리만 먹었다. 호스트가 전부 받고
       // 화면상 사각형으로 어느 카드인지 직접 고른다. 겹치면 앞쪽(뒤에 그린 것)을
       // 고른다 — 그게 눈에 보이는 카드다.
+      // ?dbg=1 로 열면 판정 사각형을 화면에 그대로 그린다. 컴퓨터에서는 되는데
+      // 태블릿에서만 안 먹는 이유를 눈으로 확인하려는 것이다 — 사각형이 카드와
+      // 겹쳐 보이면 판정은 맞는 것이고, 어긋나 보이면 그만큼이 원인이다.
+      if (location.search.includes('dbg=1')) {
+        const layer = document.createElement('div');
+        layer.style.cssText = 'position:fixed;inset:0;z-index:99998;pointer-events:none';
+        document.body.appendChild(layer);
+        const marks = [];
+        (function paint(){
+          const slots = [...document.querySelectorAll('.cc3d-slot')];
+          while (marks.length < slots.length) {
+            const m = document.createElement('div');
+            m.style.cssText = 'position:fixed;border:2px solid #0f0;box-sizing:border-box';
+            layer.appendChild(m); marks.push(m);
+          }
+          slots.forEach((s, i) => {
+            const r = s.getBoundingClientRect();
+            Object.assign(marks[i].style, { left: r.left + 'px', top: r.top + 'px',
+              width: r.width + 'px', height: r.height + 'px' });
+          });
+          requestAnimationFrame(paint);
+        })();
+        addEventListener('pointerdown', e => {
+          const d = document.createElement('div');
+          d.style.cssText = 'position:fixed;width:22px;height:22px;margin:-11px 0 0 -11px;'
+            + 'border-radius:50%;background:rgba(255,0,0,.85);z-index:99999;pointer-events:none;'
+            + 'left:' + e.clientX + 'px;top:' + e.clientY + 'px';
+          document.body.appendChild(d);
+          setTimeout(() => d.remove(), 2500);
+        }, true);
+      }
+
       const pick = e => {
         // drei 가 Html 을 어디에 붙이든 찾도록 문서 전체에서 고른다.
         // 재는 것은 판(.cc3d-slot)이 아니라 그 안의 카드(.cc)다. 판은 줄이 매달린
