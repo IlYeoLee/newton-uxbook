@@ -362,13 +362,15 @@
     filter:drop-shadow(0 0.1cqw 0.25cqw rgba(0,0,0,.35));
     isolation:isolate;   /* 아래 그림자가 페이지 배경 밑으로 빠지지 않게 */
   }
-  /* 밝은 장에서는 흰 마우스·꺾쇠가 배경에 묻힌다. 아래에서 위로 옅어지는
-     검정을 깔아 띄운다. 타원이라 가장자리에 선이 생기지 않는다. */
+  /* 밝은 장에서는 흰 마우스·꺾쇠가 배경에 묻힌다. 표지 스크림(.cv-bottom)과 같은
+     결로, 가로로 긴 띠를 깔아 은은하게 띄운다. 동그란 얼룩으로 보이지 않게 폭은
+     페이지 전폭이고, 끝을 완전한 검정 대신 낮게 두어 경계가 도드라지지 않는다.
+     .scroll-hint 안에 있으므로 스크롤하면 힌트와 함께 사라진다. */
   .scroll-hint::before{
-    content:"";position:absolute;left:50%;bottom:-2.5cqw;transform:translateX(-50%);
-    width:22cqw;height:11cqw;z-index:-1;
-    background:radial-gradient(ellipse at 50% 100%,
-      rgba(0,0,0,.40) 0%, rgba(0,0,0,.22) 42%, rgba(0,0,0,0) 72%);
+    content:"";position:absolute;left:50%;bottom:-1.4cqw;transform:translateX(-50%);
+    width:100cqw;height:9cqw;z-index:-1;
+    background:linear-gradient(0deg,
+      rgba(0,0,0,.30) 0%, rgba(0,0,0,.16) 38%, rgba(0,0,0,.05) 70%, rgba(0,0,0,0) 100%);
   }
   .scroll-hint .scroll-mouse{
     width:1.55cqw;height:2.55cqw;border:0.13cqw solid #fff;border-radius:1cqw;position:relative;
