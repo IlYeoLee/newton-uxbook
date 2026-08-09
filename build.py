@@ -8,8 +8,14 @@ for f in os.listdir(ASSETS):
     name, ext = os.path.splitext(f)
     EXT[name] = ext
 
+def brand(s):
+    """원고(피그마 영한검수)의 표기는 Newton 하나다. 옛 원고의 대문자 NEWTON 이
+    본문·토글·영문 번역에 뒤섞여 남아 있어서, 내보내는 자리에서 한 번에 맞춘다.
+    로고와 크레딧 라벨은 이 길을 타지 않으므로 대문자 그대로 남는다."""
+    return re.sub(r'\bNEWTON\b', 'Newton', s or "")
+
 def esc(s):
-    return ihtml.escape(s or "", quote=False)
+    return ihtml.escape(brand(s), quote=False)
 
 # ---- translation cache (free): build reads translations.json and attaches data-en ----
 TRANS_PATH = os.path.join(ROOT, "translations.json")
@@ -31,7 +37,7 @@ def en_attr(ko):
     e = strip_lead_emoji(e)   # 한글에서 뗀 이모지가 영문에는 남아 있었다
     if not e:
         return ""
-    return ' data-en="' + ihtml.escape(e, quote=True).replace("\n", " ") + '"'
+    return ' data-en="' + ihtml.escape(brand(e), quote=True).replace("\n", " ") + '"'
 
 # hero images have hi-res 16:9 mobile variants (desktop keeps its portrait crop)
 # 모바일에서만 갈아끼우는 소스. 확장자를 붙이면 그걸 쓴다 — .mp4 면 <img> 가
@@ -379,7 +385,10 @@ TEXT_PATCHES = {
     "움직임이 끝난 뒤에도, NEWTON은 다음 플레이를 준비합니다. 하체 웨어러블은 포터블 스테이션에서 다시 충전되고, 패브릭 파츠는 분리해 산뜻하게 관리됩니다. 오늘 몸에 남은 리듬과 막혔던 순간은 다음 도전을 위한 단서가 됩니다. 오늘의 플레이는 여기서 멈추지 않고 더 가볍고, 더 익숙한 다음 움직임으로 이어집니다.":
         "플레이가 끝난 뒤에도 오늘의 움직임은 다음을 향해 이어집니다. 리포트는 꿈꾸던 플레이와 \n가까워진 정도를 보여주며, 움직임의 성취를 새로운 도전의 가능성으로 확장합니다. 함께 뛰었던 Newton은 스테이션 위에서 충전되고, 땀에 닿은 패브릭 파츠는 세탁하여 산뜻하게 보관됩니다. 오늘의 감각은 다음 도전을 기다리는 설렘으로 남습니다.",
     "NEWTON은 스포츠를 시작하고 더 깊이 도전하는 경험에서 출발합니다.\n하지만 우리가 설계한 것은 특정 종목의 기술이 아니라, 낯선 움직임을 각자의 몸에 맞는 속도로 시작하게 하는 방식입니다. 이 방식은 새로운 스텝을 익히는 순간을 넘어, 처음 균형을 배우고 다시 걷는 감각을 되찾는 순간까지 확장될 수 있습니다.\n누구나 자신의 차례를 믿고, 다음 움직임을 시작할 수 있도록.":
-        "Newton은 스포츠를 시작하고 도전하는 경험에서 출발합니다.\n하지만 그 중심에는 하나의 종목이 아니라, 낯선 움직임을 내 몸의 속도로 시작하게 하는 구조에 있습니다. 그 가능성은 러닝, 복싱, 농구를 넘어 균형을 배우고 다시 걷는 감각을 회복하는 \n순간까지 확장될 수 있습니다. 누구나 자신의 차례를 믿고, 새로운 움직임에 도전할 수 있도록.",
+        "Newton은 스포츠를 시작하고 도전하는 경험에서 출발합니다.\n하지만 그 중심에는 하나의 종목이 아니라, 낯선 움직임을 내 몸의 속도로 시작하게 하는 구조에 있습니다. 그 가능성은 러닝, 복싱, 농구를 넘어 균형을 배우고 다시 걷는 감각을 회복하는 \n순간까지 확장될 수 있습니다. 누구나 자신의 차례를 믿고, 새로운 움직임에 도전할 수 있도록.\n\nFind Your Movement.",
+    "Now, Every Turn is Yours.": "Now, Every Turn Is Yours.",
+    # 제품 이름이 '프로젝션 유닛'에서 Core 로 바뀌었는데 이 토글 제목만 옛 이름이었다
+    "Tech Research- Projection Unit의 타당성": "Tech Research - Core의 타당성",
     "NEWTON은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!":
         "Newton은 꿈꾸던 스포츠 콘텐츠를 내가 있는 곳에서 바로 도전할 수 있는 \n경험으로 바꿉니다. 바닥과 벽면에 펼쳐진 움직임의 단서를 따라가며, 보고만 있던 멋진 동작을 내 몸으로 시도하죠. 하체 웨어러블은 움직임의 감각을 조율해, 낯선 움직임도 내 플레이로 이어가게 돕습니다. 이제, 당신의 차례입니다!",
     "운동은 해야 하지만, \n반복은 금방 지루해":
@@ -604,7 +613,10 @@ WIDE_VIDEO = {"11": "logo_symbol.mp4"}
 # 넣으면 cover 로 잘려서 화면이 거의 안 보인다.
 PAGE_VIDEO = {"04": ("pack_proto.mp4", "m5.mp4")}
 
-KICKER_OVERRIDE = {"03": "For Those Who Turn Trends Into Play", "08": "(1) A Spark to Move"}
+# 킥커는 MARKERS 의 뒷말을 그대로 쓰되, 원고(피그마 영한검수)에서 따로 정한 것만 덮는다.
+# 07 은 제품 이름이 '프로젝션 유닛'에서 'Core' 로 바뀌었다 — 본문은 이미 Core 다.
+KICKER_OVERRIDE = {"03": "Who It’s For", "04": "Concept", "07": "Core",
+                   "08": "(1) A Spark to Move", "09": "Expandability"}
 
 # 다중 이미지 페이지 → 데스크톱은 슬라이딩 캐러셀, 모바일은 16:9 합성 한 장.
 # 피그마 "웹" 섹션의 프레임 이름이 그대로 페이지 번호이고, N-1/N-2 가 추가 컷이다.
