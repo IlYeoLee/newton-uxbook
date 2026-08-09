@@ -143,6 +143,22 @@ def render_toggle(node):
     body = render_toggle_body(node.get("c") or [])
     return f'<details class="toggle"><summary{en_attr(node["x"])}>{esc(node["x"])}</summary><div class="toggle-body">{body}</div></details>'
 
+def evidence_group(kids, i):
+    """줄지어 선 증거 카드를 한 겹으로 묶는다.
+
+    Evidence 토글을 카드로 바꾸면서 층이 하나 사라져, 본문과 증거가 같은 높이에
+    나란히 쌓여 벽이 됐다. 근거 자체는 여전히 카드 안(주장 바로 밑)에 있고,
+    여기서 접히는 건 증거 목록이다."""
+    ev = []
+    while i < len(kids) and kids[i].get("evidence"):
+        ev.append(render_callout(kids[i]))
+        i += 1
+    label = f"근거 {len(ev)}건"
+    TRANS.setdefault(label, f"Evidence ({len(ev)})")
+    return (f'<div class="group"><details class="toggle evidence">'
+            f'<summary{en_attr(label)}>{esc(label)}</summary>'
+            f'<div class="toggle-body">{"".join(ev)}</div></details></div>'), i
+
 def render_toggle_body(kids):
     """토글 안은 어느 깊이에서나 두 가지뿐이다 — 카드, 아니면 중첩 토글.
     원본에서 맨 문단·그림이 카드 밖으로 흘러다니던 것을 한 장의 카드로 묶는다.
@@ -160,6 +176,10 @@ def render_toggle_body(kids):
         t = n["t"]
         if t == "HR":            # 카드로 나누고 나면 구분선이 할 일이 없다
             i += 1
+        elif t == "CALLOUT" and n.get("evidence"):
+            flush()
+            html, i = evidence_group(kids, i)
+            out.append(html)
         elif t == "CALLOUT":
             flush()
             out.append(render_callout(n))
@@ -321,6 +341,10 @@ def render_children(items, group_toggles=True):
             lis = "".join(f"<li{en_attr(g.get('x',''))}>{esc(g.get('x',''))}</li>" for g in group)
             out.append(f"<ul class='list'>{lis}</ul>")
             continue
+        if n["t"] == "CALLOUT" and n.get("evidence"):
+            html, i = evidence_group(items, i)   # 카드 안에 든 증거도 같은 규칙으로 묶는다
+            out.append(html)
+            continue
         if n["t"] == "TOGGLE" and group_toggles:
             # consecutive toggles share one grey container (skipped inside a finding box)
             tg = []
@@ -375,7 +399,8 @@ def unify_toggles(nodes):
                 if en and " : " in en:
                     TRANS.setdefault(claim, en.split(" : ", 1)[1].strip())
                 head = {"t": "P", "x": f"Evidence {int(m.group(1)):02d}\n{claim}"}
-                out.append({"t": "CALLOUT", "x": "", "card": True, "c": [head] + n["c"]})
+                out.append({"t": "CALLOUT", "x": "", "card": True, "evidence": True,
+                            "c": [head] + n["c"]})
                 continue
         out.append(n)
     return out
