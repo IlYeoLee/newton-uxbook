@@ -119,7 +119,10 @@ function Band({
     ang = new THREE.Vector3(),
     rot = new THREE.Vector3(),
     dir = new THREE.Vector3();
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 20, linearDamping: 20 };
+  // 두 감쇠는 하는 일이 다르다. 각감쇠 20 은 구형 태블릿에서 줄이 떨리는 걸 잡아준다.
+  // 선감쇠는 낙하 속도를 정한다(종단속도 ≈ 중력/선감쇠). 20 이면 0.9/초라, 카드를
+  // 공중으로 날린 뒤 제자리로 오는 데 몇 초가 걸려 물속처럼 보였다. 4 면 4.5/초.
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 20, linearDamping: 4 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
   const { camera } = useThree();
