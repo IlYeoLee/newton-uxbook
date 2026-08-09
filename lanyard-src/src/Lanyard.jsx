@@ -229,8 +229,14 @@ function Band({
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
 
       // 아주 약한 바람. 카드마다 위상을 달리해 다섯 장이 한 몸처럼 움직이지 않게 한다.
-      // 바람은 껐다. 아주 약해도 카드가 끊임없이 미끄러져, 손가락이 닿을 때쯤
-      // 이미 자리를 뜬다. 전시에서는 가만히 있는 편이 낫다.
+      // 아주 미세한 흔들림만 남긴다. 예전 값(0.004)은 카드가 눈에 띄게 미끄러져
+      // 손가락이 닿을 때쯤 자리를 떠 있었다. 1/8 로 줄이면 살아 있는 느낌은
+      // 남으면서 과녁은 사실상 제자리다.
+      if (!dragged && !zoomed) {
+        const t = state.clock.elapsedTime;
+        const w = Math.sin(t * 0.4 + index * 1.73) * 0.0005;
+        j2.current.applyImpulse({ x: w, y: 0, z: w * 0.3 }, true);
+      }
     }
   });
 
