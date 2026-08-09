@@ -2524,6 +2524,7 @@ void main(){
       function openZoom(i, el){
         closeZoom();
         lastOpen = Date.now();
+        dbg('OPEN  확대 열림');
         const src = el || (list[i] && list[i].el);
         if (!src) return;
         zoomEl = document.createElement('div');
@@ -2601,8 +2602,27 @@ void main(){
         });
         downSlot = null; moved = 0;
       };
+      // 진단판. ?dbg=1 로 열면 기기에서 어떤 이벤트가 오는지 화면에 찍힌다.
+      // 태블릿은 개발자도구를 붙이기 번거로워서, 눈으로 볼 수 있게 남겨 둔다.
+      const DBG = location.search.includes('dbg=1');
+      let dbgBox = null;
+      const dbg = msg => {
+        if (!DBG) return;
+        if (!dbgBox) {
+          dbgBox = document.createElement('pre');
+          dbgBox.style.cssText = 'position:fixed;left:0;right:0;bottom:0;max-height:38vh;'
+            + 'overflow:auto;z-index:99999;margin:0;padding:8px;background:rgba(0,0,0,.86);'
+            + 'color:#0f0;font:11px/1.35 monospace;white-space:pre-wrap;pointer-events:none';
+          document.body.appendChild(dbgBox);
+        }
+        dbgBox.textContent = (msg + '\n' + dbgBox.textContent).slice(0, 1400);
+      };
+
       host.addEventListener('pointerdown', e => {
         release();
+        dbg('down  type=' + e.pointerType + ' btn=' + e.buttons
+            + ' zoomed=' + page.classList.contains('zoomed')
+            + ' pick=' + (pick(e) ? 'O' : 'X'));
         if (page.classList.contains('zoomed')) return;
         downSlot = pick(e);
         moved = 0; sx = ox = e.clientX; sy = oy = e.clientY;
@@ -2637,6 +2657,8 @@ void main(){
         release();                     // 잡힌 카드는 전부 놓는다
         const slop = isTouch ? 30 : 8;
         const quick = Date.now() - downAt < 500;
+        dbg('end   ' + (e && e.type) + ' disp=' + Math.round(disp) + ' slop=' + slop
+            + ' quick=' + quick + ' → ' + (disp > slop && !(quick && disp < slop * 2) ? '드래그(무시)' : '탭'));
         if (disp > slop && !(quick && disp < slop * 2)) return;
         // 눌린 판이 품고 있는 카드가 곧 그 사람이다. 인덱스를 거치지 않는다.
         const cc = slot.querySelector('.cc');
@@ -2647,6 +2669,8 @@ void main(){
       // 하지만 탭이면 click 은 반드시 온다. pointer 쪽에서 이미 열었으면
       // (400ms 안이면) 그냥 둔다.
       host.addEventListener('click', e => {
+        dbg('click zoomed=' + page.classList.contains('zoomed')
+            + ' since=' + (Date.now() - lastOpen) + ' pick=' + (pick(e) ? 'O' : 'X'));
         if (page.classList.contains('zoomed')) return;
         if (Date.now() - lastOpen < 400) return;
         const slot = pick(e);
@@ -2654,7 +2678,7 @@ void main(){
         if (cc) openZoom(-1, cc);
       });
       host.addEventListener('pointerup', endDrag);
-      host.addEventListener('pointercancel', endDrag);
+      host.addEventListener('pointercancel', e => { dbg('cancel'); endDrag(e); });
       // 호스트에서 pointerup 을 한 번이라도 놓치면 카드가 영영 마우스를 따라다닌다.
       // 창 전체에서도 받아 반드시 놓는다.
       addEventListener('pointerup', endDrag, true);
