@@ -250,7 +250,7 @@
   /* 비율을 1185:449 로 못 박으면, 그 비율이 아닌 이미지는 contain 때문에 좌우에
      빈 띠가 생겨 다른 레이아웃보다 여백이 넓어 보인다. 컨테이너가 이미지 비율을
      따라가게 두면 좌우가 꽉 차고 여백은 다른 페이지와 같은 0.830cqw 가 된다. */
-  .wide-media{flex:0 1 auto;min-height:0;margin:auto 0.830cqw 0.830cqw;
+  .wide-media{flex:0 1 auto;min-height:0;margin:auto 0 0;
     border-radius:3.320cqw;overflow:hidden;position:relative}
   /* height:auto 라야 이미지가 제 비율대로 폭을 꽉 채운다. 세로가 남는 만큼은
      .wide-media 의 margin:auto 가 흡수한다. */
@@ -375,9 +375,12 @@
   .page-text::-webkit-scrollbar{display:none}
 
   /* vertical layout (used ONLY on the intro + scenario pages): title/body on top, big image at bottom */
+  /* 좌우·하단 여백은 .page 의 0.830cqw 하나로 통일한다. 레이아웃마다 여기에
+     제 여백을 또 얹어서, 같은 책 안에서 2단 페이지는 0.830, 가로형과 인트로는
+     1.660, 스크롤 페이지 하단은 4.814cqw 로 제각각이었다. */
   .page-scroll{
     width:100%;height:100%;overflow-y:auto;scrollbar-width:none;
-    padding:0 0 3.984cqw;
+    padding:0;
   }
   .page-scroll::-webkit-scrollbar{display:none}
   /* header component (Figma 12:846): kicker(red) on top, then title-left(264px)/body-right(flex) */
@@ -397,7 +400,7 @@
   .head-titlecol .head-title{width:auto}
   .head-credit{font-size:1.079cqw;color:var(--muted);letter-spacing:.02em;margin:1.328cqw 0 0}
   .page-content{width:100%;padding:0 6.639cqw}
-  .page-hero{margin:2.656cqw 0.830cqw 0;line-height:0}
+  .page-hero{margin:2.656cqw 0 0;line-height:0}
   .page-hero img{width:100%;height:auto;display:block;border-radius:2.656cqw}
   /* content images near full-bleed (~10px sides) against the 80px content padding */
   .page-content figure.figure{margin-left:calc(0.830cqw - 6.639cqw);margin-right:calc(0.830cqw - 6.639cqw)}
@@ -455,9 +458,9 @@
   @media (prefers-reduced-motion:reduce){.scroll-hint .scroll-mouse::before,.scroll-hint .chev{animation:none}}
 
   /* intro: no scroll — image fills the remaining height as a wide crop */
-  .page[data-page="intro"] .page-scroll{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0.830cqw}
+  .page[data-page="intro"] .page-scroll{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
   .page[data-page="intro"] .head-block{flex:0 0 auto}
-  .page[data-page="intro"] .page-hero{flex:1 1 auto;min-height:0;margin:2.656cqw 0.830cqw 0}
+  .page[data-page="intro"] .page-hero{flex:1 1 auto;min-height:0;margin:2.656cqw 0 0}
   .page[data-page="intro"] .page-hero img{width:100%;height:100%;object-fit:cover}
 
   .kicker{color:var(--red);font-weight:700;font-size:1.494cqw;margin:0 0 1.328cqw;letter-spacing:-.02em}
@@ -2928,8 +2931,13 @@ void main(){
         clone.classList.remove('grabbing');
         clone.classList.add('flipped');   // 확대하면 뒷면(역할·SNS)이 기본
         // 카드 아무 데나 누르면 앞뒤가 뒤집힌다. 단, SNS 버튼은 링크로 살린다.
+        // 터치에서는 카드를 연 그 탭이 만든 click 이 방금 얹힌 이 판 위로 떨어져
+        // (합성 click 은 뒤늦게 그 자리를 다시 짚는다) 열자마자 앞면으로 뒤집혔다.
+        // 웹에서 안 보이던 이유는 마우스는 click 이 원래 카드로 가기 때문이다.
+        const openedAt = Date.now();
         clone.addEventListener('click', e => {
           if (e.target.closest('.cc-sns')) return;
+          if (Date.now() - openedAt < 400) return;   // 열리게 한 탭의 잔향
           clone.classList.toggle('flipped');
         });
         // 붙이기 전에 뒷면으로 맞춰 넣는다. 붙인 뒤에 클래스를 주면 앞면에서
@@ -2949,7 +2957,7 @@ void main(){
       // 캔버스는 React 가 마운트한 뒤에 생긴다. 여기서 미리 잡으면 null 이고,
       // ndc() 가 그 자리에서 터져 드래그가 시작조차 못 했다. 쓸 때 찾는다.
       const getCanvas = () => host.querySelector('canvas');
-      let downSlot = null, moved = 0, sx = 0, sy = 0, downAt = 0, isTouch = false;
+      let downSlot = null, moved = 0, sx = 0, sy = 0, ox = 0, oy = 0, downAt = 0, isTouch = false;
 
       // 끌기: 캔버스로 이벤트를 흘려보내면 결국 레이캐스트를 타서 첫 카드로
       // 몰린다. 판마다 자기 카드의 물리를 직접 미는 API(__band)를 들고 있으므로
@@ -2968,12 +2976,14 @@ void main(){
       // 고른다 — 그게 눈에 보이는 카드다.
       const pick = e => {
         // drei 가 Html 을 어디에 붙이든 찾도록 문서 전체에서 고른다.
+        // 손가락은 마우스만큼 정확하지 않다 — 가장자리를 조금 넓혀 잡는다.
+        const pad = 10;
         const slots = [...document.querySelectorAll('.cc3d-slot')];
         for (let i = slots.length - 1; i >= 0; i--) {
           const r = slots[i].getBoundingClientRect();
           if (!r.width) continue;
-          if (e.clientX >= r.left && e.clientX <= r.right &&
-              e.clientY >= r.top && e.clientY <= r.bottom) return slots[i];
+          if (e.clientX >= r.left - pad && e.clientX <= r.right + pad &&
+              e.clientY >= r.top - pad && e.clientY <= r.bottom + pad) return slots[i];
         }
         return null;
       };
@@ -2993,7 +3003,7 @@ void main(){
         release();
         if (page.classList.contains('zoomed')) return;
         downSlot = pick(e);
-        moved = 0; sx = e.clientX; sy = e.clientY;
+        moved = 0; sx = ox = e.clientX; sy = oy = e.clientY;
         downAt = Date.now(); isTouch = e.pointerType !== 'mouse';
         if (!downSlot) return;
         host.setPointerCapture && host.setPointerCapture(e.pointerId);
@@ -3011,15 +3021,19 @@ void main(){
       });
       const endDrag = e => {
         if (!downSlot) return;
-        const slot = downSlot, dist = moved;
+        const slot = downSlot;
+        // 누른 자리에서 얼마나 벗어나 뗐는지로 본다. 지금까지는 움직인 거리를
+        // 전부 더해서(경로 길이) 판단했는데, 손가락이 제자리에서 떨리기만 해도
+        // 그 합이 금세 커진다 — 태블릿에서 탭이 자꾸 드래그로 넘어가 여러 번
+        // 눌러야 열리던 게 이것 때문이다. 제자리로 돌아와 뗐으면 탭이다.
+        const dx = (e && e.clientX != null ? e.clientX : sx) - ox;
+        const dy = (e && e.clientY != null ? e.clientY : sy) - oy;
+        const disp = Math.hypot(dx, dy);
         release();                     // 잡힌 카드는 전부 놓는다
-        // 터치는 손가락이 흔들려 8px 를 쉽게 넘긴다. 마우스 8, 터치 22 로 두고
-        // 짧게(300ms 이내) 눌렀다 뗀 건 조금 움직였어도 탭으로 본다.
-        // 구형 기기는 프레임이 뜸해 손가락 흔들림이 한 번에 크게 잡힌다.
-        // 그래서 가벼운 탭도 드래그로 넘어가 확대가 안 열렸다. 여유를 더 준다.
-        const slop = isTouch ? 34 : 8;
+        if (e && e.type === 'pointercancel') return;   // 기기가 가로챈 제스처
+        const slop = isTouch ? 30 : 8;
         const quick = Date.now() - downAt < 500;
-        if (dist > slop && !(quick && dist < slop * 2)) return;
+        if (disp > slop && !(quick && disp < slop * 2)) return;
         // 눌린 판이 품고 있는 카드가 곧 그 사람이다. 인덱스를 거치지 않는다.
         const cc = slot.querySelector('.cc');
         if (cc) openZoom(-1, cc);
