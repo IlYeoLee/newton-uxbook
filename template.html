@@ -2599,18 +2599,17 @@ void main(){
           if (e.clientX >= r.left - pad && e.clientX <= r.right + pad &&
               e.clientY >= r.top - pad && e.clientY <= r.bottom + pad) return boxes[i].s;
         }
-        // 사각형 안에 안 들어가도 가장 가까운 카드를 연다. 카드는 줄에 매달려
-        // 흔들리고 원근까지 걸려 있어, 손가락이 눈에 보이는 카드를 눌러도 계산된
-        // 사각형에서 조금씩 벗어난다. 눌렀는데 아무 일도 안 나는 것보다, 눈에
-        // 제일 가까운 카드를 여는 편이 낫다. 한 장 폭 넘게 떨어지면 무시한다.
+        // 사각형에 안 걸리면 가로로 가장 가까운 카드를 연다.
+        // 판(drei 의 Html)은 보이는 카드보다 짧게 잡힌다 — 기기에서 재보니 판은
+        // 세로 218~497 인데 카드 한복판을 누르면 662 가 찍혔다. 카드가 줄에 매달려
+        // 흔들리고 원근까지 걸려 있어 사각형을 맞추려 들면 계속 어긋난다.
+        // 다섯 장이 한 줄로 서 있으니 가로 위치로 고르는 게 사람이 기대하는 대로다.
         let best = null, bestD = Infinity;
         for (const { r, s } of boxes) {
-          const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
-          const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
-          const d = Math.hypot(dx, dy);
+          const d = Math.abs(e.clientX - (r.left + r.right) / 2);
           if (d < bestD) { bestD = d; best = s; }
         }
-        return bestD <= (boxes[0] ? boxes[0].r.width : 300) ? best : null;
+        return best;
       };
 
       // 직전에 잡았던 카드를 반드시 놓고 시작한다. 확대 중이라고 그냥 빠져나가면
