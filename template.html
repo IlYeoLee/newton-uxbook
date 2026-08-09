@@ -259,6 +259,48 @@
   /* 로고 장: 흰 배경 가이드 사진 위로 검은 배경 심볼 모션이 겹쳐 뜬다.
      높이를 정하는 건 사진이고, 영상은 그 위에 포개 놓는다(비율이 같다).
      바탕이 검정이라 영상 페이드가 흰 종이로 빠져 번쩍이지 않는다. */
+  /* ---- 체험 장(피그마 93:493) ----
+     가로형 판의 이미지 자리를 카드 두 장으로 나눈다. 가운데 틈은 좌우 여백과
+     같은 두께다(피그마 실측 10/1205 = 0.830cqw — .wide-media 의 margin 과 같은 값).
+     카드 바탕은 브랜드 그라디언트 그대로다. 왼쪽은 표지와 같은 밝은 흐름
+     (프리즘→샌드→코랄→레드), 오른쪽은 그 아래로 더 내려간 어두운 흐름이다. */
+  .try-pair{display:flex;gap:0.830cqw;background:none}
+  .try-card{flex:1 1 0;min-width:0;aspect-ratio:588/449;position:relative;
+    border-radius:3.320cqw;overflow:hidden}
+  .try-app{background:linear-gradient(180deg,
+    #D1FEFF 0%, #FEC389 6.49%, #FE6E3C 16.83%, #FA3030 41.68%)}
+  .try-sim{background:linear-gradient(180deg,
+    #FA3030 0%, #910F0F 6.34%, #511815 16.64%, #091212 41.27%)}
+  /* 세 대의 목업은 카드 위쪽에 걸쳐 놓인다(피그마 460/588 폭) */
+  .try-app img{position:absolute;left:10.9%;top:3.8%;width:78.2%;height:auto;display:block}
+  .try-shot{position:absolute;left:16%;top:12.5%;width:68.2%;height:52.3%;
+    object-fit:cover;border-radius:1cqw;display:block}
+  /* 스크린샷 아래를 어둠으로 덮어 글이 얹힐 바닥을 만든다(피그마 Rectangle 1954132191) */
+  .try-scrim{position:absolute;left:-2%;right:-2%;top:46.1%;height:56.8%;
+    background:linear-gradient(180deg,rgba(9,18,18,0) 0%,rgba(9,18,18,1) 80%)}
+  .try-info{position:absolute;left:20.2%;right:20.2%;top:66.8%;text-align:center;color:#fff}
+  .try-title{margin:0;font-size:2.561cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .try-by{margin:0.5cqw 0 0;font-size:1.189cqw;font-weight:400;color:#FAFAFA;
+    display:flex;justify-content:center;gap:0.5cqw}
+  /* 흰 알약 버튼. 링크는 나중에 붙는다 — 그때까지는 눌러도 아무 데도 안 간다. */
+  .try-cta{display:inline-flex;align-items:center;gap:0.6cqw;margin-top:1.4cqw;
+    padding:0.9cqw 2.2cqw;border-radius:999px;background:#fff;color:#091212;
+    font-size:1.646cqw;font-weight:700;text-decoration:none;letter-spacing:-.02em;
+    transition:transform .18s ease, box-shadow .18s ease}
+  .try-cta:hover{transform:translateY(-0.15cqw);box-shadow:0 0.6cqw 1.6cqw rgba(0,0,0,.35)}
+  .try-cta svg{width:1.5cqw;height:1.5cqw;fill:none;stroke:currentColor;stroke-width:2.2;
+    stroke-linecap:round;stroke-linejoin:round}
+  .try-cta[aria-disabled="true"]{cursor:default}
+  @media (max-width:640px){
+    /* 폰에서는 두 장을 위아래로 쌓는다 — 나란히 두면 목업이 손톱만 해진다 */
+    .try-pair{flex-direction:column;gap:5vw}
+    .try-card{border-radius:5vw}
+    .try-title{font-size:6vw}
+    .try-by{font-size:3vw;gap:2vw}
+    .try-cta{font-size:4vw;padding:2.6vw 6vw;gap:2vw;margin-top:3.5vw}
+    .try-cta svg{width:4vw;height:4vw}
+  }
+
   .wide-media.vid{background:#000;position:relative}
   .wide-media.vid .lf-still{position:relative;z-index:1;transition:opacity .4s linear}
   .wide-media.vid video.loop-fade{position:absolute;inset:0;z-index:2;opacity:0}
@@ -862,7 +904,7 @@
     color:#000;padding:0;
   }
   /* 리플은 호스트 안에서만 퍼져야 한다 — 클릭 가능한 요소 전부에 걸어둔다 */
-  button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint{position:relative;overflow:hidden}
+  button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint, .try-cta{position:relative;overflow:hidden}
   .ripple{
     position:absolute;border-radius:50%;background:rgba(0,0,0,.16);
     transform:scale(0);pointer-events:none;animation:ripple .6s ease-out;
@@ -1267,6 +1309,7 @@
       ...page.querySelectorAll('.page-content > *'),
       page.querySelector('.page-hero'),
       page.querySelector('.wide-media'),
+      ...page.querySelectorAll('.try-pair > *'),   // 좌우 카드가 차례로 올라온다
     ].filter(Boolean);
     items.forEach((el, n) => {
       el.classList.remove('stagger');
@@ -1733,7 +1776,7 @@
   })();
 
   // 리플: 클릭 속성이 있는 요소 전부에 위임으로 건다. 개별 부착은 빠뜨리기 쉽다.
-  const RIPPLE_SEL = 'button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint';
+  const RIPPLE_SEL = 'button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint, .try-cta';
   addEventListener('pointerdown', e => {
     const host = e.target.closest && e.target.closest(RIPPLE_SEL);
     // 좌우 페이지 넘김 영역은 화면 절반짜리라 리플이 과하다 — 제외한다

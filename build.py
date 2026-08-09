@@ -724,6 +724,40 @@ products_page = f'''
   <div class="wide-media wide-16x9">{img_tag("products_hero")}</div>
 </div>'''
 
+# ---- 체험 장 (피그마 93:493 "텍스트+이미지 크게쓰고싶을 때") ----
+# 가로형 판인데 이미지 자리가 카드 두 장으로 갈린다. 원본의 설명 문구는 임시라
+# 책의 실제 내용(모바일 GUI 장 · 시뮬레이터)에 맞춰 다시 썼다.
+# 버튼 링크는 아직 없다. 주소가 정해지면 이 한 줄만 채우면 된다.
+TRY_CTA_URL = ""
+TRY_KICKER = "Try It Yourself"
+TRY_TITLE = "Newton을 직접\n만져볼 수 있게"
+TRY_BODY = ("UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바이브 코딩하며 곧바로 "
+            "만져지는 프로토타입으로 확인했습니다. 모바일 앱은 오늘의 플레이를 고르고 "
+            "강도와 모드를 정한 뒤 기록으로 돌아오는 흐름을 담고, 프로젝터 시뮬레이터는 "
+            "하드웨어 없이도 지면 위에 펼쳐지는 움직임 가이드를 그대로 보여줍니다.\n"
+            "아래 버튼을 눌러 직접 만져볼 수 있습니다.")
+
+def try_page():
+    href = f' href="{TRY_CTA_URL}" target="_blank" rel="noopener"' if TRY_CTA_URL else ' aria-disabled="true"'
+    arrow = ('<svg viewBox="0 0 24 24" aria-hidden="true">'
+             '<path d="M5 12h13M13 6l6 6-6 6"/></svg>')
+    return f'''
+<div class="page wide-page" data-page="try">
+  <div class="wide-text">{head_block(TRY_KICKER, TRY_TITLE, TRY_BODY)}</div>
+  <div class="wide-media try-pair">
+    <div class="try-card try-app"><img src="assets/try_app.png" alt="" loading="lazy"></div>
+    <div class="try-card try-sim">
+      <img class="try-shot" src="assets/try_sim.jpg" alt="" loading="lazy">
+      <div class="try-scrim"></div>
+      <div class="try-info">
+        <p class="try-title">Newton’s Projector Simulator</p>
+        <p class="try-by">Designed &amp; Dev By Ilyeo Lee</p>
+        <a class="try-cta"{href}>View Now {arrow}</a>
+      </div>
+    </div>
+  </div>
+</div>'''
+
 # "Play with Newton!" — new first Scenario page: two-column (left image + right text/toggles)
 # "Newton User-facing 와이어프레임 (Mobile)" 은 당분간 책에서 뺀다. 지우는 게 아니라
 # 안 그리는 것뿐이다 — 원본은 structure_full.json 에 그대로 있고 git 에도 남아 있으니
@@ -953,6 +987,7 @@ for m in PAGE_ORDER:
         # Products 와 같은 결로 — 개요 장(Play with Newton!)이 탭의 맨 앞, 전면 영상이 뒤.
         pages_out.append(playwith_page)
         pages_out.append(lead_page("scenario-lead", "lead_scenario.mp4"))
+pages_out.append(try_page())          # Archive 탭 첫 장 — 직접 만져보는 프로토타입
 pages_out.append(archive_page())      # 인물 소개 앞
 pages_out.append(credits_page())      # 마지막 장
 sections_html = "".join(pages_out)
@@ -976,7 +1011,7 @@ NAV_GROUPS = [
     ("Extensibility", "sec-09", ["sec-09"]),
     ("Branding", "sec-10", ["sec-10", "sec-11", "sec-12", "sec-13", "sec-14", "sec-15"]),
     # 과정 사진과 만든 사람들은 성격이 같다 — 제품 설명이 끝난 뒤의 기록이다.
-    ("Archive", "archive", ["archive", "credits"]),
+    ("Archive", "try", ["try", "archive", "credits"]),
 ]
 nav_html = "".join(
     f'<button type="button" class="pill" data-target="{target}" data-members="{",".join(members)}">{esc(label)}</button>'
