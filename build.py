@@ -723,7 +723,12 @@ products_page = f'''
 </div>'''
 
 # "Play with Newton!" — new first Scenario page: two-column (left image + right text/toggles)
-playwith_toggles = [t for t in (touch_toggle, flow_toggle, wire_toggle) if t]
+# "Newton User-facing 와이어프레임 (Mobile)" 은 당분간 책에서 뺀다. 지우는 게 아니라
+# 안 그리는 것뿐이다 — 원본은 structure_full.json 에 그대로 있고 git 에도 남아 있으니
+# 이 스위치만 True 로 되돌리면 그 자리에 그대로 돌아온다.
+SHOW_WIREFRAME = False
+playwith_toggles = [t for t in (touch_toggle, flow_toggle,
+                                wire_toggle if SHOW_WIREFRAME else None) if t]
 playwith_media = img_tag(img14["src"]) if img14 else ""
 playwith_page = f'''
 <div class="page" data-page="playwith">
@@ -936,7 +941,6 @@ pages_out = []
 for m in PAGE_ORDER:
     if m == FIRST_PRODUCT:
         pages_out.append(lead_page("products-lead", "lead_products.mp4"))
-        pages_out.append(products_page)   # 원고의 "Products 05" 개요 장
         pages_out.append(products_page)   # 원고의 "Products 05" 개요 장
     pages_out.append(render_page(m, seg_of[m]))
     if m == "04 Solution":
