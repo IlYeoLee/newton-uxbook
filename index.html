@@ -250,7 +250,9 @@
   /* 비율을 1185:449 로 못 박으면, 그 비율이 아닌 이미지는 contain 때문에 좌우에
      빈 띠가 생겨 다른 레이아웃보다 여백이 넓어 보인다. 컨테이너가 이미지 비율을
      따라가게 두면 좌우가 꽉 차고 여백은 다른 페이지와 같은 0.830cqw 가 된다. */
-  .wide-media{flex:0 1 auto;min-height:0;margin:auto 0 0;
+  /* 가로형 판은 .page 의 패딩을 0 으로 두므로(위 .wide-page) 여백을 여기서 낸다.
+     값은 다른 장과 같은 0.830cqw 다 — 걷어내면 그림이 종이 끝에 붙는다. */
+  .wide-media{flex:0 1 auto;min-height:0;margin:auto 0.830cqw 0.830cqw;
     border-radius:3.320cqw;overflow:hidden;position:relative}
   /* height:auto 라야 이미지가 제 비율대로 폭을 꽉 채운다. 세로가 남는 만큼은
      .wide-media 의 margin:auto 가 흡수한다. */
