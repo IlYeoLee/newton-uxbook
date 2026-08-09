@@ -659,12 +659,20 @@
   /* 뒷면은 흐름 배치다. %로 못 박아 두면 줄 수가 사람마다 달라(2~6줄) 어떤
      카드는 버튼이 글에 겹치고 어떤 카드는 아래가 휑하게 빈다. 위아래 여백만
      정해 두고 칩·역할·버튼·이름을 한 덩이로 가운데 세운다. */
+  /* 칩과 이름은 어느 카드에서나 같은 자리에 못 박는다 — 역할 줄 수가 사람마다
+     2~6줄로 달라도 이 둘은 같은 높이에 있어야 한 벌로 보인다.
+     가운데 띠(역할 목록 + 소셜 버튼)만 흐름 배치로 두고 세로 가운데에 세운다.
+     %로 전부 못 박아 두면 여섯 줄짜리에서 버튼이 글에 겹치고, 반대로 두 줄짜리는
+     아래가 휑하게 빈다. 위아래 여백이 칩·이름 자리를 그만큼 비워 둔다. */
   .cc-back{display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:calc(var(--cw)*.05);padding:calc(var(--cw)*.12) calc(var(--cw)*.08);
+    gap:calc(var(--cw)*.05);
+    padding:calc(var(--cw)*.38) calc(var(--cw)*.08) calc(var(--cw)*.17);
     box-sizing:border-box}
-  .cc-back>.cc-chips-top,.cc-back>.cc-desc,.cc-back>.cc-links,.cc-back>.cc-sig{
+  .cc-back>.cc-desc,.cc-back>.cc-links{
     position:static;left:auto;right:auto;top:auto;bottom:auto;margin:0;
     width:auto;max-width:100%}
+  .cc-back>.cc-chips-top{top:15%;bottom:auto}
+  .cc-back>.cc-sig{top:auto;bottom:calc(var(--cw)*.06)}
   .cc-chip{min-width:calc(var(--cw)*.152);height:calc(var(--cw)*.094);border-radius:999px;
     background:rgba(255,255,255,.2);color:#fff;font-family:'OffBit','Supreme',sans-serif;font-size:calc(var(--cw)*.068);font-weight:700;
     letter-spacing:-.04em;display:grid;place-items:center;padding:0 calc(var(--cw)*.036)}
