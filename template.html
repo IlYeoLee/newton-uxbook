@@ -254,14 +254,15 @@
     border-radius:3.320cqw;overflow:hidden;position:relative}
   /* height:auto 라야 이미지가 제 비율대로 폭을 꽉 채운다. 세로가 남는 만큼은
      .wide-media 의 margin:auto 가 흡수한다. */
-  .wide-media img,.wide-media .fade-stack img{width:100%;height:auto;display:block;
+  .wide-media video,.wide-media img,.wide-media .fade-stack img{width:100%;height:auto;display:block;
     border-radius:3.320cqw}
+  .wide-media.vid{background:#000}   /* 검은 배경 영상 — 페이드가 검정으로 빠지게 */
   .wide-media .fade-stack{width:100%;border-radius:3.320cqw;overflow:hidden}
   .wide-media .fade-track img{object-fit:contain}
   @media (max-width:640px){
     .wide-text{padding:6vw 5vw 0}
     .wide-media{margin:0 5vw 5vw;border-radius:5vw}
-    .wide-media img{aspect-ratio:1185/449}
+    .wide-media img,.wide-media video{aspect-ratio:1185/449}
   }
   .page-media{
     width:32.780cqw;height:100%;flex:none;position:relative;
@@ -1650,13 +1651,30 @@
   function pageMedia(page, on){
     if (!page) return;
     // video.media = 모바일에서 사진 자리에 들어간 배경 영상. 떠난 장에서는 멈춰야 한다.
-    page.querySelectorAll('.cover-video, .lead-page video, video.media').forEach(v => {
+    page.querySelectorAll('.cover-video, .lead-page video, video.media, video.loop-fade').forEach(v => {
       if (!on) { v.pause(); return; }
       v.currentTime = 0;
       v.dataset.userPaused = '0';
       v.play().catch(() => {});
     });
   }
+
+  // 루프 이음매를 페이드로 물린다. CSS 애니메이션을 같은 길이로 걸면 영상 클럭과
+  // 조금씩 어긋나 몇 바퀴 뒤엔 엉뚱한 데서 어두워진다 — currentTime 에서 직접 읽는다.
+  (function loopFade(){
+    const vids = document.querySelectorAll('video.loop-fade');
+    if (!vids.length) return;
+    const F = 0.4;   // 앞뒤 페이드 길이(초)
+    (function tick(){
+      vids.forEach(v => {
+        const d = v.duration;
+        if (!d) return;
+        const edge = Math.min(v.currentTime, d - v.currentTime);
+        v.style.opacity = Math.max(0, Math.min(1, edge / F));
+      });
+      requestAnimationFrame(tick);
+    })();
+  })();
 
   // 리플: 클릭 속성이 있는 요소 전부에 위임으로 건다. 개별 부착은 빠뜨리기 쉽다.
   const RIPPLE_SEL = 'button, summary, .pill, .pg-btn, .tool-btn, .lb-close, .lb-stepper button, .cc-close, .v-play, .v-sound, .cc-sns, [data-nav], .brand, .fs-hint';

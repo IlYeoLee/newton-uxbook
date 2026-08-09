@@ -503,6 +503,10 @@ def render_vertical(page_id, kicker, title_text, body_items, hero, scroll_hint=F
 # 이미지가 2.6:1 가로형이라 좌우 2단이 아니라 텍스트 위 / 이미지 아래로 간다.
 WIDE_PAGES = {"10", "11", "12", "13"}
 
+# 가로형 자리를 사진이 아니라 영상이 채우는 페이지. 영상 비율이 사진과 같아야 한다
+# (심볼 1186×450 ≈ 로고 사진 1185×449).
+WIDE_VIDEO = {"11": "logo_symbol.mp4"}
+
 KICKER_OVERRIDE = {"03": "For Those Who Turn Trends Into Play", "08": "(1) A Spark to Move"}
 
 # 다중 이미지 페이지 → 데스크톱은 슬라이딩 캐러셀, 모바일은 16:9 합성 한 장.
@@ -535,7 +539,12 @@ def render_page(marker, seg):
     if num in WIDE_PAGES:
         hero, rest2 = extract_hero(rest)
         car = CAROUSEL.get(num)
-        if car:
+        if num in WIDE_VIDEO:
+            # 사진 대신 영상. 소리도 조작할 것도 없으니 v-figure 의 재생 막대는 안 단다.
+            # 루프 이음매는 스크립트가 앞뒤를 페이드로 물린다(.loop-fade).
+            media = (f'<video class="loop-fade" src="assets/{WIDE_VIDEO[num]}" '
+                     f'muted loop autoplay playsinline preload="auto"></video>')
+        elif car:
             names, _ = car
             seq = names + names[:1]
             slides = "".join(f'<img src="assets/{n}{EXT.get(n, ".png")}" alt="" loading="lazy">' for n in seq)
@@ -549,10 +558,13 @@ def render_page(marker, seg):
         rest3 = [n for n in rest2 if n["t"] != "P"]
         body_text = "\n".join(n.get("x", "") for n in paras if n.get("x"))
         head = head_block(kicker, h4['x'] if h4 else '', body_text)
+        # 영상 자리는 바탕을 검게 둔다 — 영상 자체가 검은 배경이라, 페이드가
+        # 흰 종이로 빠지면 이음매에서 화면이 번쩍인다.
+        media_cls = " vid" if num in WIDE_VIDEO else ""
         return f'''
 <div class="page wide-page" data-page="sec-{num}">
   <div class="wide-text">{head}{render_children(rest3)}</div>
-  <div class="wide-media">{media}</div>
+  <div class="wide-media{media_cls}">{media}</div>
 </div>'''
     # everything else keeps the left-image / right-text two-column layout
     hero, rest = extract_hero(rest)
@@ -584,7 +596,7 @@ playwith_page = f'''
 <div class="page" data-page="playwith">
   <div class="page-media">{playwith_media}</div>
   <div class="page-text">
-    <p class="kicker">Scenario</p>
+    <p class="kicker">Concept</p>
     <h2 class="chapter-title">Play with Newton!</h2>
     {render_children(playwith_toggles)}
   </div>
@@ -632,22 +644,23 @@ SNS_ICON = {
 CREDIT_COLS = [
     [("Advisory\nProfessor", [("심유리", "Yuri Sim"), ("이문환", "Moonhwan Lee")])],
     [("ID Tutor", [("주호영", "Hoyoung Joo")]),
-     ("ID tutor", [("정수헌", "Soohun Jung")])],
+     ("ID Tutor", [("정수헌", "Soohun Jung")])],
     [("VD Tutor", [("워크스", "WORKS")])],
     [("Videographer", [("양의열", "Euiyeol Yang"), ("조수완", "Cho Suwan"),
                        ("이문환", "Moonhwan Lee")])],
 ]
 
 def credit_rows():
-    # 크레딧은 전부 영문 대문자다(한글 이름은 쓰지 않는다).
+    # 크레딧은 영문으로만 쓴다(한글 이름은 쓰지 않는다). 대문자는 "THANKS TO"
+    # 제목 하나뿐이고, 역할과 이름은 위에 적어둔 대소문자 그대로 나간다.
     cols = ""
     for groups in CREDIT_COLS:
         blocks = ""
         for role, names in groups:
             people = "".join(
-                f'<div class="cr-name"><span class="cr-en">{esc(en.upper())}</span></div>'
+                f'<div class="cr-name"><span class="cr-en">{esc(en)}</span></div>'
                 for _ko, en in names)
-            role_html = esc(role.upper()).replace("\n", "<br>")
+            role_html = esc(role).replace("\n", "<br>")
             blocks += (f'<div class="cr-item"><p class="cr-role">{role_html}</p>'
                        f'<div class="cr-names">{people}</div></div>')
         cols += f'<div class="cr-col">{blocks}</div>'
