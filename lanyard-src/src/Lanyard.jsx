@@ -25,8 +25,9 @@ extend({ MeshLineGeometry, MeshLineMaterial });
 function ResponsiveCam({ isMobile, baseFov = 20 }) {
   const { camera, size } = useThree();
   useEffect(() => {
-    camera.position.z = isMobile ? 32 : 20;
-    camera.fov = isMobile ? 30 : baseFov;
+    // 2줄(3+2) 배열이 들어오므로 데스크톱도 살짝 물러난다
+    camera.position.z = isMobile ? 38 : 26;
+    camera.fov = isMobile ? 33 : 26;
     camera.updateProjectionMatrix();
   }, [isMobile, baseFov, camera, size.width]);
   return null;
@@ -82,8 +83,9 @@ export default function Lanyard({
             <Band
               key={i}
               index={i}
-              anchorX={anchors[i]}
+              anchorX={p.ax ?? anchors[i]}
               hangY={p.hangY ?? 4}
+              ropeK={p.ropeK ?? 1}
               isMobile={isMobile}
               cardEl={p.el}
               frontImage={p.front}
@@ -117,6 +119,7 @@ function Band({
   index = 0,
   anchorX = 0,
   hangY = 4,
+  ropeK = 1,
   cardEl = null,
   frontImage = null,
   backImage = null,
@@ -195,9 +198,10 @@ function Band({
   // 끌었는지 눌렀는지 구분한다. 끈 거리가 짧으면 "탭"으로 보고 확대한다.
   const moved = useRef(0);
 
-  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.7]);
-  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.7]);
-  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.7]);
+  // 끈 길이 배율(유저 08-12: 위에서부터 내려온 느낌) — 관절 간격·시작 위치가 같이 늘어난다
+  useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 0.7 * ropeK]);
+  useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 0.7 * ropeK]);
+  useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 0.7 * ropeK]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
     [0, 2.0, 0]
@@ -248,9 +252,11 @@ function Band({
       // 카드가 뒤따르는 결을 만든다.
       if (!dragged && !zoomed) {
         const t = state.clock.elapsedTime;
-        const w = Math.sin(t * 0.37 + index * 1.73) * 0.012
+        // 끈이 길수록 같은 임펄스가 큰 흔들림이 된다(지렛대) — 길이에 반비례로 죽인다.
+        //   안 그러면 아랫줄(ropeK 3)이 크게 떠돌며 서로 겹쳤다(실측 스샷).
+        const w = (Math.sin(t * 0.37 + index * 1.73) * 0.012
                 + Math.sin(t * 0.91 + index * 2.40) * 0.005
-                + Math.sin(t * 1.83 + index * 0.70) * 0.002;
+                + Math.sin(t * 1.83 + index * 0.70) * 0.002) / ropeK;
         j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
         card.current.applyImpulse({ x: w * 0.5, y: 0, z: w * 0.2 }, true);
       }
@@ -266,16 +272,16 @@ function Band({
     <>
       <group position={[anchorX, hangY, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={[0, -1.05, 0]} ref={j1} {...segmentProps}>
+        <RigidBody position={[0, -1.05 * ropeK, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0, -2.1, 0]} ref={j2} {...segmentProps}>
+        <RigidBody position={[0, -2.1 * ropeK, 0]} ref={j2} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0, -3.15, 0]} ref={j3} {...segmentProps}>
+        <RigidBody position={[0, -3.15 * ropeK, 0]} ref={j3} {...segmentProps}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[0, -5.15, 0]} ref={card} {...segmentProps} type={cardType}>
+        <RigidBody position={[0, -3.15 * ropeK - 2.0, 0]} ref={card} {...segmentProps} type={cardType}>
           <CuboidCollider args={[1.067, 1.500, 0.02]} />
           <group
             scale={3}
