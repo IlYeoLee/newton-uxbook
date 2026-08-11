@@ -266,6 +266,9 @@
      같은 두께다(피그마 실측 10/1205 = 0.830cqw — .wide-media 의 margin 과 같은 값).
      카드 바탕은 브랜드 그라디언트 그대로다. 왼쪽은 표지와 같은 밝은 흐름
      (프리즘→샌드→코랄→레드), 오른쪽은 그 아래로 더 내려간 어두운 흐름이다. */
+  .page[data-page="try"]{display:block;overflow-y:auto;scrollbar-width:none}
+  .page[data-page="try"]::-webkit-scrollbar{display:none}
+  .page[data-page="try"] .wide-media{flex:none;margin:0 0.830cqw 0.996cqw}
   .try-pair{display:flex;gap:0.830cqw;background:none}
   .try-card{flex:1 1 0;min-width:0;aspect-ratio:588/449;position:relative;
     border-radius:3.320cqw;overflow:hidden}
@@ -303,13 +306,14 @@
   /* 알약 버튼은 카드 위에 얹힌 흰색 20% 다(양쪽 카드 같은 값). 링크는 나중에
      붙는다 — 그때까지는 눌러도 아무 데도 안 간다. */
   .try-card>.try-cta{position:absolute;margin:0;
-    top:82.851%;left:50%;transform:translateX(-50%);width:40.306%;height:13.140%;
-    display:flex;align-items:center;justify-content:center;gap:0.6cqw;
-    border-radius:999px;background:rgba(255,255,255,.20);color:#fff;
-    font-size:1.646cqw;font-weight:700;text-decoration:none;letter-spacing:-.02em;
+    top:80.5%;left:50%;transform:translateX(-50%);width:52%;height:17%;min-height:44px;
+    display:flex;align-items:center;justify-content:center;gap:0.7cqw;
+    border-radius:999px;background:rgba(255,255,255,.28);color:#fff;
+    font-size:2.05cqw;font-weight:800;text-decoration:none;letter-spacing:-.02em;
+    box-shadow:0 0.6cqw 2.2cqw rgba(0,0,0,.28);
     transition:background .18s ease, transform .18s ease}
-  .try-cta:hover{background:rgba(255,255,255,.30);transform:translateX(-50%) translateY(-0.15cqw)}
-  .try-cta svg{width:1.5cqw;height:1.5cqw;fill:none;stroke:currentColor;stroke-width:2.2;
+  .try-cta:hover{background:rgba(255,255,255,.40);transform:translateX(-50%) translateY(-0.2cqw)}
+  .try-cta svg{width:1.9cqw;height:1.9cqw;fill:none;stroke:currentColor;stroke-width:2.2;
     stroke-linecap:round;stroke-linejoin:round;flex:none}
   .try-cta[aria-disabled="true"]{cursor:default}
   @media (max-width:640px){
@@ -327,8 +331,8 @@
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
     .try-by{font-size:3vw;gap:2vw}
-    .try-cta{font-size:4vw;gap:2vw}
-    .try-cta svg{width:4vw;height:4vw}
+    .try-cta{font-size:5vw;gap:2.4vw}
+    .try-cta svg{width:5vw;height:5vw}
   }
 
   .wide-media.vid{background:#000;position:relative}
