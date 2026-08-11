@@ -315,6 +315,11 @@
   @media (max-width:640px){
     /* 폰에서는 두 장을 위아래로 쌓는다 — 나란히 두면 목업이 손톱만 해진다 */
     .try-pair{flex-direction:column;gap:5vw}
+    /* ★ column 에서 flex:1 1 0 은 높이 0 이 된다 — aspect-ratio 가 기준 삼을 변이 없어
+       카드 두 장(View Now 버튼 포함)이 통째로 사라졌다(유저: 모바일에서 안 뜬다). */
+    .try-card{flex:0 0 auto;width:100%;aspect-ratio:588/449}
+    /* 마지막 카드의 CTA 가 하단 넘김 원버튼과 겹치지 않게 스크롤 여유를 준다 */
+    .try-pair{margin-bottom:calc(8vw + 72px)}
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
     .try-by{font-size:3vw;gap:2vw}
@@ -1025,12 +1030,17 @@
     .ar-stage{inset:5vw 5vw 5vw;border-radius:5vw;perspective:160vw}
     .ar-item img{max-width:72vw;max-height:70vw}
     .ar-item img{border-radius:3vw}
-    .ar-title{font-size:3.3vw}
-    .ar-count{font-size:2.3vw}
-    .ar-chips{gap:3.5vw;margin-bottom:3vw}
-    .ar-chip{font-size:2.2vw}
-    .ar-chip.on{font-size:3vw}
-    .ar-foot{bottom:6vw}
+    /* 타이틀·카운터가 스테이지 밖(빨간 프레임)에 걸쳐 있었다 — 스테이지 안으로 */
+    .ar-head{top:9vw}
+    .ar-title{font-size:4.2vw}
+    .ar-count{font-size:3vw}
+    /* 칩 줄이 화면보다 넓어 좌우가 잘렸다 — 여백을 주고 촘촘히 감는다 */
+    .ar-foot{left:4vw;right:4vw}
+    .ar-chips{gap:2vw 3.4vw;margin-bottom:2.6vw}
+    .ar-chip{font-size:2.6vw}
+    .ar-chip.on{font-size:3.4vw}
+    /* 페이지 넘김 원버튼(하단 중앙)과 겹치지 않게 그 위로 올린다 */
+    .ar-foot{bottom:calc(8vw + 64px)}
   }
 
   /* lightbox (Figma 이미지 확대) — anchored to the book so it stays inside the tablet screen */
