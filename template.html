@@ -268,7 +268,7 @@
      (프리즘→샌드→코랄→레드), 오른쪽은 그 아래로 더 내려간 어두운 흐름이다. */
   .page[data-page="try"]{display:block;overflow-y:auto;scrollbar-width:none}
   .page[data-page="try"]::-webkit-scrollbar{display:none}
-  .page[data-page="try"] .wide-media{flex:none;margin:0 0.830cqw 0.996cqw}
+  .page[data-page="try"] .wide-media{flex:none;margin:0 0.830cqw calc(0.996cqw + 84px)}
   .try-pair{display:flex;gap:0.830cqw;background:none}
   .try-card{flex:1 1 0;min-width:0;aspect-ratio:588/449;position:relative;
     border-radius:3.320cqw;overflow:hidden}
@@ -297,23 +297,20 @@
     rgba(9,18,18,0) 0%,rgba(9,18,18,.62) 42%,rgba(9,18,18,1) 68%)}
   /* 제목·크레딧은 352 짜리 정보 프레임 안에 있지만 글줄이 그보다 넓어 좌우로
      넘쳐 나온다(제목 380). 카드 전폭을 주고 가운데 정렬해 한 줄로 세운다. */
-  .try-card>.try-title,.try-card>.try-by{
+  .try-card>.try-title{
     position:absolute;left:0;width:100%;margin:0;text-align:center;color:#fff;
     white-space:nowrap}
-  .try-title{top:66.815%;font-size:2.561cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
-  .try-by{top:75.056%;font-size:1.189cqw;font-weight:400;color:#FAFAFA;line-height:1.2;
-    display:flex;justify-content:center;gap:0.747cqw}
+  .try-title{top:68.5%;font-size:2.9cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
   /* 알약 버튼은 카드 위에 얹힌 흰색 20% 다(양쪽 카드 같은 값). 링크는 나중에
      붙는다 — 그때까지는 눌러도 아무 데도 안 간다. */
   .try-card>.try-cta{position:absolute;margin:0;
     top:80.5%;left:50%;transform:translateX(-50%);width:52%;height:17%;min-height:44px;
     display:flex;align-items:center;justify-content:center;gap:0.7cqw;
     border-radius:999px;background:rgba(255,255,255,.28);color:#fff;
-    font-size:2.05cqw;font-weight:800;text-decoration:none;letter-spacing:-.02em;
-    box-shadow:0 0.6cqw 2.2cqw rgba(0,0,0,.28);
+    font-size:2.7cqw;font-weight:800;text-decoration:none;letter-spacing:-.02em;
     transition:background .18s ease, transform .18s ease}
   .try-cta:hover{background:rgba(255,255,255,.40);transform:translateX(-50%) translateY(-0.2cqw)}
-  .try-cta svg{width:1.9cqw;height:1.9cqw;fill:none;stroke:currentColor;stroke-width:2.2;
+  .try-cta svg{width:2.4cqw;height:2.4cqw;fill:none;stroke:currentColor;stroke-width:2.2;
     stroke-linecap:round;stroke-linejoin:round;flex:none}
   .try-cta[aria-disabled="true"]{cursor:default}
   @media (max-width:640px){
@@ -327,12 +324,11 @@
     .try-pair .try-mock{aspect-ratio:auto;height:auto}
     .try-pair .try-shot{aspect-ratio:auto}
     /* 마지막 카드 CTA 가 하단 넘김 원버튼과 겹치지 않게 스크롤 여유를 준다 */
-    .try-pair{margin-bottom:calc(8vw + 72px)}
+    .try-pair{margin-bottom:calc(10vw + 96px)}
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
-    .try-by{font-size:3vw;gap:2vw}
-    .try-cta{font-size:5vw;gap:2.4vw}
-    .try-cta svg{width:5vw;height:5vw}
+    .try-cta{font-size:6.2vw;gap:2.6vw}
+    .try-cta svg{width:6vw;height:6vw}
   }
 
   .wide-media.vid{background:#000;position:relative}
@@ -791,7 +787,7 @@
   .cc-zoom .cc.flipped .cc-front{opacity:0}
   .cc-zoom .cc.flipped .cc-back{opacity:1}
   .cc-zoom.no-anim .cc-face{transition:none}
-  .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer}
+  .cc-zoom .cc-sns{pointer-events:auto;cursor:pointer;width:calc(var(--cw)*.30);height:calc(var(--cw)*.30)}
   /* 확대된 뒷면은 카드 모서리에서 최소 40px 을 비운다. 작은 3D 카드에는 걸지
      않는다 — 거기서 40px 은 카드를 통째로 먹는다. */
   .cc-zoom .cc-back{padding:max(calc(var(--cw)*.38),40px) max(calc(var(--cw)*.08),40px) max(calc(var(--cw)*.17),40px)}
@@ -820,8 +816,8 @@
     .cc-name{font-size:6.4vw}
     .cc-chip,.cc-sig{font-size:2.6vw}
     .cc-desc{font-size:3.2vw}
-    .cc-sns{width:9vw;height:9vw}
-    .cc-close{bottom:8vw}
+    .cc-sns{width:15vw;height:15vw}
+    .cc-close{bottom:19vw}
     .cc-zoom{--cc-reserve:calc(8vw + max(3.32cqw, 28px) + 20px)}
   }
 
@@ -1091,7 +1087,8 @@
   .lb-close{
     /* 피그마 27:103 실측: 48x40 알약, 아이콘 16 (1205 기준). 고정 px 로 두면
        책이 축소될수록 상대적으로 커진다 → cqw 로 비율 고정. */
-    width:3.98cqw;height:3.32cqw;min-width:34px;min-height:28px;
+    /* ★ 스테퍼(.lb-stepper 48px)와 최소 높이를 맞춘다(유저 08-12: X 가 −/+ 와 크기가 다르다) */
+    width:4.8cqw;height:3.98cqw;min-width:56px;min-height:48px;
     border-radius:999px;border:none;cursor:pointer;
     background:#fff;color:#000;display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 20px rgba(0,0,0,.25);
@@ -2912,6 +2909,9 @@ void main(){
           //   아랫줄만 끈을 훨씬 길게 — 전원이 위에서부터 내려온 것으로 읽힌다.
           //   (앵커를 중간에 두면 끈이 공중에서 시작해 리본이 꼬여 보였다 — 실측)
           list.forEach((p, i) => {
+            // 끈은 프레임 상단 밖(8.2)에서 들어온다 — 카메라 프레임 상단이 ~6.3 이라
+            //   앵커가 화면 밖 = '저 위에서부터 내려온' 그림. (12.5 안은 밴드 렌더가
+            //   불안정해 기각 — 끈이 토막나거나 사라졌다, 실측 스샷)
             if (i < 3) { p.ax = (i - 1) * 3.15;        p.hangY = 8.2; p.ropeK = 1.6; }
             else       { p.ax = (i - 3) * 3.3 - 1.65;  p.hangY = 8.2; p.ropeK = 3.0; }
           });

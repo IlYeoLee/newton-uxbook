@@ -756,7 +756,6 @@ def try_card(key, cls, media, title, by):
       {media}
       <div class="try-scrim"></div>
       <p class="try-title">{title}</p>
-      <p class="try-by"><span>{by}</span><span>Designed &amp; Dev By</span></p>
       <a class="try-cta"{href}>View Now {ARROW_SVG}</a>
     </div>'''
 

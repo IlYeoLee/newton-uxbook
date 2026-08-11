@@ -26,7 +26,8 @@ function ResponsiveCam({ isMobile, baseFov = 20 }) {
   const { camera, size } = useThree();
   useEffect(() => {
     // 2줄(3+2) 배열이 들어오므로 데스크톱도 살짝 물러난다
-    camera.position.z = isMobile ? 38 : 26;
+    camera.position.z = isMobile ? 35 : 24;
+    camera.position.y = isMobile ? 0.9 : 0.8;   // 끈이 위에서 내려오는 여백을 남긴다
     camera.fov = isMobile ? 33 : 26;
     camera.updateProjectionMatrix();
   }, [isMobile, baseFov, camera, size.width]);
@@ -329,7 +330,7 @@ function Band({
           </group>
         </RigidBody>
       </group>
-      <mesh ref={band}>
+      <mesh ref={band} frustumCulled={false}>
         <meshLineGeometry />
         <meshLineMaterial
           color="white"
