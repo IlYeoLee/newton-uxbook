@@ -315,6 +315,15 @@
   @media (max-width:640px){
     /* 폰에서는 두 장을 위아래로 쌓는다 — 나란히 두면 목업이 손톱만 해진다 */
     .try-pair{flex-direction:column;gap:5vw}
+    /* ★ column 에서 flex:1 1 0 은 높이 0 이 된다 — aspect-ratio 가 기준 삼을 변이 없어
+       카드 두 장(View Now 버튼 포함)이 통째로 사라졌다(유저: 모바일에서 안 뜬다). */
+    .try-card{flex:0 0 auto;width:100%;aspect-ratio:588/449}
+    /* ★ 전역 규칙(.wide-media img → aspect-ratio 1185/449)이 카드 목업까지 눌러
+       1451×1081 이미지를 2.64:1 로 찌그러뜨렸다(유저: 다 깨짐). 카드 안은 원비율로. */
+    .try-pair .try-mock{aspect-ratio:auto;height:auto}
+    .try-pair .try-shot{aspect-ratio:auto}
+    /* 마지막 카드 CTA 가 하단 넘김 원버튼과 겹치지 않게 스크롤 여유를 준다 */
+    .try-pair{margin-bottom:calc(8vw + 72px)}
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
     .try-by{font-size:3vw;gap:2vw}
@@ -488,7 +497,10 @@
     background:rgba(9,18,18,.42);backdrop-filter:blur(16px) saturate(1.5);-webkit-backdrop-filter:blur(16px) saturate(1.5);
     opacity:0;transform:translateY(0.5cqw);transition:opacity .22s ease,transform .22s ease;pointer-events:none;
   }
-  .v-figure:hover .v-bar,.v-figure:focus-within .v-bar{opacity:1;transform:none;pointer-events:auto}
+  .v-figure:hover .v-bar,.v-figure:focus-within .v-bar,.v-figure.ui-on .v-bar{opacity:1;transform:none;pointer-events:auto}
+  /* ④ 전체화면 — 영상은 검은 바탕에 contain, 바는 그대로 산다 */
+  .v-figure:fullscreen{background:#000;display:flex;align-items:center;justify-content:center}
+  .v-figure:fullscreen video{width:100%;height:100%;object-fit:contain;border-radius:0}
   .v-bar button{
     flex:none;width:2.2cqw;height:2.2cqw;min-width:28px;min-height:28px;display:grid;place-items:center;
     border:0;padding:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;transition:background .15s ease
@@ -1022,15 +1034,15 @@
   .ar-count{margin:0.332cqw 0 0;font-size:0.996cqw;font-weight:400;color:rgba(255,255,255,.55)}
   @media (max-width:640px){
     .archive-page{overflow:hidden}
-    .ar-stage{inset:5vw 5vw 5vw;border-radius:5vw;perspective:160vw}
-    .ar-item img{max-width:72vw;max-height:70vw}
+    /* ★ 풀블리드(유저 08-12): 여백·라운드 0, 꽉 채운다 */
+    .ar-stage{inset:0;border-radius:0;perspective:160vw}
+    .ar-item img{max-width:84vw;max-height:76vw}
     .ar-item img{border-radius:3vw}
-    .ar-title{font-size:3.3vw}
-    .ar-count{font-size:2.3vw}
-    .ar-chips{gap:3.5vw;margin-bottom:3vw}
-    .ar-chip{font-size:2.2vw}
-    .ar-chip.on{font-size:3vw}
-    .ar-foot{bottom:6vw}
+    .ar-head{top:8vw}
+    .ar-title{font-size:4.2vw}
+    .ar-count{font-size:3vw}
+    /* ★ 묶음 칩은 모바일에서 뺀다(유저) — 스와이프로만 본다 */
+    .ar-foot{display:none}
   }
 
   /* lightbox (Figma 이미지 확대) — anchored to the book so it stays inside the tablet screen */
@@ -1194,7 +1206,8 @@
     .nav-zone{display:none}
 
     /* 터치에는 hover 가 없다 → 영상 바를 항상 띄운다 */
-    .v-bar{opacity:1;transform:none;pointer-events:auto;left:3vw;right:3vw;bottom:3vw;gap:3vw;padding:2vw 3vw}
+    /* ★ 상시 표시 폐기(유저 08-12: 왜 항상 고정이냐) — 탭하면 뜨고 몇 초 뒤 사라진다(.ui-on, JS) */
+    .v-bar{left:3vw;right:3vw;bottom:3vw;gap:3vw;padding:2vw 3vw}
     .v-bar button{width:9vw;height:9vw}
     .v-seek{height:1.2vw}
     .v-time{font-size:3.2vw}
@@ -1226,6 +1239,10 @@
       opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease;
     }
     .fs-hint.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+    /* ⑦ 크레딧(Designed By) — 풀블리드(유저 08-12: 마진 없이 풀 뷰) */
+    .credits-page .lany-stage,.credits-page .cc-dim{inset:0;border-radius:0}
+    /* ③ 본문(.wide-text 하단 0) 과 이미지(.wide-media 상단 0) 가 맞붙어 간격이 0 이었다 */
+    .wide-text{padding-bottom:4vw}
   }
 </style>
 </head>
@@ -1234,6 +1251,8 @@
 <!-- 시나리오 영상 컨트롤 아이콘 -->
 <svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
   <symbol id="ic-play" viewBox="0 0 24 24"><path d="M8 5.2v13.6L19 12z"/></symbol>
+  <symbol id="ic-full" viewBox="0 0 24 24"><path d="M4 9V4h5v2H6v3zm10-5h5v5h-2V6h-3zM4 15h2v3h3v2H4zm14 0h2v5h-5v-2h3z"/></symbol>
+  <symbol id="ic-fullexit" viewBox="0 0 24 24"><path d="M9 4v5H4V7h3V4zM20 9h-5V4h2v3h3zM4 15h5v5H7v-3H4zm11 5v-5h5v2h-3v3z"/></symbol>
   <symbol id="ic-pause" viewBox="0 0 24 24"><path d="M7 5h3.1v14H7zm6.9 0H17v14h-3.1z"/></symbol>
   <symbol id="ic-mute" viewBox="0 0 24 24"><path d="M4 9.3h3.6L12 5.4v13.2L7.6 14.7H4z"/>
     <path d="M16.4 9.6l4.2 4.8m0-4.8l-4.2 4.8" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></symbol>
@@ -1350,6 +1369,14 @@
   function updateChrome(){
     book.classList.toggle('is-cover', ids[idx] === 'cover');
     pills.forEach(p => p.classList.toggle('active', p.dataset.members.split(',').includes(ids[idx])));
+    // ② 탭바가 좁아 활성 탭이 가려질 수 있다 — 페이지가 바뀔 때마다 활성 탭을
+    //   가운데로 미리 굴려 두면, 도달하기 전에 이미 보인다(유저 08-12).
+    {
+      const act = pills.find(p => p.classList.contains('active'));
+      const bar = act && act.parentElement;
+      if (act && bar && bar.scrollWidth > bar.clientWidth)
+        bar.scrollTo({ left: act.offsetLeft - (bar.clientWidth - act.offsetWidth) / 2, behavior: 'smooth' });
+    }
     counter.innerHTML = '<span class="cur">' + idx + '</span><span class="tot"> / ' + (pages.length - 1) + '</span>';
     document.getElementById('prevBtn').disabled = false;   // 앞뒤 모두 순환한다
     if (typeof updateHint === 'function') updateHint();
@@ -1475,6 +1502,28 @@
         else if (e.key === 'ArrowLeft') v.currentTime = Math.max(0, v.currentTime - 5);
         else return;
         e.preventDefault();
+      });
+
+      // ⑧ 바 자동 숨김 — 탭/클릭이 바를 깨우고, 2.6초 손 안 대면 스스로 사라진다.
+      //   호버가 있는 데스크톱은 기존 :hover 가 그대로 겹쳐 동작한다.
+      let uiT = 0;
+      const uiShow = () => {
+        fig.classList.add('ui-on');
+        clearTimeout(uiT);
+        uiT = setTimeout(() => fig.classList.remove('ui-on'), 2600);
+      };
+      fig.addEventListener('pointerdown', uiShow);
+      fig.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') uiShow(); });
+
+      // ④ 전체화면 — iOS 사파리는 요소 전체화면이 없어 비디오 네이티브 플레이어로 폴백
+      const full = fig.querySelector('.v-full');
+      if (full) full.addEventListener('click', () => {
+        if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
+        if (fig.requestFullscreen) fig.requestFullscreen().catch(() => {});
+        else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (full) setIcon(full, document.fullscreenElement === fig ? 'ic-fullexit' : 'ic-full');
       });
 
       if (snd) snd.addEventListener('click', () => {
@@ -2019,6 +2068,14 @@
     fsTried = true;
     goFullscreen();
   }, true);
+  // ① 모바일: 표지 아무 곳이나 탭하면 시작(유저 08-12). 같은 탭이 위 전체화면
+  //   제스처도 함께 만족한다 — 버튼·링크·힌트 탭은 제 역할대로 두고 건너뛴다.
+  document.addEventListener('pointerup', e => {
+    if (ids[idx] !== 'cover') return;
+    if (!matchMedia('(max-width:640px)').matches) return;
+    if (e.target.closest('button, a, .fs-hint')) return;
+    setTimeout(() => { if (ids[idx] === 'cover') show(1); }, 60);
+  }, true);
 
   // Mobile: guide the user with a snackbar hint on the cover; double-tap enters fullscreen.
   // (A page can't auto-fullscreen on load — browsers require a user gesture.)
@@ -2410,7 +2467,12 @@ void main(){
         const ang = d * STEP;
         const rad = ang * Math.PI / 180;
         const x = Math.sin(rad) * R * w / 100;
-        const z = (Math.cos(rad) - 1) * R * w / 100;
+        // ★ 원통 z 만으로는 부족하다(유저 08-12: 옆의 흐린 장이 중앙 위에 얹힌다).
+        //   rotateY 된 옆 장의 안쪽 모서리가 halfW·sin(각) 만큼 앞으로 튀어나와
+        //   중앙 장(z=0)보다 가까워진다 — preserve-3d 는 픽셀 깊이로 그리므로
+        //   모서리가 중앙 장을 뚫고 올라온다. 거리당 z 를 넉넉히 더 물린다
+        //   (0.14w > 최대 halfW(0.36w)×sin22° = 0.135w).
+        const z = (Math.cos(rad) - 1) * R * w / 100 - ad * 0.14 * w;
         // 순간이동시킬 장은 전환을 끄고 새 자리를 준 뒤, 그 자리를 브라우저에
         // 확정시키고(offsetWidth) 나서 전환을 되살린다. rAF 로 되돌리면 스타일
         // 계산이 콜백 뒤에 와서, 살아난 전환을 타고 그대로 미끄러진다.

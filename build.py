@@ -256,7 +256,10 @@ def video_tag(src, wrap="figure v-figure"):
         f'<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-play"></use></svg></button>'
         f'<div class="v-seek" role="slider" tabindex="0" aria-label="재생 위치" '
         f'aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i class="v-fill"></i></div>'
-        f'<span class="v-time">0:00</span>{sound}'
+        f'<span class="v-time">0:00</span>'
+        # 전체화면(유저 08-12) — 모바일에서 가로 영상이 작아 크게 볼 길이 없었다
+        f'<button class="v-full" type="button" aria-label="전체화면">'
+        f'<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-full"></use></svg></button>{sound}'
         f'</div></figure>')
 
 def render_media(files):

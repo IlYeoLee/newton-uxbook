@@ -18,6 +18,20 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
+
+// 모바일(<768px)에선 카드 5장이 한 화면에 다 들어오게 카메라를 물린다(유저 08-12:
+// 3장만 보인다). 스팬 (5-1)*gap=10 이 세로 화면 폭 안에 오려면 fov·거리를 같이 올린다.
+// 탭하면 기존 확대(cc-zoom)가 크게 보여주므로, 여기선 '전원이 보인다'가 우선이다.
+function ResponsiveCam({ isMobile, baseFov = 20 }) {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    camera.position.z = isMobile ? 32 : 20;
+    camera.fov = isMobile ? 30 : baseFov;
+    camera.updateProjectionMatrix();
+  }, [isMobile, baseFov, camera, size.width]);
+  return null;
+}
+
 export default function Lanyard({
   people = [],
   position = [0, 0, 20],
@@ -60,6 +74,7 @@ export default function Lanyard({
         gl={{ alpha: transparent }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
+        <ResponsiveCam isMobile={isMobile} baseFov={fov} />
         <ambientLight intensity={Math.PI} />
         <Suspense fallback={null}>
         <Physics gravity={gravity} timeStep={1 / 60}>
