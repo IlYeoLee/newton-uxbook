@@ -827,14 +827,10 @@
   .page.lead-page{padding:0.830cqw 0.830cqw 0.996cqw;overflow:hidden}
   .lead-page .v-figure{position:absolute;inset:0.830cqw 0.830cqw 0.996cqw;margin:0;cursor:default;
     border-radius:3.320cqw;overflow:hidden;background:#000}
-  /* ★ 전 해상도 공통(유저 08-12 반복 지시): 검정판 대신 같은 장면 앰비언트.
-     영상은 contain 으로 안 잘리게, 남는 면은 포스터 강블러+딤이 채운다.
-     (video 를 하나 더 얹으면 디코딩이 두 배 — 포스터 정지컷으로 같은 그림을 만든다) */
-  .lead-page .v-figure::before{content:"";position:absolute;inset:-12%;z-index:0;
-    background:var(--poster) center/cover no-repeat;
-    filter:blur(4cqw) saturate(1.25) brightness(.5);transform:scale(1.2)}
-  .lead-page .v-figure::after{content:"";position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.35)}
-  .lead-page .v-figure video{position:relative;z-index:1;width:100%;height:100%;object-fit:contain}
+  /* 데스크톱 무대(≈1.62:1)에 16:9 를 contain 하면 위아래 25px 띠가 생겨 '깨진 검정'으로
+     보였다(유저 스샷·실측). 데스크톱은 cover(크롭 상하 25px, 체감 없음)로 되돌리고,
+     앰비언트+contain 은 띠가 큰 모바일 세로에서만 쓴다(아래 미디어쿼리). */
+  .lead-page .v-figure video{position:relative;z-index:1;width:100%;height:100%;object-fit:cover}
   .lead-page .v-bar{left:12cqw;right:12cqw;bottom:2.5cqw}
 
   blockquote.quote{
@@ -1146,7 +1142,7 @@
     .page-text{flex:none;height:auto;overflow:visible;padding:5vw 5vw 20vw}   /* bottom room clears the pager bar */
 
     /* vertical (intro/scenario) pages */
-    .page-scroll{flex:1;padding:0 0 20vw}
+    .page-scroll{flex:1;padding:0 0 26vw}
     .head-block{padding:6vw 5vw 4vw;gap:12px}
     .head-block.step{padding-top:6vw}
     .head-row{flex-direction:column;gap:8px}
@@ -1241,6 +1237,7 @@
     .lead-page .v-figure::after{content:"";position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.35)}
     .lead-page .v-figure video{position:relative;z-index:1;border-radius:0;
       width:100%;height:100%;object-fit:contain}
+    .lead-page .v-bar{left:5vw;right:5vw;bottom:calc(6vw + 60px)}
   }
 
   /* fullscreen hint snackbar (mobile cover only; toggled by JS) */
