@@ -733,7 +733,8 @@ products_page = f'''
 # 가로형 판인데 이미지 자리가 카드 두 장으로 갈린다. 원본의 설명 문구는 임시라
 # 책의 실제 내용(모바일 GUI 장 · 시뮬레이터)에 맞춰 다시 썼다.
 # 버튼 링크는 아직 없다. 주소가 정해지면 이 한 줄만 채우면 된다.
-TRY_CTA = {"app": "", "sim": ""}   # 주소가 정해지면 여기만 채우면 링크가 붙는다
+TRY_CTA = {"app": "https://dab2n.github.io/figma-prototype/home.html",
+           "sim": "https://ilyeolee.github.io/newton-design-token-simulator/"}
 TRY_KICKER = "Try It Yourself"
 TRY_TITLE = "Newton을 직접\n만져볼 수 있게"
 TRY_BODY = ("UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바이브 코딩하며 곧바로 "
