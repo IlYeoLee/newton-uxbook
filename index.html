@@ -1817,6 +1817,19 @@
     pageMedia(pages[i], true);       // 들어온 페이지의 영상은 첫 프레임부터
   }
 
+  // ---- 20초 아무도 안 만지면 표지로 (전시 부스에서 다음 사람이 처음부터 본다) ----
+  (function idleToCover(){
+    const WAIT = 20000;
+    let t;
+    // 영상을 보는 중은 손을 안 대도 보고 있는 것이다 — 끝날 때까지 기다린다.
+    const watching = () => [...document.querySelectorAll('video')].some(v => !v.paused && !v.ended);
+    const back = () => { if (watching()) return kick(); if (idx !== 0) show(0); };
+    const kick = () => { clearTimeout(t); t = setTimeout(back, WAIT); };
+    ['pointerdown','pointermove','keydown','wheel','touchstart','scroll']
+      .forEach(e => addEventListener(e, kick, {passive:true, capture:true}));
+    kick();
+  })();
+
   // ---- 시나리오 영상: 스크롤 자동재생 + 재생바/사운드 ----
   (function scenarioVideo(){
     const figs = [...document.querySelectorAll('.v-figure')];
