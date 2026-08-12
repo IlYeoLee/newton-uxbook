@@ -25,10 +25,11 @@ extend({ MeshLineGeometry, MeshLineMaterial });
 function ResponsiveCam({ isMobile, baseFov = 20 }) {
   const { camera, size } = useThree();
   useEffect(() => {
-    // 2줄(3+2) 배열이 들어오므로 데스크톱도 살짝 물러난다
-    camera.position.z = isMobile ? 35 : 24;
-    camera.position.y = isMobile ? 0.9 : 0.8;   // 끈이 위에서 내려오는 여백을 남긴다
-    camera.fov = isMobile ? 33 : 26;
+    // 태블릿·웹 = 원래 프레이밍(한 줄 5명 크게, 2일 전 모습) · 모바일 = 2줄용
+    // 한 줄 5명이 양끝까지 안 잘리게 — 스팬 ±5 + 카드 1.07 = 6.07 < 반폭 6.95(z22.5)
+    camera.position.z = isMobile ? 35 : 22.5;
+    camera.position.y = isMobile ? 0.9 : 0;
+    camera.fov = isMobile ? 33 : baseFov;
     camera.updateProjectionMatrix();
   }, [isMobile, baseFov, camera, size.width]);
   return null;
@@ -82,11 +83,13 @@ export default function Lanyard({
         <Physics gravity={gravity} timeStep={1 / 60}>
           {people.map((p, i) => (
             <Band
-              key={i}
+              key={i + (isMobile ? '-m' : '-d')}
               index={i}
-              anchorX={p.ax ?? anchors[i]}
-              hangY={p.hangY ?? 4}
-              ropeK={p.ropeK ?? 1}
+              // 배치(유저 08-13): 태블릿·웹 = 한 줄 5명(원래 간격·짧은 끈, 2일 전 모습) ·
+              //   모바일 = 3+2 두 줄 + 프레임 밖에서 내려오는 긴 끈
+              anchorX={isMobile ? (i < 3 ? (i - 1) * 3.15 : (i - 3) * 3.3 - 1.65) : anchors[i]}
+              hangY={isMobile ? 8.2 : 4}
+              ropeK={isMobile ? (i < 3 ? 1.6 : 3.0) : 1}
               isMobile={isMobile}
               cardEl={p.el}
               frontImage={p.front}
@@ -257,7 +260,7 @@ function Band({
         //   안 그러면 아랫줄(ropeK 3)이 크게 떠돌며 서로 겹쳤다(실측 스샷).
         const w = (Math.sin(t * 0.37 + index * 1.73) * 0.012
                 + Math.sin(t * 0.91 + index * 2.40) * 0.005
-                + Math.sin(t * 1.83 + index * 0.70) * 0.002) / ropeK;
+                + Math.sin(t * 1.83 + index * 0.70) * 0.002) / ropeK * 0.65;
         j2.current.applyImpulse({ x: w, y: 0, z: w * 0.35 }, true);
         card.current.applyImpulse({ x: w * 0.5, y: 0, z: w * 0.2 }, true);
       }
