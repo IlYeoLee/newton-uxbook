@@ -743,7 +743,8 @@ TRY_TITLE = "Newton을 직접\n만져볼 수 있게"
 TRY_BODY = ("UX 구조부터 GUI와 그래픽 인터랙션까지, Claude로 바이브 코딩하며 곧바로 "
             "만져지는 프로토타입으로 확인했습니다. 모바일 앱은 오늘의 플레이를 고르고 "
             "강도와 모드를 정한 뒤 기록으로 돌아오는 흐름을 담고, 프로젝터 시뮬레이터는 "
-            "하드웨어 없이도 지면 위에 펼쳐지는 움직임 가이드를 그대로 보여줍니다.\n"
+            "하드웨어 없이도 지면 위에 펼쳐지는 움직임 가이드를 그대로 보여줍니다. "
+            "모바일에서 바로 도전할 수 있는 경험으로 바꿉니다.\n"
             "아래 버튼을 눌러 직접 만져볼 수 있습니다.")
 
 ARROW_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>'
@@ -756,6 +757,7 @@ def try_card(key, cls, media, title, by):
       {media}
       <div class="try-scrim"></div>
       <p class="try-title">{title}</p>
+      <p class="try-by"><span>{by}</span><span>Designed &amp; Dev By</span></p>
       <a class="try-cta"{href}>View Now {ARROW_SVG}</a>
     </div>'''
 

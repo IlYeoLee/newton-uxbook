@@ -266,9 +266,6 @@
      같은 두께다(피그마 실측 10/1205 = 0.830cqw — .wide-media 의 margin 과 같은 값).
      카드 바탕은 브랜드 그라디언트 그대로다. 왼쪽은 표지와 같은 밝은 흐름
      (프리즘→샌드→코랄→레드), 오른쪽은 그 아래로 더 내려간 어두운 흐름이다. */
-  .page[data-page="try"]{display:block;overflow-y:auto;scrollbar-width:none}
-  .page[data-page="try"]::-webkit-scrollbar{display:none}
-  .page[data-page="try"] .wide-media{flex:none;margin:0 0.830cqw calc(0.996cqw + 84px)}
   .try-pair{display:flex;gap:0.830cqw;background:none}
   .try-card{flex:1 1 0;min-width:0;aspect-ratio:588/449;position:relative;
     border-radius:3.320cqw;overflow:hidden}
@@ -297,20 +294,22 @@
     rgba(9,18,18,0) 0%,rgba(9,18,18,.62) 42%,rgba(9,18,18,1) 68%)}
   /* 제목·크레딧은 352 짜리 정보 프레임 안에 있지만 글줄이 그보다 넓어 좌우로
      넘쳐 나온다(제목 380). 카드 전폭을 주고 가운데 정렬해 한 줄로 세운다. */
-  .try-card>.try-title{
+  .try-card>.try-title,.try-card>.try-by{
     position:absolute;left:0;width:100%;margin:0;text-align:center;color:#fff;
     white-space:nowrap}
-  .try-title{top:68.5%;font-size:2.9cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .try-title{top:66.815%;font-size:2.561cqw;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .try-by{top:75.056%;font-size:1.189cqw;font-weight:400;color:#FAFAFA;line-height:1.2;
+    display:flex;justify-content:center;gap:0.747cqw}
   /* 알약 버튼은 카드 위에 얹힌 흰색 20% 다(양쪽 카드 같은 값). 링크는 나중에
      붙는다 — 그때까지는 눌러도 아무 데도 안 간다. */
   .try-card>.try-cta{position:absolute;margin:0;
-    top:80.5%;left:50%;transform:translateX(-50%);width:52%;height:17%;min-height:44px;
-    display:flex;align-items:center;justify-content:center;gap:0.7cqw;
-    border-radius:999px;background:rgba(255,255,255,.28);color:#fff;
-    font-size:2.7cqw;font-weight:800;text-decoration:none;letter-spacing:-.02em;
+    top:82.851%;left:50%;transform:translateX(-50%);width:40.306%;height:13.140%;
+    display:flex;align-items:center;justify-content:center;gap:0.6cqw;
+    border-radius:999px;background:rgba(255,255,255,.20);color:#fff;
+    font-size:1.646cqw;font-weight:700;text-decoration:none;letter-spacing:-.02em;
     transition:background .18s ease, transform .18s ease}
-  .try-cta:hover{background:rgba(255,255,255,.40);transform:translateX(-50%) translateY(-0.2cqw)}
-  .try-cta svg{width:2.4cqw;height:2.4cqw;fill:none;stroke:currentColor;stroke-width:2.2;
+  .try-cta:hover{background:rgba(255,255,255,.30);transform:translateX(-50%) translateY(-0.15cqw)}
+  .try-cta svg{width:1.5cqw;height:1.5cqw;fill:none;stroke:currentColor;stroke-width:2.2;
     stroke-linecap:round;stroke-linejoin:round;flex:none}
   .try-cta[aria-disabled="true"]{cursor:default}
   @media (max-width:640px){
@@ -325,6 +324,11 @@
     .try-pair .try-shot{aspect-ratio:auto}
     /* 마지막 카드 CTA 가 하단 넘김 원버튼과 겹치지 않게 스크롤 여유를 준다 */
     .try-pair{margin-bottom:calc(10vw + 96px)}
+    /* 데스크톱 원본 복원에 따른 모바일 전용 강등분(유저 08-13: 웹은 이전 정교 레이아웃) */
+    .page[data-page="try"]{display:block;overflow-y:auto;scrollbar-width:none}
+    .page[data-page="try"]::-webkit-scrollbar{display:none}
+    .try-by{display:none}
+    .try-cta{width:60%;height:16%;min-height:48px;font-weight:800}
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
     .try-cta{font-size:6.2vw;gap:2.6vw}
@@ -2051,6 +2055,12 @@
   // In-app browsers (KakaoTalk, Instagram, Line…) can't do real fullscreen; their webview
   // instead jerks into a landscape "fullscreen-ish" mode. Detect them and skip fullscreen there.
   const inApp = /KAKAOTALK|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+  // 카카오톡 인앱은 전체화면·회전을 지원하지 않는다 — 들어오자마자 기본 브라우저로
+  // 자동 이동한다(유저 08-13: 힌트 탭까지 기다리지 말 것). 외부 브라우저는 UA 가
+  // 달라 루프가 없다. 다른 인앱(인스타 등)은 스킴이 없어 기존 힌트 버튼을 유지.
+  if (/KAKAOTALK/i.test(navigator.userAgent)) {
+    location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+  }
 
   // Double-tap on the COVER (page 1) only → go fullscreen.
   // Browsers won't let us block exit (Esc/back is always allowed); on Android the
