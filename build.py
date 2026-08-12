@@ -47,6 +47,8 @@ def en_attr(ko):
 MOBILE_SRC = {
     "img_04": "m2", "img_06": "m4", "img_10": "m5.mp4", "img_18": "m6",
     "img_22": "m7", "img_23": "m8", "img_14": "m9", "img_37": "m11",
+    # 브랜딩 GUI·키링 — 세로 원본이 모바일 16:9 박스에서 잘려(유저 08-13) 전용 16:9 크롭을 단다
+    "bx_gui": "m_bxgui", "bx_goods": "m_bxgoods",
     # 피그마 "나우유어턴"(93:492) — 세로본(93:486)이 웹·태블릿, 16:9(93:445)가 모바일.
     "nowyourturn": "m_nowyourturn.jpg",
 }

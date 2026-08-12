@@ -195,7 +195,7 @@ function Band({
   }, [flipped]);
 
   const [curve] = useState(
-    () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
+    () => new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
   );
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
@@ -244,6 +244,9 @@ function Band({
       curve.points[1].copy(j2.current.lerped);
       curve.points[2].copy(j1.current.lerped);
       curve.points[3].copy(fixed.current.translation());
+      // 끈 상단 연장(유저 08-13: 줄이 중간에서 잘린 듯 시작) — 물리는 그대로,
+      // 앵커 위로 시각 점 하나를 더 얹어 프레임 밖에서부터 내려온 것으로 그린다.
+      curve.points[4].set(fixed.current.translation().x, fixed.current.translation().y + 7, 0);
       band.current.geometry.setPoints(curve.getPoints(32));
       ang.copy(card.current.angvel());
       rot.copy(card.current.rotation());

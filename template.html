@@ -314,7 +314,8 @@
   .try-cta[aria-disabled="true"]{cursor:default}
   @media (max-width:640px){
     /* 폰에서는 두 장을 위아래로 쌓는다 — 나란히 두면 목업이 손톱만 해진다 */
-    .try-pair{flex-direction:column;gap:5vw}
+    .try-pair{flex-direction:column;gap:16px}
+    .page[data-page="try"] .wide-media{margin-left:16px;margin-right:16px}
     /* ★ column 에서 flex:1 1 0 은 높이 0 이 된다 — aspect-ratio 가 기준 삼을 변이 없어
        카드 두 장(View Now 버튼 포함)이 통째로 사라졌다(유저: 모바일에서 안 뜬다). */
     .try-card{flex:0 0 auto;width:100%;aspect-ratio:588/449}
@@ -331,8 +332,8 @@
     .try-cta{width:60%;height:16%;min-height:48px;font-weight:800}
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
-    .try-cta{font-size:6.2vw;gap:2.6vw}
-    .try-cta svg{width:6vw;height:6vw}
+    .try-cta{font-size:4.4vw;gap:2vw}   /* 본문(≈17px)급 — 버튼만 튀지 않게 */
+    .try-cta svg{width:4.6vw;height:4.6vw}
   }
 
   .wide-media.vid{background:#000;position:relative}
@@ -504,7 +505,12 @@
   .v-figure:hover .v-bar,.v-figure:focus-within .v-bar,.v-figure.ui-on .v-bar{opacity:1;transform:none;pointer-events:auto}
   /* ④ 전체화면 — 영상은 검은 바탕에 contain, 바는 그대로 산다 */
   .v-figure:fullscreen{background:#000;display:flex;align-items:center;justify-content:center}
-  .v-figure:fullscreen video{width:100%;height:100%;object-fit:contain;border-radius:0}
+  /* 전체화면도 생검정 금지(유저) — 같은 장면 앰비언트(포스터 강블러+딤) 위에 영상 */
+  .v-figure:fullscreen::before{content:"";position:absolute;inset:-12%;z-index:0;
+    background:var(--poster) center/cover no-repeat;
+    filter:blur(60px) saturate(1.25) brightness(.5);transform:scale(1.2)}
+  .v-figure:fullscreen::after{content:"";position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.35)}
+  .v-figure:fullscreen video{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:0}
   .v-bar button{
     flex:none;width:2.2cqw;height:2.2cqw;min-width:28px;min-height:28px;display:grid;place-items:center;
     border:0;padding:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;transition:background .15s ease
@@ -1494,6 +1500,7 @@
         play.setAttribute('aria-label', v.paused ? '재생' : '일시정지');
       };
       v.addEventListener('play', sync);
+      v.addEventListener('play', () => uiShow());
       v.addEventListener('pause', sync);
       // 사용자가 직접 멈춘 영상은 다시 스크롤해도 자동으로 재생하지 않는다
       play.addEventListener('click', () => {

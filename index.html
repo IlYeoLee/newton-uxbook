@@ -314,7 +314,8 @@
   .try-cta[aria-disabled="true"]{cursor:default}
   @media (max-width:640px){
     /* 폰에서는 두 장을 위아래로 쌓는다 — 나란히 두면 목업이 손톱만 해진다 */
-    .try-pair{flex-direction:column;gap:5vw}
+    .try-pair{flex-direction:column;gap:16px}
+    .page[data-page="try"] .wide-media{margin-left:16px;margin-right:16px}
     /* ★ column 에서 flex:1 1 0 은 높이 0 이 된다 — aspect-ratio 가 기준 삼을 변이 없어
        카드 두 장(View Now 버튼 포함)이 통째로 사라졌다(유저: 모바일에서 안 뜬다). */
     .try-card{flex:0 0 auto;width:100%;aspect-ratio:588/449}
@@ -331,8 +332,8 @@
     .try-cta{width:60%;height:16%;min-height:48px;font-weight:800}
     .try-card{border-radius:5vw}
     .try-title{font-size:6vw}
-    .try-cta{font-size:6.2vw;gap:2.6vw}
-    .try-cta svg{width:6vw;height:6vw}
+    .try-cta{font-size:4.4vw;gap:2vw}   /* 본문(≈17px)급 — 버튼만 튀지 않게 */
+    .try-cta svg{width:4.6vw;height:4.6vw}
   }
 
   .wide-media.vid{background:#000;position:relative}
@@ -504,7 +505,12 @@
   .v-figure:hover .v-bar,.v-figure:focus-within .v-bar,.v-figure.ui-on .v-bar{opacity:1;transform:none;pointer-events:auto}
   /* ④ 전체화면 — 영상은 검은 바탕에 contain, 바는 그대로 산다 */
   .v-figure:fullscreen{background:#000;display:flex;align-items:center;justify-content:center}
-  .v-figure:fullscreen video{width:100%;height:100%;object-fit:contain;border-radius:0}
+  /* 전체화면도 생검정 금지(유저) — 같은 장면 앰비언트(포스터 강블러+딤) 위에 영상 */
+  .v-figure:fullscreen::before{content:"";position:absolute;inset:-12%;z-index:0;
+    background:var(--poster) center/cover no-repeat;
+    filter:blur(60px) saturate(1.25) brightness(.5);transform:scale(1.2)}
+  .v-figure:fullscreen::after{content:"";position:absolute;inset:0;z-index:0;background:rgba(0,0,0,.35)}
+  .v-figure:fullscreen video{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;border-radius:0}
   .v-bar button{
     flex:none;width:2.2cqw;height:2.2cqw;min-width:28px;min-height:28px;display:grid;place-items:center;
     border:0;padding:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;transition:background .15s ease
@@ -1382,7 +1388,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-07">
-  <div class="page-media"><div class="fade-stack"><div class="fade-track" data-n="3"><img src="assets/img_23.png?v=3cf1fa66" alt="" loading="lazy"><img src="assets/img_23-2.png?v=d187072d" alt="" loading="lazy"><img src="assets/img_23.png?v=3cf1fa66" alt="" loading="lazy"></div></div><img class="media m-only" src="assets/m8.png?v=17665ed4" alt="" loading="lazy"></div>
+  <div class="page-media"><div class="fade-stack"><div class="fade-track" data-n="3"><img src="assets/img_23.png?v=7f2153c0" alt="" loading="lazy"><img src="assets/img_23-2.png?v=d187072d" alt="" loading="lazy"><img src="assets/img_23.png?v=7f2153c0" alt="" loading="lazy"></div></div><img class="media m-only" src="assets/m8.png?v=eccd5973" alt="" loading="lazy"></div>
   <div class="page-text">
     <p class="kicker">Core</p>
     <h2 class="chapter-title" data-en="Core  that turns any place into a field of challenge">어떤 곳이든 도전의<br>필드로 바꾸는 Core</h2>
@@ -1390,7 +1396,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-06">
-  <div class="page-media"><div class="fade-stack"><div class="fade-track" data-n="3"><img src="assets/img_22.png?v=021a3d38" alt="" loading="lazy"><img src="assets/img_22-2.png?v=2aef0e29" alt="" loading="lazy"><img src="assets/img_22.png?v=021a3d38" alt="" loading="lazy"></div></div><img class="media m-only" src="assets/m7.png?v=c093d46f" alt="" loading="lazy"></div>
+  <div class="page-media"><div class="fade-stack"><div class="fade-track" data-n="3"><img src="assets/img_22.png?v=148e3483" alt="" loading="lazy"><img src="assets/img_22-2.png?v=2aef0e29" alt="" loading="lazy"><img src="assets/img_22.png?v=148e3483" alt="" loading="lazy"></div></div><img class="media m-only" src="assets/m7.png?v=16b2baeb" alt="" loading="lazy"></div>
   <div class="page-text">
     <p class="kicker">Station</p>
     <h2 class="chapter-title" data-en="Station to help you prepare for your challenge">도전을 시작할<br>준비를 돕는 Station</h2>
@@ -1441,7 +1447,7 @@
   <div class="wide-media"><img class="media" src="assets/bx_type.png?v=f22aa707" alt="" loading="lazy"></div>
 </div>
 <div class="page" data-page="sec-14">
-  <div class="page-media"><img class="media" src="assets/bx_gui.png?v=29c86b87" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/bx_gui.png?v=29c86b87" alt="" loading="lazy" data-msrc="assets/m_bxgui.png?v=82e15a50"></div>
   <div class="page-text">
     <p class="kicker">GUI</p>
     <h2 class="chapter-title" data-en="A mobile GUI that connects the flow of play">플레이의 흐름을 연결하는<br>모바일 GUI</h2>
@@ -1449,7 +1455,7 @@
   </div>
 </div>
 <div class="page" data-page="sec-15">
-  <div class="page-media"><img class="media" src="assets/bx_goods.png?v=dffe1b51" alt="" loading="lazy"></div>
+  <div class="page-media"><img class="media" src="assets/bx_goods.png?v=dffe1b51" alt="" loading="lazy" data-msrc="assets/m_bxgoods.png?v=40d8caa4"></div>
   <div class="page-text">
     <p class="kicker">Goods</p>
     <h2 class="chapter-title" data-en="A Newton keyring made to your taste">나의 취향을 담은<br>Newton 키링</h2>
@@ -1896,6 +1902,7 @@
         play.setAttribute('aria-label', v.paused ? '재생' : '일시정지');
       };
       v.addEventListener('play', sync);
+      v.addEventListener('play', () => uiShow());
       v.addEventListener('pause', sync);
       // 사용자가 직접 멈춘 영상은 다시 스크롤해도 자동으로 재생하지 않는다
       play.addEventListener('click', () => {
@@ -3359,7 +3366,7 @@ void main(){
         if (loading) return;
         loading = true;
         const s = document.createElement('script');
-        s.src = 'assets/lanyard.bundle.js?v=046c19a5';
+        s.src = 'assets/lanyard.bundle.js?v=cde630a9';
         s.onload = () => { loading = false; tryBoot(); };
         // 번들을 못 받으면 예전 CSS 카드로 되돌린다(그때만 보인다).
         s.onerror = () => { loading = false; stage.classList.add('no3d'); };
@@ -3378,7 +3385,7 @@ void main(){
       if (window.NewtonLanyard || loading) return;
       loading = true;
       const s = document.createElement('script');
-      s.src = 'assets/lanyard.bundle.js?v=046c19a5';
+      s.src = 'assets/lanyard.bundle.js?v=cde630a9';
       s.onload = () => { loading = false; tryBoot(); };   // 이미 도착해 있으면 바로 붙는다
       s.onerror = () => { loading = false; };             // 실패해도 도착할 때 다시 받는다
       document.body.appendChild(s);
