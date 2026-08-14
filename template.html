@@ -356,7 +356,12 @@
   /* sec-02: seamless track slide (1→2→3→4→loop), no white gap between frames */
   .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
   .fade-track{display:flex;height:100%}
-  .fade-track img{height:100%;object-fit:cover;flex:none}
+  /* 트랙 안 프레임에는 라운드를 주지 않는다. 위 `.page-media img` 의 border-radius 가
+     낱장마다 걸리는 바람에, 슬라이드가 넘어가는 0.7초 동안 두 장의 둥근 모서리가 맞닿아
+     가운데 흰 틈이 벌어지고 제품이 카드 모서리에 잘려 보였다(유저 08-14: 중간중간 잘려서
+     보여). 둥근 카드는 .fade-stack 의 radius + overflow:hidden 이 이미 만든다 — 낱장이
+     또 가질 이유가 없다. 바로 위 주석의 '틈 없이 이어지는 슬라이드'가 원래 의도였다. */
+  .fade-track img{height:100%;object-fit:cover;flex:none;border-radius:0}
   /* data-n = 슬라이드 수(마지막 장 = 첫 장이라 이미지 수 + 1). 장당 2.1s 정지 + 0.7s 이동으로
      장수가 달라도 넘어가는 속도는 같다: 3장 8.4s, 4장 11.2s, 5장 14s. */
   .fade-track[data-n="3"]{width:300%;animation:slide3 8.4s cubic-bezier(.7,0,.3,1) infinite}
