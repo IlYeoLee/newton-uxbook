@@ -353,23 +353,20 @@
   /* 모바일에서 사진이 영상으로 갈리는 자리가 있다(data-msrc=*.mp4) — 같은 상자로 둔다 */
   .page-media img,.page-media video{width:100%;height:100%;object-fit:cover;border-radius:3.320cqw;display:block}
   .page-media .m-only{display:none}   /* mobile-only single image (sec-02); shown via the mobile media query */
-  /* sec-02: seamless track slide (1→2→3→4→loop), no white gap between frames */
+  /* 카드 안 여러 장 = **페이지 넘어가는 것과 같은 모션**(유저 08-14). 옛 방식은 트랙을
+     옆으로 미는 슬라이드였는데, 미는 0.7초 동안 두 장이 한 화면에 걸쳐 제품이 반씩 잘려
+     보였다. 페이지 전환(.page{transition:opacity .3s ease})과 같은 디졸브로 통일한다 —
+     한 번에 한 장만 보이니 잘리는 순간이 아예 없다. 넘어가는 간격은 그대로 2.8초.
+     들어오는 장이 z-index 1 로 위에 깔려서 교차하는 동안 배경이 비치지 않는다.
+     낱장 라운드는 주지 않는다(둥근 카드는 .fade-stack 이 만든다). */
   .fade-stack{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3.320cqw}
-  .fade-track{display:flex;height:100%}
-  /* 트랙 안 프레임에는 라운드를 주지 않는다. 위 `.page-media img` 의 border-radius 가
-     낱장마다 걸리는 바람에, 슬라이드가 넘어가는 0.7초 동안 두 장의 둥근 모서리가 맞닿아
-     가운데 흰 틈이 벌어지고 제품이 카드 모서리에 잘려 보였다(유저 08-14: 중간중간 잘려서
-     보여). 둥근 카드는 .fade-stack 의 radius + overflow:hidden 이 이미 만든다 — 낱장이
-     또 가질 이유가 없다. 바로 위 주석의 '틈 없이 이어지는 슬라이드'가 원래 의도였다. */
-  .fade-track img{height:100%;object-fit:cover;flex:none;border-radius:0}
-  /* data-n = 슬라이드 수(마지막 장 = 첫 장이라 이미지 수 + 1). 장당 2.1s 정지 + 0.7s 이동으로
-     장수가 달라도 넘어가는 속도는 같다: 3장 8.4s, 4장 11.2s, 5장 14s. */
-  .fade-track[data-n="3"]{width:300%;animation:slide3 8.4s cubic-bezier(.7,0,.3,1) infinite}
-  .fade-track[data-n="3"] img{width:33.3333%}
-  .fade-track[data-n="4"]{width:400%;animation:slide4 11.2s cubic-bezier(.7,0,.3,1) infinite}
-  .fade-track[data-n="4"] img{width:25%}
-  .fade-track[data-n="5"]{width:500%;animation:slide5 14s cubic-bezier(.7,0,.3,1) infinite}
-  .fade-track[data-n="5"] img{width:20%}
+  /* 겹치기는 grid 한 칸으로 한다(absolute 아님). 넓은 도판(.wide-media)은 상자 높이가
+     이미지의 제 높이에서 나오는데, absolute 로 띄우면 그 높이가 0 이 돼 도판이 통째로
+     사라진다(실측: sec-12 stack 1343x0). 한 칸에 겹치면 높이는 그대로 남는다. */
+  .fade-track{display:grid;grid-template-columns:100%;height:100%}
+  .fade-track > img{grid-area:1/1;width:100%;height:100%;object-fit:cover;
+    border-radius:0;opacity:0;transition:opacity .3s ease}
+  .fade-track img.on{opacity:1;z-index:1}
   @keyframes slide3{
     0%,25%{transform:translateX(0)}
     33.333%,58.333%{transform:translateX(-33.3333%)}
@@ -1772,6 +1769,25 @@
 </div>
 
 <script>
+  // 카드 안 여러 장 넘기기 = 페이지 전환과 같은 디졸브(유저 08-14). CSS 는 .on 한 장만
+  //   띄우고, 순서는 여기서 돈다. 마지막 장은 첫 장의 사본이다(옛 슬라이드가 끊김 없이
+  //   되감기려고 붙여 둔 것) — 디졸브에는 필요 없으니 회전에서 뺀다. 간격 2.8s 는 옛
+  //   슬라이드의 한 장 주기(정지 2.1 + 이동 0.7)와 같다.
+  document.querySelectorAll('.fade-track').forEach(tr => {
+    const all = [...tr.querySelectorAll('img')];
+    const imgs = all.length > 1 && all[0].getAttribute('src') === all[all.length - 1].getAttribute('src')
+      ? all.slice(0, -1) : all;
+    if (!imgs.length) return;
+    let k = 0;
+    imgs[0].classList.add('on');
+    if (imgs.length < 2) return;
+    setInterval(() => {
+      imgs[k].classList.remove('on');
+      k = (k + 1) % imgs.length;
+      imgs[k].classList.add('on');
+    }, 2800);
+  });
+
   const book = document.getElementById('book');
   const pages = [...document.querySelectorAll('.page')];
   const ids = pages.map(p => p.dataset.page);
